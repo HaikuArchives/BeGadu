@@ -1,0 +1,8 @@
+common.o: common.c libgadu.h
+libgadu.o: libgadu.c libgadu-config.h compat.h libgadu.h
+pubdir.o: pubdir.c libgadu.h
+http.o: http.c libgadu-config.h compat.h libgadu.h
+dcc.o: dcc.c
+events.o: events.c libgadu-config.h compat.h libgadu.h
+pubdir50.o: pubdir50.c libgadu.h
+obsolete.o: obsolete.c libgadu.h

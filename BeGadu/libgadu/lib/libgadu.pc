@@ -1,0 +1,11 @@
+prefix=/boot/home/config
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: libgadu
+Version: 20040109
+Description: libgadu
+Libs: -L${libdir} -lgadu   -lsocket -lbind
+Cflags: -I${includedir} 
+
