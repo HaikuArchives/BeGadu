@@ -1,0 +1,28 @@
+#
+# BeGadu Jamfile, v1.0
+# Ten plik jest częścią kodu źródłowego BeGadu
+# Strona: http://zsee.szczecin.pl/~aljen/gadu
+#
+
+SubDir TOP ;
+C++FLAGS += -DWERSJA=\\\"$(WERSJA)\\\" -I./include ;
+LINKLIBS = -L./lib -lbe -lroot -ltranslation -lgadu lib/Stackbar.a ;
+RESOURCE = BeGadu.rsrc ;
+
+Main BeGadu :
+	src/xmalloc.c src/dynstuff.c src/strlcpy.c
+	src/GfxStuff.cpp src/GaduListItem.cpp src/Debug.cpp
+	src/Chat.cpp src/Osoba.cpp src/Siec.cpp
+	src/SiecHandler.cpp src/SiecLib.cpp src/Opcje.cpp
+	src/ProfilWizard.cpp
+	src/SiecInt.cpp src/Main.cpp src/BeGadu.cpp ;
+
+BinPackage BeGadu-$(WERSJA)-bin.zip ;
+Depends BeGadu-$(WERSJA).zip-bin : BeGadu ;
+SourcePackage BeGadu-$(WERSJA).zip ;
+Depends BeGadu-$(WERSJA).zip : BeGadu ;
+
+NotFile package ;
+Depends package :
+	BeGadu-$(WERSJA)-bin.zip
+	BeGadu-$(WERSJA).zip ;
