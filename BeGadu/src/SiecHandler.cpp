@@ -40,11 +40,6 @@ int32 HandlerThread(void *_handler)
 		gg_change_status(siec->fSesja, siec->fStatus);
 		if(siec->fWindow)
 			siec->fWindow->PostMessage(BEGG_UPDATE_STATUS);
-		if(siec->fWindow->fProfil->fUserlista->IsValid() == false)
-			siec->fWindow->fProfil->fUserlista->Import(siec->fSesja, siec->fWindow->fProfil->fUserlista->fLista);
-		else
-			siec->fWindow->fProfil->fUserlista->Send(siec->fSesja);
-
 		while(!handler->fDie)
 		{
 			FD_ZERO(&rd);
@@ -83,19 +78,31 @@ int32 HandlerThread(void *_handler)
 						case GG_STATE_CONNECTED:
 						case GG_EVENT_CONN_SUCCESS:
 						{
-							fprintf(stderr,"Połączyłem się :D\n");
+							fprintf(stderr,"Connected to GG\n");
+							fprintf(stderr, "Checking userlist... ");
+							if(siec->fWindow->fProfil->fUserlista->IsValid() == false ||  siec->fWindow->fProfil->fNeedImport == true)
+							{
+								fprintf(stderr, "Failed\n");
+								siec->fWindow->fProfil->fUserlista->Import(siec->fSesja, siec->fWindow->fProfil->fUserlista->fLista);
+								siec->fWindow->fProfil->fNeedImport = false;
+							}
+							else
+							{
+								fprintf(stderr, "Ok\n");
+								siec->fWindow->fProfil->fUserlista->Send(siec->fSesja);
+							}
 							break;
 						}
 						case GG_EVENT_CONN_FAILED:
 						{
-							fprintf(stderr, "Nie mogłem się podpiąc :/\n");
+							fprintf(stderr, "Connect failed :/\n");
 							gg_event_free(siec->fZdarzenie);
 							siec->PostMessage(USUN_HANDLER);
 							break;
 						}
 						case GG_EVENT_MSG:
 						{
-							fprintf(stderr, "mam mesga\n");
+							fprintf(stderr, "I've got mesg :D\n");
 							BMessage *wiadomosc = new BMessage(MAM_WIADOMOSC);
 							wiadomosc->AddInt32("kto", siec->fZdarzenie->event.msg.sender);
 							wiadomosc->AddString("msg", (char*)siec->fZdarzenie->event.msg.message);
@@ -185,7 +192,6 @@ int32 HandlerThread(void *_handler)
 						 {
 							Lista *lista = siec->fWindow->fProfil->fUserlista->fLista;
 							Userlist *userlista = siec->fWindow->fProfil->fUserlista;
-						 	char *descr = siec->fZdarzenie->event.status.descr; // to implement opisy ;)
 						 	Osoba *o;
 						 	if(!(o = userlista->Find(siec->fZdarzenie->event.status.uin)))
 						 		break;
@@ -196,7 +202,7 @@ int32 HandlerThread(void *_handler)
 						 			break;
 						 	}
 						 	o->fStatus = siec->fZdarzenie->event.status.status;
-						 	o->fOpis = descr;
+						 	o->fOpis->SetTo(siec->fZdarzenie->event.status.descr);
 						 	siec->fWindow->fListaView->MakeEmpty();
 						 	siec->fWindow->PostMessage(BEGG_UPDATE_LISTY);
 						 	break;
@@ -218,7 +224,7 @@ int32 HandlerThread(void *_handler)
 						 				break;
 						 		}
 						 		o->fStatus = siec->fZdarzenie->event.notify60[i].status;
-						 		o->fOpis = siec->fZdarzenie->event.notify60[i].descr;
+						 		o->fOpis->SetTo(siec->fZdarzenie->event.notify60[i].descr);
 							}
 				 			if(siec->fWindow->fListaView->LockLooper())
 				 			{
@@ -246,7 +252,7 @@ int32 HandlerThread(void *_handler)
 						 			break;
 						 	}
 						 	o->fStatus = siec->fZdarzenie->event.status60.status;
-						 	o->fOpis = siec->fZdarzenie->event.status60.descr;
+						 	o->fOpis->SetTo(siec->fZdarzenie->event.status60.descr);
 
 					 		if(siec->fWindow->fListaView->LockLooper())
 					 		{

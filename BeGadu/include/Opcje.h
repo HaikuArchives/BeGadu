@@ -29,6 +29,8 @@ class Opcje : public BWindow
 		MainWindow			*	fWindow;
 		BBitmap				*	fLogo;
 		BitmapView			*	fLogoView;
+		BTextControl			*	fNumerControl;
+		BTextControl			*	fHasloControl;
 
 };
 

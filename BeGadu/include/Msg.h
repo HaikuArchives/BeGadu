@@ -42,3 +42,6 @@
 #define BEGG_CONNECTING		1234
 #define OPCJE_OK			'opok'
 #define OPCJE_ANULUJ		'opan'
+#define PROFILE_CREATED		'prcr'
+#define OPEN_PROFILE_WIZARD 'oppw'
+#define CONFIG_OK			'cfok'

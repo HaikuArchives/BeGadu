@@ -28,6 +28,7 @@ class ChatWindow : public BWindow
 		virtual bool QuitRequested();
 		virtual void FrameResized(float, float);
 		virtual void Show();
+		virtual void WindowActivated(bool activated);
 		
 		Siec			*	fSiec;
 		MainWindow		*	fWindow;

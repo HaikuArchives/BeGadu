@@ -30,20 +30,20 @@ class Osoba
 {
 	public:
 							Osoba();
-		char			*	fImie;					/* Imię */
-		char			*	fNazwisko;				/* Nazwisko */
-		char			*	fNick;					/* Pseudonim */
-		char			*	fDisplay;				/* Wyświetl jako */
-		char			*	fTelefon;				/* Telefon */
-		char			*	fEmail;					/* E-Mail */
+		BString			*	fImie;					/* Imię */
+		BString			*	fNazwisko;				/* Nazwisko */
+		BString			*	fNick;					/* Pseudonim */
+		BString			*	fDisplay;				/* Wyświetl jako */
+		BString			*	fTelefon;				/* Telefon */
+		BString			*	fEmail;					/* E-Mail */
 		uin_t				fUIN;					/* Numer GG */
 		int					fStatus;				/* Aktualny status */
-		char			*	fOpis;					/* Aktualny opis */
+		BString			*	fOpis;					/* Aktualny opis */
 		struct in_addr		fIP;					/* Adres IP osoby */
 		unsigned short		fPort;					/* Port osoby */
 		int					fProtokol;				/* Wersja protokołu */
 		time_t				fLastSeen;				/* Jeśli jest niedost./ukryty, to od kiedy */
-		char			*	fLastDescr;				/* J.w. ostatni opis */
+		BString			*	fLastDescr;				/* J.w. ostatni opis */
 		struct in_addr		fLastIP;				/* J.w. ostatni IP */
 		unsigned short		fLastPort;				/* J.w. ostatni port */
 		int 				fImgSize;				/* Maksymalny rozmiar obrazków */
@@ -66,10 +66,10 @@ class Userlist
 {
 	public:
 						Userlist();						 /* Konstruktor */
-		int				Read();							 /* Ładuje userliste z pliku */
-		int				Write();						 /* Zapisuje ją do pliku */
+		int				Read(BString *name);			 /* Ładuje userliste z pliku */
+		int				Write(BString *name);			 /* Zapisuje ją do pliku */
 		void			ClearStatus(Osoba *osoba);		 /* Czyści status danej osobie */
-		void			Add(uin_t nr, const char *Imie, const char *Nazwisko, const char *Nick, const char *Disp, const char *Telefon, const char *Email); 
+		void			Add(uin_t nr, BString *Imie, BString *Nazwisko, BString *Nick, BString *Disp, BString *Telefon, BString *Email); 
 		void			Remove(Osoba *osoba);			 /* Usuwa osobę */
 		void			Replace(Osoba *osoba);			 /* Podmienia osobę */
 		void			Import(struct gg_session *fSesja, Lista *lista);
@@ -93,23 +93,26 @@ class Userlist
 class Profil
 {
 	public:
-								Profil(char *nazwa);
 								Profil();
-		void					Load();
+		void					Load(BString *profile);
 		void					Save();
-		
-		BMessage			*	fCfgMsg;
+		void					SetUIN(uin_t number);
+		void					SetPass(BString *password);
+		void					SetName(BString *name);
+		void 					SetRect(BRect rect);
+
+		Userlist			*	fUserlista;
 		BRect					fRect;
 		uin_t					fNumer;
-		const char			*	fHaslo;
+		BString				*	fHaslo;
 		int						fAutoStatus;
-		const char			*	fImie;
-		const char			*	fNazwisko;
-		const char			*	fNick;
-		const char			*	fNazwaProfilu;
-		const char			*	fTelefon;
-		const char			*	fEmail;
-		Userlist			*	fUserlista;
+		BString				*	fImie;
+		BString				*	fNazwisko;
+		BString				*	fNick;
+		BString				*	fNazwaProfilu;
+		BString				*	fTelefon;
+		BString				*	fEmail;
+		bool					fNeedImport;
 };
 
 

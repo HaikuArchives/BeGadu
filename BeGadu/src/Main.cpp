@@ -1,7 +1,7 @@
 /*
 	Main.cpp
-	Code: aljen <aljen@gumisie.org>
-	Homepage: http://gadu.beos.pl
+	Code: aljen <aljen@gumisie.be>
+	Homepage: http://begadu.sf.net
 */
 
 #include <stdlib.h>
@@ -13,7 +13,7 @@
 #include <MenuBar.h>
 #include <MenuField.h>
 #include <ScrollView.h>
-#include <OutlineListView.h>
+#include <ListView.h>
 #include <Application.h>
 #include <Bitmap.h>
 #include <Screen.h>
@@ -31,13 +31,20 @@
 #define MAINWINDOW_RECT BRect(50,50,300,350)
 #define MAINWINDOW_NAME	"BeGadu " WERSJA
 
-MainWindow::MainWindow(Profil *profil, Siec *siec)
+
+MainWindow::MainWindow(BString *profil)
  	: BWindow(MAINWINDOW_RECT, MAINWINDOW_NAME, B_TITLED_WINDOW, B_NOT_ZOOMABLE | B_ASYNCHRONOUS_CONTROLS)
 {
+	/* creating new Profil() and loading its config */
+	fProfil = new Profil();
+	fProfil->Load(profil);
+	/* corecting main window title */
+	SetTitle(profil->String());
+	/* we're setting window size limits */
 	SetSizeLimits(250, 600, 300, 600);
-	fProfil		= profil;
+	fSiec = new Siec(fProfil, fProfil->fUserlista->fLista);
+	fSiec->GotWindow(this);
 	fListaItems = new Lista(512);
-	fSiec		= siec;
 	if(fProfil->fRect.IsValid())
 		MoveTo(fProfil->fRect.left, fProfil->fRect.top);
 	/* ustaw menu */
@@ -86,6 +93,7 @@ MainWindow::MainWindow(Profil *profil, Siec *siec)
 	r.top = fIconsView->Bounds().bottom + menuBar->Bounds().bottom;
 	
 	fGaduView = new BView(r, "fGaduView", B_FOLLOW_ALL, B_FRAME_EVENTS | B_WILL_DRAW | B_FULL_UPDATE_ON_RESIZE);
+	fGaduView->SetViewColor(90,90,90);
 	AddChild(fGaduView);
 	
 	/* lista */
@@ -93,7 +101,8 @@ MainWindow::MainWindow(Profil *profil, Siec *siec)
 	r.right -= B_V_SCROLL_BAR_WIDTH;
 	r.bottom -= 30;
 
-	fListaView = new BOutlineListView(r, "fListaView");
+	fListaView = new BListView(r, "fListaView", B_SINGLE_SELECTION_LIST);
+	fListaView->SetViewColor(110,110,110);
 	BFont *font = new BFont(be_plain_font);
 	font->SetSize(15.0);
 	font->SetEncoding(B_ISO_8859_2);
@@ -127,19 +136,31 @@ MainWindow::MainWindow(Profil *profil, Siec *siec)
 	
 	fStatus = new BMenuField(r, "fStatus", "Status:", fStatusMenu, B_FOLLOW_LEFT | B_FOLLOW_BOTTOM, B_WILL_DRAW | B_NAVIGABLE | B_FRAME_EVENTS);
 	fGaduView->AddChild(fStatus);
-
 	if(fProfil->fUserlista->IsValid())
 	{
 		fListaItems = fProfil->fUserlista->fLista;
 		PostMessage(BEGG_UPDATE_LISTY);
 	}
+	if(fProfil->fAutoStatus != GG_STATUS_NOT_AVAIL)
+	{
+		if(fSiec->fSesja)
+			gg_change_status(fSiec->fSesja, fProfil->fAutoStatus);
+		else
+			fSiec->Login(fProfil->fAutoStatus);
+	}
+	fprintf(stderr,"Profile %s loaded.\n",fProfil->fNazwaProfilu->String());
 }
 
 /* mówimy aplikacji by wyszła */
 bool MainWindow::QuitRequested()
 {
+	/* saving profile settings */
+	fProfil->SetRect(Frame());
+	fProfil->Save();
+	/* cleaning up ;D */
+	fSiec->GotWindow(NULL);
+	fSiec->Quit();
 	be_app->PostMessage(B_QUIT_REQUESTED);
-	/* nie zamykamy okna, najpierw zapiszemy jego aktualną pozycje :) */
 	return false;
 }
 
@@ -189,8 +210,7 @@ void MainWindow::MessageReceived(BMessage *message)
 			for(int i = 0; i < fProfil->fUserlista->fLista->CountItems(); i++)
 			{
 				osoba = (Osoba*) fProfil->fUserlista->fLista->ItemAt(i);
-				fprintf(stderr, "kto->fNazwa = %s, osoba->fDisplay = %s\n", kto->fNazwa, osoba->fDisplay);
-				if(!strcmp(osoba->fDisplay, kto->fNazwa))
+				if(!strcmp(osoba->fDisplay->String(), kto->fNazwa->String()))
 				{
 					fprintf(stderr, "sa rowne :)\n");
 					break;

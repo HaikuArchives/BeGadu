@@ -11,6 +11,7 @@
 #include <File.h>
 #include <FindDirectory.h>
 #include <Alert.h>
+#include <StorageKit.h>
 #include "Osoba.h"
 extern "C" {
 #include "xmalloc.h"
@@ -25,124 +26,163 @@ extern "C" {
 
 Osoba::Osoba()
 {
-}
-
-Profil::Profil(char *nazwa)
-{
-	fCfgMsg = new BMessage();
-	fCfgMsg->AddRect("fRect", BRect(50,50,300,350));
-	fCfgMsg->AddInt32("fNumer", 0);
-	fCfgMsg->AddString("fHaslo", "");
-	fCfgMsg->AddInt32("fAutoStatus", GG_STATUS_AVAIL);
-	fCfgMsg->AddString("fImie", "");
-	fCfgMsg->AddString("fNazwisko", "");
-	fCfgMsg->AddString("fNick", "");
-	fCfgMsg->AddString("fNazwaProfilu", "Nowy");
-	fCfgMsg->AddString("fTelefon", "");
-	fCfgMsg->AddString("fEmail", "");
-	fNazwaProfilu = nazwa;
-	fUserlista = new Userlist();
-	Load();
+	fImie = new BString("");
+	fNazwisko = new BString("");
+	fNick = new BString("");
+	fDisplay = new BString("");
+	fTelefon = new BString("");
+	fEmail = new BString("");
+	fOpis = new BString("");
+	fLastDescr = new BString("");
 }
 
 Profil::Profil()
 {
-	fCfgMsg = new BMessage();
-	fCfgMsg->AddRect("fRect", BRect(50,50,300,350));
-	fCfgMsg->AddInt32("fNumer", 0);
-	fCfgMsg->AddString("fHaslo", "");
-	fCfgMsg->AddInt32("fAutoStatus", GG_STATUS_AVAIL);
-	fCfgMsg->AddString("fImie", "");
-	fCfgMsg->AddString("fNazwisko", "");
-	fCfgMsg->AddString("fNick", "");
-	fCfgMsg->AddString("fNazwaProfilu", "Nowy");
-	fCfgMsg->AddString("fTelefon", "");
-	fCfgMsg->AddString("fEmail", "");
-	fNazwaProfilu = "Nowy";
+	fRect.left = 50;
+	fRect.top = 50;
+	fRect.right = 300;
+	fRect.bottom = 350;
+	fImie = new BString();
+	fImie->SetTo("");
+	fNazwisko = new BString();
+	fNazwisko->SetTo("");
+	fNick = new BString();
+	fNick->SetTo("");
+	fTelefon = new BString();
+	fTelefon->SetTo("");
+	fEmail = new BString();
+	fEmail->SetTo("");
+	fNazwaProfilu = new BString();
+	fNazwaProfilu->SetTo("Nowy");
+	fNumer = 0;
+	fHaslo = new BString();
+	fHaslo->SetTo("");
 	fUserlista = new Userlist();
-	Load();
+	fAutoStatus = GG_STATUS_AVAIL;
+	fNeedImport = true;
 }
 
-void Profil::Load()
+void Profil::SetUIN(uin_t number)
+{
+	fNumer = number;
+}
+
+void Profil::SetPass(BString *pass)
+{
+	fHaslo = pass;
+}
+
+void Profil::SetName(BString *name)
+{
+	fNazwaProfilu = name;
+}
+
+void Profil::SetRect(BRect rect)
+{
+	fRect = rect;
+}
+
+void Profil::Load(BString *profile)
 {
 	BPath path;
-	BString plik = "BeGadu.";
-	plik << fNazwaProfilu;
+	BMessage *cfgmesg = new BMessage();
 	find_directory(B_USER_SETTINGS_DIRECTORY, &path);
-	path.Append(plik.String());
+	path.Append("BeGadu/Profiles");
+	path.Append(profile->String());
+	path.Append("Profil");
 	BFile file(path.Path(), B_READ_ONLY);
 	if(file.InitCheck() == B_OK)
 	{
-		fCfgMsg->Unflatten(&file);
+		cfgmesg->Unflatten(&file);
 		file.Unset();
 	}
-	if( fCfgMsg->FindRect("fRect", &fRect) != B_OK )
+	if( cfgmesg->FindRect("fRect", &fRect) != B_OK )
 		fRect =  BRect(50,50,300,350);
-	if( fCfgMsg->FindInt32("fNumer", (int32*)&fNumer) != B_OK )
+	if( cfgmesg->FindInt32("fNumer", (int32*)&fNumer) != B_OK )
 		fNumer = 0;
-	if( fCfgMsg->FindString("fHaslo", &fHaslo) != B_OK )
-		fHaslo = "";
-	if( fCfgMsg->FindInt32("fAutoStatus", (int32*)&fAutoStatus) != B_OK )
+	if( cfgmesg->FindString("fHaslo", fHaslo) != B_OK )
+		fHaslo->SetTo("");
+	if( cfgmesg->FindInt32("fAutoStatus", (int32*)&fAutoStatus) != B_OK )
 		fAutoStatus = GG_STATUS_AVAIL;
-	if( fCfgMsg->FindString("fImie", &fImie) != B_OK )
-		fImie = "";
-	if( fCfgMsg->FindString("fNazwisko", &fNazwisko) != B_OK )
-		fNazwisko = "";
-	if( fCfgMsg->FindString("fNick", &fNick) != B_OK )
-		fNick = "";
-	if( fCfgMsg->FindString("fNazwaProfilu", &fNazwaProfilu) != B_OK )
-		fNazwaProfilu = "";
-	if( fCfgMsg->FindString("fTelefon", &fTelefon) != B_OK )
-		fTelefon = "";
-	if( fCfgMsg->FindString("fEmail", &fEmail) != B_OK )
-		fEmail = "";
-	fUserlista->Read();
+	if( cfgmesg->FindString("fImie", fImie) != B_OK )
+		fImie->SetTo("");
+	if( cfgmesg->FindString("fNazwisko", fNazwisko) != B_OK )
+		fNazwisko->SetTo("");
+	if( cfgmesg->FindString("fNick", fNick) != B_OK )
+		fNick->SetTo("");
+	if( cfgmesg->FindString("fNazwaProfilu", fNazwaProfilu) != B_OK )
+		fNazwaProfilu->SetTo("");
+	if( cfgmesg->FindString("fTelefon", fTelefon) != B_OK )
+		fTelefon->SetTo("");
+	if( cfgmesg->FindString("fEmail", fEmail) != B_OK )
+		fEmail->SetTo("");
+	if( cfgmesg->FindBool("fNeedImport", &fNeedImport) != B_OK )
+		fNeedImport = true;
+	delete cfgmesg;
+	fprintf(stderr, "Loading profile from: %s\n", path.Path());
+	fUserlista->Read(fNazwaProfilu);
 }
 
 void Profil::Save()
 {
-	fCfgMsg->ReplaceRect("fRect", fRect );
-	fCfgMsg->ReplaceInt32("fNumer", fNumer);
-	fCfgMsg->ReplaceString("fHaslo", fHaslo);
-	fCfgMsg->ReplaceInt32("fAutoStatus", fAutoStatus);
-	fCfgMsg->ReplaceString("fImie", fImie);
-	fCfgMsg->ReplaceString("fNazwisko", fNazwisko);
-	fCfgMsg->ReplaceString("fNick", fNick);
-	fCfgMsg->ReplaceString("fNazwaProfilu", fNazwaProfilu);
-	fCfgMsg->ReplaceString("fTelefon", fTelefon);
-	fCfgMsg->ReplaceString("fEmail", fEmail);
-
+	BMessage *cfgmesg = new BMessage();
+	cfgmesg->AddRect("fRect", fRect );
+	cfgmesg->AddInt32("fNumer", fNumer);
+	cfgmesg->AddString("fHaslo", *fHaslo);
+	cfgmesg->AddInt32("fAutoStatus", fAutoStatus);
+	cfgmesg->AddString("fImie", *fImie);
+	cfgmesg->AddString("fNazwisko", *fNazwisko);
+	cfgmesg->AddString("fNick", *fNick);
+	cfgmesg->AddString("fNazwaProfilu", *fNazwaProfilu);
+	cfgmesg->AddString("fTelefon", *fTelefon);
+	cfgmesg->AddString("fEmail", *fEmail);
+	cfgmesg->AddBool("fNeedImport", fNeedImport);
 	BPath path;
-	BString plik = "BeGadu.";
-	plik << fNazwaProfilu;
+	BEntry entry;
 	find_directory(B_USER_SETTINGS_DIRECTORY, &path);
-	path.Append(plik.String());
+	path.Append("BeGadu/Profiles");
+	BDirectory * profil = new BDirectory(path.Path());
+	if(profil->FindEntry(fNazwaProfilu->String(), &entry) != B_OK)
+	{
+		path.Append(fNazwaProfilu->String());
+		profil->CreateDirectory(path.Path(), profil);
+	}
+	find_directory(B_USER_SETTINGS_DIRECTORY, &path);
+	path.Append("BeGadu/Profiles");
+	path.Append(fNazwaProfilu->String());
+	path.Append("Profil");
 	BFile file(path.Path(), B_WRITE_ONLY | B_CREATE_FILE | B_ERASE_FILE);
 	if(file.InitCheck() == B_OK)
 	{
-		fCfgMsg->Flatten(&file);
+		cfgmesg->Flatten(&file);
 		file.Unset();
 	}
-	fUserlista->Write();
+	delete cfgmesg;
+	fprintf(stderr, "Saving profile to: %s\n", path.Path());
+	fUserlista->Write(fNazwaProfilu);
 }
+
 
 /* Konstruktor userlisty */
 Userlist::Userlist()
 {	
-	/* sądze, że nikt nie ma >512 osób na liście :P */
+	/* sadze, że nikt nie ma >512 osób na liscie :P */
 	fIsValid = false;
 	fLista = new Lista(512);
 }
 
 /* Wczytuje userliste z pliku w formacie eksportu z servera */
 /* Kod w większości ze źródeł ekg/userlist.[c,h] */
-int Userlist::Read()
+int Userlist::Read(BString *name)
 {
+
 	BPath 		path;
 	FILE	*	plik;
 	char	*	buf;
 	find_directory(B_USER_SETTINGS_DIRECTORY, &path);
-	path.Append("BeGadu.userlist");
+	path.Append("BeGadu/Profiles");
+	path.Append(name->String());
+	path.Append("Userlist");
 	
 	if(!(plik = fopen(path.Path(), "r")))
 		return -1;
@@ -173,15 +213,15 @@ int Userlist::Read()
 			xfree(buf);
 			continue;
 		}
-		osoba->fImie = strdup(entry[0]);
-		osoba->fNazwisko = strdup(entry[1]);
-		osoba->fNick = strdup(entry[2]);
-		osoba->fDisplay = strdup(entry[3]);
-		osoba->fTelefon = strdup(entry[4]);
+		osoba->fImie->SetTo(entry[0]);
+		osoba->fNazwisko->SetTo(entry[1]);
+		osoba->fNick->SetTo(entry[2]);
+		osoba->fDisplay->SetTo(entry[3]);
+		osoba->fTelefon->SetTo(entry[4]);
 		osoba->fStatus = GG_STATUS_NOT_AVAIL;
 		/* mamy mejla ? */
 		if(count>7)
-			osoba->fEmail = xstrdup(entry[7]);
+			osoba->fEmail->SetTo(entry[7]);
 		for(i = 0; i < count; i++)
 			xfree(entry[i]);
 		fLista->AddItem(osoba);
@@ -195,12 +235,14 @@ int Userlist::Read()
 
 /* Zapisuje userliste do pliku w formacie eksportu z servera */
 /* Kod w większości ze źródeł ekg/userlist.[c,h] */
-int Userlist::Write()
+int Userlist::Write(BString *name)
 {
 	BPath 		path;
 	FILE	*	plik;
 	find_directory(B_USER_SETTINGS_DIRECTORY, &path);
-	path.Append("BeGadu.userlist");
+	path.Append("BeGadu/Profiles");
+	path.Append(name->String());
+	path.Append("Userlist");
 	char *	contacts, tmp[PATH_MAX];
 	
 	if(!(contacts = Dump()))
@@ -239,10 +281,8 @@ void Userlist::ClearStatus(Osoba *osoba)
 				memset(&o->fLastIP, 0, sizeof(struct in_addr));
 				o->fPort = 0;
 				o->fLastPort = 0;
-				free(o->fOpis);
-				free(o->fLastDescr);
-				o->fOpis = NULL;
-				o->fLastDescr = NULL;
+				o->fOpis->SetTo("");
+				o->fLastDescr->SetTo("");
 				break;
 			}
 	}				
@@ -250,17 +290,17 @@ void Userlist::ClearStatus(Osoba *osoba)
 
 /* Dodaje osobę o numerze i ustawia jej nazwę wyświetlania */
 /* Kod w większości ze źródeł ekg/userlist.[c,h] */
-void Userlist::Add(uin_t nr, const char *Imie, const char *Nazwisko, const char *Nick, const char *Disp, const char *Telefon, const char *Email)
+void Userlist::Add(uin_t nr, BString *Imie, BString *Nazwisko, BString *Nick, BString *Disp, BString *Telefon, BString *Email)
 {
 	Osoba *o = new Osoba();
 	o->fUIN = nr;
-	o->fImie = strdup(Imie);
-	o->fNazwisko = strdup(Nazwisko);
-	o->fNick = strdup(Nick);
-	o->fDisplay = strdup(Disp);
-	o->fTelefon = strdup(Telefon);
+	o->fImie = Imie;
+	o->fNazwisko = Nazwisko;
+	o->fNick = Nick;
+	o->fDisplay = Disp;
+	o->fTelefon = Telefon;
 	o->fStatus = GG_STATUS_NOT_AVAIL;
-	o->fEmail = strdup(Email);
+	o->fEmail = Email;
 	fLista->AddItem(o);
 }
 
@@ -326,7 +366,7 @@ Osoba * Userlist::FindMobile(const char *telefon)
 	for(int i = 0; i < fLista->CountItems(); i++)
 	{
 		o = (Osoba*) fLista->ItemAt(i);
-		if(telefon && o->fTelefon && !strcasecmp(o->fTelefon, telefon))
+		if(telefon && o->fTelefon && !strcasecmp(o->fTelefon->String(), telefon))
 			return o;
 	}
 	return NULL;
@@ -342,14 +382,14 @@ char * Userlist::Dump()
 	{
 		o = (Osoba*) fLista->ItemAt(i);
 		line = saprintf( "%s;%s;%s;%s;%s;%s;%s;%s%s\r\n",
-						 o->fImie,
-						 o->fNazwisko,
-						 o->fNick,
-						 o->fDisplay,
-						 o->fTelefon,
+						 o->fImie->String(),
+						 o->fNazwisko->String(),
+						 o->fNick->String(),
+						 o->fDisplay->String(),
+						 o->fTelefon->String(),
 						 strdup(""),
 						 itoa(o->fUIN),
-						 o->fEmail,
+						 o->fEmail->String(),
 						 strdup(""));
 		string_append(s, line);
 		xfree(line);
@@ -394,14 +434,14 @@ int	* Userlist::Set(const char *contacts)
 			continue;
 		}
 		o->fUIN = atoi(entry[6]);
-		o->fImie = entry[0];
-		o->fNazwisko = strdup(entry[1]);
-		o->fNick = strdup(entry[2]);
-		o->fDisplay = strdup(entry[3]);
-		o->fTelefon = strdup(entry[4]);
+		o->fImie->SetTo(entry[0]);
+		o->fNazwisko->SetTo(entry[1]);
+		o->fNick->SetTo(entry[2]);
+		o->fDisplay->SetTo(entry[3]);
+		o->fTelefon->SetTo(entry[4]);
 		o->fStatus = GG_STATUS_NOT_AVAIL;
 		if(count > 7)
-			o->fEmail = strdup(entry[7]);
+			o->fEmail->SetTo(entry[7]);
 		Add(o->fUIN, o->fImie, o->fNazwisko, o->fNick, o->fDisplay, o->fTelefon, o->fEmail);
 		array_free(entry);
 		delete o;

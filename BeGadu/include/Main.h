@@ -10,6 +10,7 @@
 
 #include <Window.h>
 #include <ListItem.h>
+#include <ListView.h>
 
 class Siec;
 class Opcje;
@@ -26,7 +27,7 @@ class GaduListItem;
 class MainWindow : public BWindow
 {
 	public:
-		MainWindow(Profil *profil, Siec *siec);
+		MainWindow(BString *profil);
 		virtual bool QuitRequested();
 		virtual void MessageReceived(BMessage *message);
 		void UstawStatus(char *status);
@@ -37,7 +38,7 @@ class MainWindow : public BWindow
 
 		/* do interfejsu */
 		BView				*	fGaduView;
-		BOutlineListView	*	fListaView;
+		BListView			*	fListaView;
 		GaduListItem		*	fListaItem;
 		Lista				*	fListaItems;
 		BMenu				*	fSubMenu;

@@ -10,8 +10,6 @@ extern "C" {
 class BTextControl;
 class BView;
 class BButton;
-class Profil;
-class MainWindow;
 class BRadioButton;
 class BBox;
 
@@ -29,14 +27,12 @@ class BBox;
 class ProfilWizard : public BWindow
 {
 	public:
-		ProfilWizard(MainWindow *window, Profil *profil);
+		ProfilWizard();
 		~ProfilWizard();
 		virtual void MessageReceived(BMessage *mesg);
 		virtual void Show();
-		
-		Profil			*	fProfil;
-		MainWindow		*	fWindow;
-
+		bool	fBreak;
+		Profil	*fProfil;
 	private:
 		BView			*	fPage1;
 		BView			*	fPage2;

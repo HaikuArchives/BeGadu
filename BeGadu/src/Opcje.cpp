@@ -39,9 +39,21 @@ Opcje::Opcje(Profil *profil, MainWindow *window, BRect rect) : BWindow(rect, OPC
 									   r.left + 125, r.top + 100 ),
 									   fLogo );
 	AddChild(fLogoView);
-
-
-    BButton *przycisk;
+	
+	r.left = 20;
+	r.top = 100;
+	r.right = r.left + 250;
+	r.bottom = r.top + 25;
+	fNumerControl = new BTextControl(r, "fNumerControl", "Numer GG:", "0", NULL, B_FOLLOW_LEFT | B_FOLLOW_TOP, B_WILL_DRAW | B_NAVIGABLE);
+	AddChild(fNumerControl);
+	r.left = 20;
+	r.right = r.left + 250;
+	r.top = 130;
+	r.bottom = r.top + 25;
+	fHasloControl = new BTextControl(r, "fHasloControl", "Haslo:", "", NULL, B_FOLLOW_LEFT | B_FOLLOW_TOP, B_WILL_DRAW | B_NAVIGABLE);
+	AddChild(fHasloControl);
+	r = Bounds();
+	BButton *przycisk;
     przycisk = new BButton( BRect( r.left + 360, r.bottom - 30,
     							   r.left + 440, r.bottom - 5),
     							   "przycisk ok", "Ok",
@@ -60,17 +72,19 @@ Opcje::Opcje(Profil *profil, MainWindow *window, BRect rect) : BWindow(rect, OPC
 
 
 	/* pobieramy aktualna konfiguracje */
-/*
+
     if( fNumerControl->LockLooper() )
     {
     	int numer = fProfil->fNumer;
 		char *a;
+//		a = (char*) calloc(15,1);
 		sprintf(a, "%d", numer);
         fNumerControl->SetText(a);
-        fHasloControl->SetText(fProfil->fHaslo);
+        fHasloControl->SetText(fProfil->fHaslo->String());
+		fprintf(stderr,"numer: %s\nhaslo: %s\n", a, fProfil->fHaslo->String());
         fNumerControl->UnlockLooper();
     }    
-*/
+
 }
 
 void Opcje::MessageReceived(BMessage *mesg)
@@ -85,18 +99,17 @@ void Opcje::MessageReceived(BMessage *mesg)
 		}
 		case OPCJE_OK:
 		{
-/*			if(fNumerControl->LockLooper())
+			if(fNumerControl->LockLooper())
 			{
 				fProfil->fNumer = atoi(fNumerControl->Text());
 				fNumerControl->UnlockLooper();
 			}
 			if(fHasloControl->LockLooper())
 			{
-				fProfil->fHaslo = (char*)strdup(fHasloControl->Text());
+				fProfil->fHaslo->SetTo(fHasloControl->Text());
 				fHasloControl->UnlockLooper();
 			}
 			PostMessage(B_QUIT_REQUESTED);
-			*/
 			break;
 		}
 		case BEGG_ABOUT:

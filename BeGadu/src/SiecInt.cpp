@@ -31,8 +31,8 @@ void Siec::Login()
 	/* ustawiamy pola potrzebne do połączenia z gg */
 	memset(&fLoginParam, 0, sizeof(fLoginParam));
 	fLoginParam.uin = fProfil->fNumer;
-	fLoginParam.password = (char*)fProfil->fHaslo;
-	fLoginParam.async = 0;
+	fLoginParam.password = (char*)fProfil->fHaslo->String();
+	fLoginParam.async = 1;
 	fLoginParam.status = fProfil->fAutoStatus;
 	gg_debug_level = ~0;
 	PostMessage(DODAJ_HANDLER);
@@ -47,8 +47,8 @@ void Siec::Login(int status)
 	/* ustawiamy pola potrzebne do połączenia z gg */
 	memset(&fLoginParam, 0, sizeof(fLoginParam));
 	fLoginParam.uin = fProfil->fNumer;
-	fLoginParam.password = (char*)fProfil->fHaslo;
-	fLoginParam.async = 0;
+	fLoginParam.password = (char*)fProfil->fHaslo->String();
+	fLoginParam.async = 1;
 	fLoginParam.status = fStatus;
 	gg_debug_level = ~0;
 	PostMessage(DODAJ_HANDLER);

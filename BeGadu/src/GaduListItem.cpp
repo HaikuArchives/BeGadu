@@ -15,7 +15,7 @@ extern "C" {
 #include "libgadu.h"
 }
 
-GaduListItem::GaduListItem(char *osoba, int status) : BListItem()
+GaduListItem::GaduListItem(BString *osoba, int status) : BListItem()
 {
 	fStatus = status;
 	SetIcon(fStatus);
@@ -23,7 +23,7 @@ GaduListItem::GaduListItem(char *osoba, int status) : BListItem()
 	fNazwa = osoba;
 	BFont font(be_plain_font);
 	font.SetSize(14.0);
-	float woi = font.StringWidth(fNazwa);
+	float woi = font.StringWidth(fNazwa->String());
 	SetWidth(woi);
 }
 
@@ -112,7 +112,7 @@ void GaduListItem::DrawItem(BView *owner, BRect frame, bool complete)
 	owner->SetDrawingMode(B_OP_OVER);
 	owner->MovePenTo(frame.left + 21, (((frame.bottom+frame.top)/2.0))+4.0);
 	owner->SetHighColor(kolor);
-	owner->DrawString(fNazwa);
+	owner->DrawString(fNazwa->String());
 }
 
 void GaduListItem::Update(BView *owner, const BFont *font)

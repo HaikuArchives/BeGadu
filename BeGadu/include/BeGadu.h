@@ -7,18 +7,19 @@
 #define _BE_GADU_H
 
 #include <Application.h>
+
 #include "Main.h"
 #include "Osoba.h"
 #include "Debug.h"
-class Siec;
+#include "ProfilWizard.h"
 
 class BeGadu : public BApplication
 {
 	private:
-		Profil		*	fProfil;
-		MainWindow  *	mWindow;
-		DebugWindow *	dWindow;
-		Siec		*	fSiec;
+		MainWindow  	*	mWindow;
+		DebugWindow 	*	dWindow;
+		bool				fFirstRun;
+		BString			*	fLastProfile;
 	public:
 		BeGadu();
 		virtual bool QuitRequested();

@@ -17,12 +17,12 @@
 class GaduListItem : public BListItem
 {
 	public:
-		GaduListItem(char *osoba, int status);
+		GaduListItem(BString *osoba, int status);
 		~GaduListItem();
 		void SetIcon(int status);
 		virtual void DrawItem(BView *owner, BRect frame, bool complete);
 		virtual void Update(BView *owner, const BFont *font);
-		char		*	fNazwa;
+		BString		*	fNazwa;
 		int 			fStatus;
 		BBitmap		*	fIkona;
 };

@@ -43,7 +43,7 @@ Siec::Siec(Profil *profil, Lista *lista) : BLooper("Petla sieci")
 void Siec::Quit()
 {
 	/* Rozłączamy się */
-	if(fStatus != GG_STATUS_NOT_AVAIL)
+	if((fStatus != GG_STATUS_NOT_AVAIL) || (fStatus != GG_STATUS_NOT_AVAIL_DESCR))
 		Logout();
 	Lock();
 	BLooper::Quit();
