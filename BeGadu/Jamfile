@@ -6,7 +6,7 @@
 
 SubDir TOP ;
 C++FLAGS += -DWERSJA=\\\"$(WERSJA)\\\" -I./include ;
-LINKLIBS = -L./lib -lbe -lroot -ltranslation -lgadu lib/Stackbar.a ;
+LINKLIBS = -L./lib -lbe -lroot -ltranslation -lgadu -lzeta -lbind -lsocket ;
 RESOURCE = BeGadu.rsrc ;
 
 Main BeGadu :
