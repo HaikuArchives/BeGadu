@@ -140,6 +140,7 @@ void ChatWindow::MessageReceived(BMessage *message)
 				time_t _teraz = time(NULL);
 				struct tm * teraz = localtime(&_teraz);
 				char *string;
+				int id = fSiec->GetIdent();
 				string = (char*)calloc(strlen(" [00:00]\n%s\n") + 1 + strlen(fWindow->fProfil->fNazwaProfilu) + strlen(fPowiedzControl->Text()), 1);
 				sprintf(string, "%s [%02d:%02d]\n%s\n", fWindow->fProfil->fNazwaProfilu, teraz->tm_hour, teraz->tm_min, fPowiedzControl->Text());
 				fRozmowa->Insert(fRozmowa->TextLength(), string, strlen(string));

@@ -24,6 +24,8 @@
 #include "GfxStuff.h"
 #include "Siec.h"
 #include "Osoba.h"
+#include "StackBar.h"
+#include "StackPage.h"
 
 #define OPCJE_NAME "Ustawienia"
 
@@ -40,6 +42,29 @@ Opcje::Opcje(Profil *profil, MainWindow *window, BRect rect) : BWindow(rect, OPC
 									   fLogo );
 	AddChild(fLogoView);
 
+	fSBar = new StackBar( BRect( r.left, r.top + 100,
+								 r.left+150, r.bottom ),
+						  "opcje", B_FOLLOW_LEFT | B_FOLLOW_TOP_BOTTOM,
+						  B_FULL_UPDATE_ON_RESIZE | B_WILL_DRAW | B_FRAME_EVENTS | 
+						  B_NAVIGABLE_JUMP | B_NAVIGABLE, B_FANCY_BORDER );
+	AddChild(fSBar);
+	
+	fProfilPageView = new BView(fSBar->Bounds(), "ProfilPageView", B_FOLLOW_ALL, B_WILL_DRAW);
+
+	BBitmap *profilbmp = LoadGFX("Profil.png");
+	BitmapView *profilbmpvw = new BitmapView(BRect(fProfilPageView->Bounds().left + 10, fProfilPageView->Bounds().top + 10, fProfilPageView->Bounds().left + 60, fProfilPageView->Bounds().top + 60), profilbmp);
+	fProfilPageView->AddChild(profilbmpvw);
+	fProfilPage = new StackPage("Profil");
+	fProfilView = new BView( BRect( r.left + 150, r.top,
+									r.right, r.bottom - 35 ),
+							 "ProfilView", B_FOLLOW_ALL, B_WILL_DRAW);
+//	fProfilView->SetViewColor(255,0,255);
+	fOpcjePageView = new BView(fSBar->Bounds(), "OpcjePageView", B_FOLLOW_ALL, B_WILL_DRAW);
+	fOpcjePage = new StackPage("Opcje");
+	fSBar->AddPage(fProfilPageView, fProfilPage);
+	fSBar->AddPage(fOpcjePageView, fOpcjePage);
+	AddChild(fProfilView);
+
     BButton *przycisk;
     przycisk = new BButton( BRect( r.left + 360, r.bottom - 30,
     							   r.left + 440, r.bottom - 5),
@@ -55,31 +80,21 @@ Opcje::Opcje(Profil *profil, MainWindow *window, BRect rect) : BWindow(rect, OPC
 
     AddChild(przycisk);
 
-	fNumerControl = new BTextControl(BRect(10,10,175,25), "fNumerControl", "Numer GG:", "0", NULL);
-	fHasloControl = new BTextControl(BRect(10,40,175,25), "fHasloControl", "Haslo:", "", NULL);
-	BView *siakisView = new BView(BRect(100,100,350,200), "siakisView", B_FOLLOW_ALL, B_WILL_DRAW|B_FULL_UPDATE_ON_RESIZE);
-	AddChild(siakisView);
-	siakisView->AddChild(fNumerControl);
-	siakisView->AddChild(fHasloControl);	
+	
 
 
 	/* pobieramy aktualna konfiguracje */
-
+/*
     if( fNumerControl->LockLooper() )
     {
     	int numer = fProfil->fNumer;
-		char *a = (char*) calloc(22,1);
+		char *a;
 		sprintf(a, "%d", numer);
         fNumerControl->SetText(a);
+        fHasloControl->SetText(fProfil->fHaslo);
         fNumerControl->UnlockLooper();
     }    
-	if( fHasloControl->LockLooper() )
-	{
-		char *b = (char*) calloc(20,1);
-		sprintf(b, "%s", fProfil->fHaslo);
-		fHasloControl->SetText(b);
-		fHasloControl->UnlockLooper();
-	}
+*/
 }
 
 void Opcje::MessageReceived(BMessage *mesg)
@@ -94,7 +109,7 @@ void Opcje::MessageReceived(BMessage *mesg)
 		}
 		case OPCJE_OK:
 		{
-			if(fNumerControl->LockLooper())
+/*			if(fNumerControl->LockLooper())
 			{
 				fProfil->fNumer = atoi(fNumerControl->Text());
 				fNumerControl->UnlockLooper();
@@ -104,11 +119,8 @@ void Opcje::MessageReceived(BMessage *mesg)
 				fProfil->fHaslo = (char*)strdup(fHasloControl->Text());
 				fHasloControl->UnlockLooper();
 			}
-			fprintf(stderr, "login: %d\n", fProfil->fNumer);
-			fprintf(stderr, "haslo: %s\n", fProfil->fHaslo);
-			fprintf(stderr, "haslo: %s\n", fProfil->fHaslo);
-			fprintf(stderr, "profil_name: %s\n", fProfil->fNazwaProfilu);
 			PostMessage(B_QUIT_REQUESTED);
+			*/
 			break;
 		}
 		case BEGG_ABOUT:

@@ -29,7 +29,7 @@
 #include "GfxStuff.h"
 
 #define MAINWINDOW_RECT BRect(50,50,300,350)
-#define MAINWINDOW_NAME	"BeGadu 0.20dv"
+#define MAINWINDOW_NAME	"BeGadu " WERSJA
 
 MainWindow::MainWindow(Profil *profil, Siec *siec)
  	: BWindow(MAINWINDOW_RECT, MAINWINDOW_NAME, B_TITLED_WINDOW, B_NOT_ZOOMABLE | B_ASYNCHRONOUS_CONTROLS)
@@ -39,10 +39,7 @@ MainWindow::MainWindow(Profil *profil, Siec *siec)
 	fListaItems = new Lista(512);
 	fSiec		= siec;
 	if(fProfil->fRect.IsValid())
-	{
 		MoveTo(fProfil->fRect.left, fProfil->fRect.top);
-		ResizeTo(fProfil->fRect.right - fProfil->fRect.left, fProfil->fRect.bottom - fProfil->fRect.top);
-	}
 	/* ustaw menu */
 	BRect r = Bounds();
 	BMenuBar *menuBar = new BMenuBar(r, "menu bar");
@@ -96,12 +93,12 @@ MainWindow::MainWindow(Profil *profil, Siec *siec)
 	r.right -= B_V_SCROLL_BAR_WIDTH;
 	r.bottom -= 30;
 
-	fListaView = new BListView(r, "fListaView", B_SINGLE_SELECTION_LIST);
+	fListaView = new BOutlineListView(r, "fListaView");
 	BFont *font = new BFont(be_plain_font);
 	font->SetSize(15.0);
 	font->SetEncoding(B_ISO_8859_2);
 	fListaView->SetFont(font);
-	BScrollView *scrollView = new BScrollView("scroll view", fListaView, B_FOLLOW_ALL, B_FULL_UPDATE_ON_RESIZE | B_WILL_DRAW | B_FRAME_EVENTS, false, true);
+	BScrollView *scrollView = new BScrollView("scroll view", fListaView, B_FOLLOW_ALL, B_FULL_UPDATE_ON_RESIZE, false, true);
 	fGaduView->AddChild(scrollView);
 	
 	/* musimy wiedzieć czy user zaznaczył/otworzyl osobę */	
@@ -115,6 +112,7 @@ MainWindow::MainWindow(Profil *profil, Siec *siec)
 	r.left = r.left + 5;
 	r.right = r.right -5;
 
+	BMenuItem *selectstatus;
 	fStatusMenu = new BPopUpMenu("status");
 	fDostepny = new BMenuItem("Dostępny", new BMessage(SET_AVAIL));
 	fZarazWracam = new BMenuItem("Zaraz wracam", new BMessage(SET_BRB));
@@ -151,7 +149,7 @@ void MainWindow::MessageReceived(BMessage *message)
 	{
 		case BEGG_OPCJE:
 		{
-			BScreen *screen = new BScreen(this);
+			BScreen *screen = new BScreen(NULL);
 			display_mode tryb;
 			screen->GetMode(&tryb);
 			// teraz centrujemy okienko
@@ -277,7 +275,7 @@ void MainWindow::MessageReceived(BMessage *message)
 			for(int i = 0; i < fProfil->fUserlista->fLista->CountItems(); i++)
 			{
 				o = (Osoba*) fProfil->fUserlista->fLista->ItemAt(i);
-				g = new GaduListItem(o->fDisplay, o->fStatus, o->fOpis);
+				g = new GaduListItem(o->fDisplay, o->fStatus);
 				fListaItems->AddItem(g);
 			}
 			fListaView->AddList(fListaItems);

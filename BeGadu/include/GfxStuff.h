@@ -48,6 +48,3 @@ class BitmapView : public BView
 };
 
 #endif // GFX_STUFF_H
-
-
-

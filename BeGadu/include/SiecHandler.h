@@ -31,5 +31,3 @@ class SiecHandler
 };
 
 #endif // _BEGADU_HANDLER_H
-
-

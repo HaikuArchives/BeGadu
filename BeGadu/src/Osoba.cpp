@@ -41,8 +41,6 @@ Profil::Profil(char *nazwa)
 	fCfgMsg->AddString("fTelefon", "");
 	fCfgMsg->AddString("fEmail", "");
 	fNazwaProfilu = nazwa;
-	fNumer = 0;
-	fHaslo = "";
 	fUserlista = new Userlist();
 	Load();
 }
@@ -61,8 +59,6 @@ Profil::Profil()
 	fCfgMsg->AddString("fTelefon", "");
 	fCfgMsg->AddString("fEmail", "");
 	fNazwaProfilu = "Nowy";
-	fNumer = 0;
-	fHaslo = "";
 	fUserlista = new Userlist();
 	Load();
 }
@@ -74,7 +70,6 @@ void Profil::Load()
 	plik << fNazwaProfilu;
 	find_directory(B_USER_SETTINGS_DIRECTORY, &path);
 	path.Append(plik.String());
-	fprintf(stderr,"Laduje profil %s\n", path.Path());
 	BFile file(path.Path(), B_READ_ONLY);
 	if(file.InitCheck() == B_OK)
 	{
@@ -120,10 +115,8 @@ void Profil::Save()
 	BPath path;
 	BString plik = "BeGadu.";
 	plik << fNazwaProfilu;
-	fprintf(stderr,"nazwa profilu: %s\n", fNazwaProfilu);
 	find_directory(B_USER_SETTINGS_DIRECTORY, &path);
 	path.Append(plik.String());
-	fprintf(stderr,"Zapisuje profil %s\n", path.Path());
 	BFile file(path.Path(), B_WRITE_ONLY | B_CREATE_FILE | B_ERASE_FILE);
 	if(file.InitCheck() == B_OK)
 	{
@@ -382,7 +375,7 @@ int	* Userlist::Set(const char *contacts)
 {
 	fprintf(stderr, "Userlist::Set started\n");
 	char *buf, *cont, *contsave;
-	char **entry;
+	char **entry, *uin;
 	Clear();
 	
 	cont = contsave = strdup(contacts);

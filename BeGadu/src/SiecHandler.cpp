@@ -159,6 +159,7 @@ int32 HandlerThread(void *_handler)
 							{
 								Lista *lista = siec->fWindow->fProfil->fUserlista->fLista;
 								Userlist *userlista = siec->fWindow->fProfil->fUserlista;
+						 		unsigned char *descr; // to implement opisy ;)
 						 		Osoba *o;
 						 		if(!(o = userlista->Find(n->uin)))
 						 		{
@@ -184,6 +185,7 @@ int32 HandlerThread(void *_handler)
 						 {
 							Lista *lista = siec->fWindow->fProfil->fUserlista->fLista;
 							Userlist *userlista = siec->fWindow->fProfil->fUserlista;
+						 	char *descr = siec->fZdarzenie->event.status.descr; // to implement opisy ;)
 						 	Osoba *o;
 						 	if(!(o = userlista->Find(siec->fZdarzenie->event.status.uin)))
 						 		break;
@@ -194,19 +196,9 @@ int32 HandlerThread(void *_handler)
 						 			break;
 						 	}
 						 	o->fStatus = siec->fZdarzenie->event.status.status;
-						 	if( (o->fStatus == GG_STATUS_NOT_AVAIL_DESCR) || (o->fStatus == GG_STATUS_INVISIBLE_DESCR) || (o->fStatus == GG_STATUS_BUSY_DESCR) || (o->fStatus == GG_STATUS_AVAIL_DESCR) )
-						 	{
-						 		o->fOpis = (char*) calloc(70 + 2, 1);
-							 	sprintf(o->fOpis, "%s", siec->fZdarzenie->event.status.descr);
-						 	}
-						 	else
-						 		o->fOpis = "";
-							if(siec->fWindow->fListaView->LockLooper())
-							{
-						 		siec->fWindow->fListaView->MakeEmpty();
-						 		siec->fWindow->PostMessage(BEGG_UPDATE_LISTY);
-						 		siec->fWindow->fListaView->UnlockLooper();
-						 	}
+						 	o->fOpis = descr;
+						 	siec->fWindow->fListaView->MakeEmpty();
+						 	siec->fWindow->PostMessage(BEGG_UPDATE_LISTY);
 						 	break;
 						 }
 						 
@@ -226,13 +218,7 @@ int32 HandlerThread(void *_handler)
 						 				break;
 						 		}
 						 		o->fStatus = siec->fZdarzenie->event.notify60[i].status;
-							 	if( (o->fStatus == GG_STATUS_NOT_AVAIL_DESCR) || (o->fStatus == GG_STATUS_INVISIBLE_DESCR) || (o->fStatus == GG_STATUS_BUSY_DESCR) || (o->fStatus == GG_STATUS_AVAIL_DESCR) )
-							 	{
-							 		o->fOpis = (char*) calloc(70 + 2, 1);
-								 	sprintf(o->fOpis, "%s", siec->fZdarzenie->event.notify60[i].descr);
-							 	}
-							 	else
-							 		o->fOpis = "";
+						 		o->fOpis = siec->fZdarzenie->event.notify60[i].descr;
 							}
 				 			if(siec->fWindow->fListaView->LockLooper())
 				 			{
@@ -247,6 +233,7 @@ int32 HandlerThread(void *_handler)
 						 {
 							Lista *lista = siec->fWindow->fProfil->fUserlista->fLista;
 							Userlist *userlista = siec->fWindow->fProfil->fUserlista;
+						 	char *descr;
 						 	Osoba *o;
 						 	if(!(o = userlista->Find(siec->fZdarzenie->event.status60.uin)))
 						 	{
@@ -259,13 +246,7 @@ int32 HandlerThread(void *_handler)
 						 			break;
 						 	}
 						 	o->fStatus = siec->fZdarzenie->event.status60.status;
-						 	if( (o->fStatus == GG_STATUS_NOT_AVAIL_DESCR) || (o->fStatus == GG_STATUS_INVISIBLE_DESCR) || (o->fStatus == GG_STATUS_BUSY_DESCR) || (o->fStatus == GG_STATUS_AVAIL_DESCR) )
-						 	{
-						 		o->fOpis = (char*) calloc(70 + 2, 1);
-							 	sprintf(o->fOpis, "%s", siec->fZdarzenie->event.status60.descr);
-							}
-							else
-								o->fOpis = "";
+						 	o->fOpis = siec->fZdarzenie->event.status60.descr;
 
 					 		if(siec->fWindow->fListaView->LockLooper())
 					 		{

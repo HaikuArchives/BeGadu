@@ -28,13 +28,14 @@ BeGadu::BeGadu() : BApplication("application/x-vnd.BeGadu")
 	
 	/* pokazujemy interfejs BeGadu :) */
 	mWindow->Show();
+	ProfilWizard *pw = new ProfilWizard(mWindow, fProfil);
+	pw->Show();
 }
 
 bool BeGadu::QuitRequested()
 {
 	/* zapisujemy konfiguracje */
 	fProfil->fRect = mWindow->Frame();
-	fprintf(stderr, "dupa dupa dupa%s\n", fProfil->fNazwaProfilu);
 	fProfil->Save();
 	/* czyścimy po sobie */
 	fSiec->GotWindow(NULL);

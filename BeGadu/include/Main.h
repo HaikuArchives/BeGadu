@@ -10,13 +10,11 @@
 
 #include <Window.h>
 #include <ListItem.h>
-#include <ListView.h>
 
 class Siec;
 class Opcje;
 class Lista;
 class BStringView;
-class BMenu;
 class BMenuItem;
 class BBitmap;
 class Profil;
@@ -38,7 +36,7 @@ class MainWindow : public BWindow
 
 		/* do interfejsu */
 		BView				*	fGaduView;
-		BListView			*	fListaView;
+		BOutlineListView	*	fListaView;
 		GaduListItem		*	fListaItem;
 		Lista				*	fListaItems;
 		

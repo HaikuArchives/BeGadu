@@ -15,28 +15,21 @@ extern "C" {
 #include "libgadu.h"
 }
 
-GaduListItem::GaduListItem(char *osoba, int status, char *opis) : BListItem()
+GaduListItem::GaduListItem(char *osoba, int status) : BListItem()
 {
-	fOpis = opis;
 	fStatus = status;
 	SetIcon(fStatus);
-	SetHeight(40.0);
+	SetHeight(20.0);
 	fNazwa = osoba;
-	fNormalFont = new BFont(be_plain_font);
-	fSelectedFont = new BFont(be_bold_font);
-	fStatusFont = new BFont(be_plain_font);
-	fNormalFont->SetSize(15.0);
-	fSelectedFont->SetSize(15.0);
-	fStatusFont->SetSize(14.0);
-	float woi = fSelectedFont->StringWidth(fNazwa);
+	BFont font(be_plain_font);
+	font.SetSize(14.0);
+	float woi = font.StringWidth(fNazwa);
 	SetWidth(woi);
 }
 
 GaduListItem::~GaduListItem()
 {
 	delete fIkona;
-	delete fNormalFont;
-	delete fSelectedFont;
 }
 
 void GaduListItem::SetIcon(int status)
@@ -91,30 +84,24 @@ void GaduListItem::DrawItem(BView *owner, BRect frame, bool complete)
 	rgb_color kolor;
 	if(fIkona)
 	{
-		frame.left += 5;
+		frame.left = frame.left - 10;
 		frame.top += 3;
-		frame.bottom = frame.top + 40;
+		frame.bottom = frame.top + 20;
 		BRect r( frame.left,
-				 frame.top + 10,
+				 frame.top,
 				 frame.left + 20,
-				 frame.top + 30);
+				 frame.top + 20);
 		owner->SetDrawingMode(B_OP_ALPHA);
 		owner->SetLowColor(255, 255, 255, 0);
 		owner->DrawBitmap(fIkona, r);
 	}
-	frame.left = frame.left + 22;
+	frame.left = frame.left + 20;
 	if(IsSelected() || complete)
 	{
 		if(IsSelected())
-		{
-			owner->SetFont(fSelectedFont);
 			kolor.red = kolor.green = kolor.blue = 100;
-		}
 		else
-		{
-			owner->SetFont(fNormalFont);
 			kolor = owner->ViewColor();
-		}
 		owner->SetHighColor(kolor);
 		owner->FillRect(frame);
 	}
@@ -123,13 +110,9 @@ void GaduListItem::DrawItem(BView *owner, BRect frame, bool complete)
 	else
 		kolor.red = kolor.blue = kolor.green = kolor.alpha = 0;
 	owner->SetDrawingMode(B_OP_OVER);
-	owner->MovePenTo(frame.left + 15, frame.top + 15.0);
+	owner->MovePenTo(frame.left + 21, (((frame.bottom+frame.top)/2.0))+4.0);
 	owner->SetHighColor(kolor);
 	owner->DrawString(fNazwa);
-	owner->MovePenTo(frame.left + 15, frame.top + 30.0);
-	owner->SetFont(fStatusFont);
-	owner->DrawString(fOpis);
-	owner->SetFont(fNormalFont);
 }
 
 void GaduListItem::Update(BView *owner, const BFont *font)

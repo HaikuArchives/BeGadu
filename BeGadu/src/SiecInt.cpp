@@ -24,7 +24,6 @@ extern "C" {
 
 void Siec::Login()
 {
-	fprintf(stderr,"jestem w login()\n");
 	/* ustawiamy status na "Łączenie" */
 	fStatus = BEGG_CONNECTING;
 	if(fWindow)
@@ -37,12 +36,10 @@ void Siec::Login()
 	fLoginParam.status = fProfil->fAutoStatus;
 	gg_debug_level = ~0;
 	PostMessage(DODAJ_HANDLER);
-	fprintf(stderr,"wychodze z login()\n");
 }
 
 void Siec::Login(int status)
 {
-	fprintf(stderr,"jestem w login(status)\n");
 	/* ustawiamy status na "Łączenie" */
 	fStatus = status;
 	if(fWindow)
@@ -57,7 +54,6 @@ void Siec::Login(int status)
 	PostMessage(DODAJ_HANDLER);
 	if(fWindow)
 		fWindow->PostMessage(BEGG_UPDATE_STATUS);
-	fprintf(stderr,"wychodze z login(status)\n");
 }
 
 void Siec::Logout()

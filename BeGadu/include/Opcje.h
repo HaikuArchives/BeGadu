@@ -15,6 +15,8 @@ class BCheckBox;
 class MainWindow;
 class Siec;
 class Osoba;
+class StackBar;
+class StackPage;
 class BBitmap;
 class BitmapView;
 
@@ -29,10 +31,20 @@ class Opcje : public BWindow
 		MainWindow			*	fWindow;
 		BBitmap				*	fLogo;
 		BitmapView			*	fLogoView;
-		BTextControl		*	fNumerControl;
-		BTextControl		*	fHasloControl;
+
+		/* stakbar, taki jak w M$ ałtluku ;) */
+		StackBar			*	fSBar;
+		StackPage			*	fProfilPage;
+		BView				*	fProfilPageView;
+		BView				*	fProfilView;
+		StackPage			*	fOpcjePage;
+		BView				*	fOpcjePageView;
+		BView				*	fOpcjeView;
+		StackPage			*	fDebugPage;
+		BView				*	fDebugPageView;
+		BView				*	fDebugView;
+		BTabView			*	fTabView;
+
 };
 
 #endif // _OPCJE_H
-
-

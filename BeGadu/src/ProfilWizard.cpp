@@ -229,7 +229,7 @@ void ProfilWizard::MessageReceived(BMessage *mesg)
 
 void ProfilWizard::Show()
 {
-	BScreen *screen = new BScreen(this);
+	BScreen *screen = new BScreen(NULL);
 	display_mode tryb;
 	screen->GetMode(&tryb);
 	// teraz centrujemy okienko
