@@ -16,6 +16,7 @@ class Opcje;
 class Lista;
 class BStringView;
 class BMenuItem;
+class BMenu;
 class BBitmap;
 class Profil;
 class BPopUpMenu;
@@ -39,7 +40,6 @@ class MainWindow : public BWindow
 		BOutlineListView	*	fListaView;
 		GaduListItem		*	fListaItem;
 		Lista				*	fListaItems;
-		
 		BMenu				*	fSubMenu;
 		BMenuItem			*	fProfilItem;
 

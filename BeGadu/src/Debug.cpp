@@ -37,4 +37,3 @@ void DebugWindow::MessageReceived(BMessage *message)
 		}
 	}
 }
-		

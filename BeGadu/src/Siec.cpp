@@ -196,4 +196,3 @@ Osoba * Siec::GetOsobaForUser(uin_t kto)
 
 	return NULL;
 }
-

@@ -493,4 +493,3 @@ void Lista::SetValid(bool isValid)
 {
 	fIsValid = isValid;
 }
-

@@ -149,7 +149,7 @@ void MainWindow::MessageReceived(BMessage *message)
 	{
 		case BEGG_OPCJE:
 		{
-			BScreen *screen = new BScreen(NULL);
+			BScreen *screen = new BScreen(this);
 			display_mode tryb;
 			screen->GetMode(&tryb);
 			// teraz centrujemy okienko

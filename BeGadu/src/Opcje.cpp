@@ -24,8 +24,6 @@
 #include "GfxStuff.h"
 #include "Siec.h"
 #include "Osoba.h"
-#include "StackBar.h"
-#include "StackPage.h"
 
 #define OPCJE_NAME "Ustawienia"
 
@@ -42,28 +40,6 @@ Opcje::Opcje(Profil *profil, MainWindow *window, BRect rect) : BWindow(rect, OPC
 									   fLogo );
 	AddChild(fLogoView);
 
-	fSBar = new StackBar( BRect( r.left, r.top + 100,
-								 r.left+150, r.bottom ),
-						  "opcje", B_FOLLOW_LEFT | B_FOLLOW_TOP_BOTTOM,
-						  B_FULL_UPDATE_ON_RESIZE | B_WILL_DRAW | B_FRAME_EVENTS | 
-						  B_NAVIGABLE_JUMP | B_NAVIGABLE, B_FANCY_BORDER );
-	AddChild(fSBar);
-	
-	fProfilPageView = new BView(fSBar->Bounds(), "ProfilPageView", B_FOLLOW_ALL, B_WILL_DRAW);
-
-	BBitmap *profilbmp = LoadGFX("Profil.png");
-	BitmapView *profilbmpvw = new BitmapView(BRect(fProfilPageView->Bounds().left + 10, fProfilPageView->Bounds().top + 10, fProfilPageView->Bounds().left + 60, fProfilPageView->Bounds().top + 60), profilbmp);
-	fProfilPageView->AddChild(profilbmpvw);
-	fProfilPage = new StackPage("Profil");
-	fProfilView = new BView( BRect( r.left + 150, r.top,
-									r.right, r.bottom - 35 ),
-							 "ProfilView", B_FOLLOW_ALL, B_WILL_DRAW);
-//	fProfilView->SetViewColor(255,0,255);
-	fOpcjePageView = new BView(fSBar->Bounds(), "OpcjePageView", B_FOLLOW_ALL, B_WILL_DRAW);
-	fOpcjePage = new StackPage("Opcje");
-	fSBar->AddPage(fProfilPageView, fProfilPage);
-	fSBar->AddPage(fOpcjePageView, fOpcjePage);
-	AddChild(fProfilView);
 
     BButton *przycisk;
     przycisk = new BButton( BRect( r.left + 360, r.bottom - 30,
