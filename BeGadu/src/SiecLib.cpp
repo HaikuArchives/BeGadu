@@ -13,6 +13,7 @@
 
 #include <Alert.h>
 #include <Message.h>
+#include <Roster.h>
 #include <String.h>
 
 #include "Msg.h"
@@ -28,6 +29,7 @@ extern "C" {
 
 void Siec::GotMsg(uin_t odkogo, const char *msg)
 {
+	fprintf( stderr, "Siec::GotMsg()\n" );
 	/* sprawdzamy czy mamy aktualnie otwarte okno dla tej osoby :) */
 	ChatWindow	*win = NULL;
 	for( int i = 0; i < fWinList->CountItems(); i++)
@@ -36,9 +38,10 @@ void Siec::GotMsg(uin_t odkogo, const char *msg)
 		if( win->fKto == odkogo)
 			break;
 	}
-	
 	if( win && ( win->fKto == odkogo ) )
-		win->Activate();
+	{
+//		win->Activate();
+	}
 	else
 	{
 		win = new ChatWindow(this, fWindow, odkogo);
@@ -48,13 +51,13 @@ void Siec::GotMsg(uin_t odkogo, const char *msg)
 	/* i pokazujemy je :P */
 	BMessage	*	wiadomosc = new BMessage(POKAZ_WIADOMOSC);
 	wiadomosc->AddString("msg", msg);
-	win->PostMessage(wiadomosc);
+	BMessenger(win).SendMessage(wiadomosc);
 	delete wiadomosc;
 }
 
 void Siec::AddHandler(int fd, int cond, void *data)
 {
-	fprintf(stderr, "AddHandler (fd=%d, cond=%d)\n", fd, cond );
+	fprintf(stderr, "Siec::AddHandler(fd=%d, cond=%d)\n", fd, cond );
 	SiecHandler * handler = new SiecHandler(this, fId, fd, cond, data);
 	fHandlerList->AddItem(handler);
 	handler->Run();
@@ -62,8 +65,7 @@ void Siec::AddHandler(int fd, int cond, void *data)
 
 void Siec::RemoveHandler(int fd)
 {
-	fprintf( stderr, "RemoveHandler (fd=%d)\n", fd );
-	
+	fprintf( stderr, "Siec::RemoveHandler(fd=%d)\n", fd );
 	SiecHandler *handler = NULL;
 	for(int i=0; i<fHandlerList->CountItems();i++)
 	{

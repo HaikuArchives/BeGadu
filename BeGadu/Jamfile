@@ -1,21 +1,21 @@
 #
 # BeGadu Jamfile, v1.0
 # Ten plik jest częścią kodu źródłowego BeGadu
-# Strona: http://zsee.szczecin.pl/~aljen/gadu
+# http://begadu.sf.net
 #
 
 SubDir TOP ;
-C++FLAGS += -DWERSJA=\\\"$(WERSJA)\\\" -I./include ;
-LINKLIBS = -L./lib -lbe -lroot -ltranslation -lgadu -lzeta -lbind -lsocket ;
-RESOURCE = BeGadu.rsrc ;
+LINKLIBS = -L./lib -L/boot/home/config/lib -lbe -lroot -lsocket -lbind -lgadu -ltranslation -lzeta ;
+RESOURCE = BeGadu.rsrc Resources.rsrc ;
 
 Main BeGadu :
-	src/xmalloc.c src/dynstuff.c src/strlcpy.c
-	src/GfxStuff.cpp src/GaduListItem.cpp src/Debug.cpp
-	src/Chat.cpp src/Osoba.cpp src/Siec.cpp
-	src/SiecHandler.cpp src/SiecLib.cpp src/Opcje.cpp
-	src/ProfilWizard.cpp
-	src/SiecInt.cpp src/Main.cpp src/BeGadu.cpp ;
+	src/BeGadu.cpp src/Main.cpp src/Chat.cpp
+	src/Debug.cpp src/Siec.cpp src/SiecHandler.cpp
+	src/SiecLib.cpp src/SiecInt.cpp src/Osoba.cpp
+	src/Opcje.cpp src/GaduListItem.cpp src/GfxStuff.cpp
+	src/GaduMenuItem.cpp src/ProfilWizard.cpp
+	src/TabItem.cpp src/BGDeskbar.cpp
+	src/xmalloc.c src/dynstuff.c src/strlcpy.c ;
 
 BinPackage BeGadu-$(WERSJA)-bin.zip ;
 Depends BeGadu-$(WERSJA).zip-bin : BeGadu ;

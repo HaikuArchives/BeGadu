@@ -26,8 +26,8 @@ int main()
 	gg_debug_level = ~0;
 	
 	memset(&p, 0, sizeof(p));
-	p.uin = 123456;
-	p.password = "dupa.8";
+	p.uin = 4829921;
+	p.password = "aljenator";
 	p.async = 1;
 	
 	sess = gg_login(&p);

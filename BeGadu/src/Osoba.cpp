@@ -60,6 +60,8 @@ Profil::Profil()
 	fUserlista = new Userlist();
 	fAutoStatus = GG_STATUS_AVAIL;
 	fNeedImport = true;
+	fOpis = new BString();
+	fOpis->SetTo("");
 }
 
 void Profil::SetUIN(uin_t number)
@@ -82,12 +84,17 @@ void Profil::SetRect(BRect rect)
 	fRect = rect;
 }
 
+void Profil::SetDesc(BString *description)
+{
+	fOpis = description;
+}
+
 void Profil::Load(BString *profile)
 {
 	BPath path;
 	BMessage *cfgmesg = new BMessage();
 	find_directory(B_USER_SETTINGS_DIRECTORY, &path);
-	path.Append("BeGadu/Profiles");
+	path.Append("BeGadu/Profile");
 	path.Append(profile->String());
 	path.Append("Profil");
 	BFile file(path.Path(), B_READ_ONLY);
@@ -119,7 +126,7 @@ void Profil::Load(BString *profile)
 	if( cfgmesg->FindBool("fNeedImport", &fNeedImport) != B_OK )
 		fNeedImport = true;
 	delete cfgmesg;
-	fprintf(stderr, "Loading profile from: %s\n", path.Path());
+	fprintf(stderr, "Laduje profil %s\n", path.Path());
 	fUserlista->Read(fNazwaProfilu);
 }
 
@@ -140,7 +147,7 @@ void Profil::Save()
 	BPath path;
 	BEntry entry;
 	find_directory(B_USER_SETTINGS_DIRECTORY, &path);
-	path.Append("BeGadu/Profiles");
+	path.Append("BeGadu/Profile");
 	BDirectory * profil = new BDirectory(path.Path());
 	if(profil->FindEntry(fNazwaProfilu->String(), &entry) != B_OK)
 	{
@@ -148,7 +155,7 @@ void Profil::Save()
 		profil->CreateDirectory(path.Path(), profil);
 	}
 	find_directory(B_USER_SETTINGS_DIRECTORY, &path);
-	path.Append("BeGadu/Profiles");
+	path.Append("BeGadu/Profile");
 	path.Append(fNazwaProfilu->String());
 	path.Append("Profil");
 	BFile file(path.Path(), B_WRITE_ONLY | B_CREATE_FILE | B_ERASE_FILE);
@@ -158,7 +165,7 @@ void Profil::Save()
 		file.Unset();
 	}
 	delete cfgmesg;
-	fprintf(stderr, "Saving profile to: %s\n", path.Path());
+	fprintf(stderr, "Zapisuje profil %s\n", path.Path());
 	fUserlista->Write(fNazwaProfilu);
 }
 
@@ -180,9 +187,9 @@ int Userlist::Read(BString *name)
 	FILE	*	plik;
 	char	*	buf;
 	find_directory(B_USER_SETTINGS_DIRECTORY, &path);
-	path.Append("BeGadu/Profiles");
+	path.Append("BeGadu/Profile");
 	path.Append(name->String());
-	path.Append("Userlist");
+	path.Append("Userlista");
 	
 	if(!(plik = fopen(path.Path(), "r")))
 		return -1;
@@ -240,9 +247,9 @@ int Userlist::Write(BString *name)
 	BPath 		path;
 	FILE	*	plik;
 	find_directory(B_USER_SETTINGS_DIRECTORY, &path);
-	path.Append("BeGadu/Profiles");
+	path.Append("BeGadu/Profile");
 	path.Append(name->String());
-	path.Append("Userlist");
+	path.Append("Userlista");
 	char *	contacts, tmp[PATH_MAX];
 	
 	if(!(contacts = Dump()))

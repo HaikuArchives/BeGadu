@@ -1,17 +1,22 @@
 /*
-	Siec.h
-	Ten plik jest częscią kodu źródłowego BeGadu.
-	Homepage: http://gadu.beos.pl
-*/
+ * ============================================================================
+ *  Nazwa    : Siec z Siec.h
+ *  Projekt  : BeGadu
+ *  Authorzy : 
+ *		Artur Wyszynski <artur.wyszynski@bellstream.pl>
+ *  Opis:
+ *		Glowny modul do obslugi sieci
+ *  Version  : 1.2
+ * ============================================================================
+ */
 
-#ifndef _SIEC_H
-#define _SIEC_H
+#ifndef __BEGADU_SIEC_H__
+#define __BEGADU_SIEC_H__
 
 #include <Looper.h>
-extern "C" {
-#include "libgadu.h"
-}
+#include <libgadu.h>
 
+/* zewnetrzne klasy, includowane w zrodle */
 class MainWindow;
 class ChatWindow;
 class Lista;
@@ -69,4 +74,4 @@ class Siec : public BLooper
 
 };
 
-#endif // _SIEC_H
+#endif /* __BEGADU_SIEC_H__ */

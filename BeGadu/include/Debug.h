@@ -1,11 +1,18 @@
 /*
-	Debug.h
-	Code: aljen <aljen@gumisie.org>
-	Homepage: http://gadu.beos.pl
-*/
+ * ============================================================================
+ *  Nazwa    : Debug z Debug.h
+ *  Projekt  : BeGadu
+ *  Authorzy : 
+ *		Artur Wyszynski <artur.wyszynski@bellstream.pl>
+ *  Opis:
+ *		Modul do debugowania
+ *  Version  : 1.2
+ * ============================================================================
+ */
 
-#ifndef _DEBUG_WINDOW_H
-#define _DEBUG_WINDOW_H
+
+#ifndef __BEGADU_DEBUG_H__
+#define __BEGADU_DEBUG_H__
 
 #include <Window.h>
 #include <TextView.h>
@@ -20,4 +27,4 @@ class DebugWindow : public BWindow
 		virtual void MessageReceived(BMessage *message);
 };
 
-#endif // _DEBUG_WINDOW_H
+#endif /* __BEGADU_DEBUG_H__ */

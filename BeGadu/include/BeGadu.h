@@ -1,29 +1,40 @@
 /*
-	BeGadu.h
-	Code: aljen <aljen@gumisie.org>
-*/
+ * ============================================================================
+ *  Nazwa    : BeGadu z BeGadu.h
+ *  Projekt  : BeGadu
+ *  Authorzy : 
+ *		Artur Wyszynski <artur.wyszynski@bellstream.pl>
+ *  Opis:
+ *		Glowny modul
+ *  Version  : 1.2
+ * ============================================================================
+ */
 
-#ifndef _BE_GADU_H
-#define _BE_GADU_H
+#ifndef __BEGADU_H__
+#define __BEGADU_H__
 
 #include <Application.h>
 
-#include "Main.h"
-#include "Osoba.h"
-#include "Debug.h"
-#include "ProfilWizard.h"
+/* zewnetrzne klasy, includowane w zrodle */
+class DebugWindow;
+class MainWindow;
 
 class BeGadu : public BApplication
 {
-	private:
-		MainWindow  	*	mWindow;
-		DebugWindow 	*	dWindow;
-		bool				fFirstRun;
-		BString			*	fLastProfile;
 	public:
 		BeGadu();
 		virtual bool QuitRequested();
 		virtual void MessageReceived(BMessage *message);
+		virtual void ReadyToRun();
+		void AddDeskbarIcon();
+		void DelDeskbarIcon();
+
+	private:
+		MainWindow  	*	mWindow;
+		DebugWindow 	*	dWindow;
+		bool				fFirstRun;
+		bool				fHideAtStart;
+		BString			*	fLastProfile;
 };
 
-#endif // _BE_GADU_H
+#endif /* __BEGADU_H__ */

@@ -1,8 +1,20 @@
-// GfxStuff.cpp - funkcje do ladowania .bmp'kow itp itd :)
+/*
+ * ============================================================================
+ *  Name     : GfxStuff from GfxStuff.h
+ *  Part of  : BeGadu
+ *  Authors  : 
+ *		Artur Wyszynski <artur.wyszynski@bellstream.pl>
+ *  Implementation notes:
+ *		Misc stuff: loading files, etc
+ *  Version  : 1.2
+ * ============================================================================
+ */
+
 #include <File.h>
 #include <stdlib.h>
 #include <Bitmap.h>
 #include <BitmapStream.h>
+#include <Message.h>
 #include <TranslatorRoster.h>
 #include <TranslationUtils.h>
 #include <View.h>
@@ -91,17 +103,13 @@ void IconControl::MouseUp(BPoint point)
 	if(IsDown)
 	{
 		if(point.x >= r.left && point.x <= r.right && point.y >= r.top && point.y <= r.bottom)
-		{
-			if(Window())
-				Window()->PostMessage(mesg);
 			IsDown = false;
-		}
 	}
 }
 
-void IconControl::MessageReceived(BMessage *message)
+void IconControl::MessageReceived( BMessage *message )
 {
-	switch(message->what)
+	switch( message->what )
 	{
 		default:
 			BView::MessageReceived(message);
@@ -120,26 +128,47 @@ BBitmap* LoadBMP(char* filename)
 	return result;
 }
 
-BBitmap *LoadGFX(char *filename)
+
+BBitmap *LoadGFX(const char *filename)
 {
-	return BTranslationUtils::GetBitmap(filename);
+	BBitmap *bitmap = NULL;
+	bitmap = BTranslationUtils::GetBitmap(filename);
+	if( !bitmap )
+	{
+		fprintf( stderr, "!bitmap\n" );
+		return NULL;
+	}
+	if( bitmap->InitCheck() != B_OK )
+	{
+		fprintf( stderr, "bitmap->InitCheck() != B_OK \n" );
+		return NULL;
+	}
+	fprintf( stderr, "return bitmap (%p)\n", bitmap );
+	return bitmap;
 }
 	
-BitmapView::BitmapView( BRect frame, BBitmap *bmap )
+BitmapView::BitmapView( BRect frame, const char *name, BResources *res )
 			   : BView( frame, "bitmap_view", B_FOLLOW_LEFT_RIGHT | B_FOLLOW_TOP, B_WILL_DRAW | B_FULL_UPDATE_ON_RESIZE )
 {
+	fResources = res;
 	SetViewColor( 255, 255, 255 );
-	themap = bmap;
-	bmbounds = themap->Bounds();
+	fBitmap = GetBitmap(name);
+	if( fBitmap )
+	{
+		fprintf( stderr, " bitmap ok\n" );
+		bmbounds = fBitmap->Bounds();
+	}
 }
 
 
-BitmapView::~BitmapView() {
-	delete themap;
+BitmapView::~BitmapView()
+{
+	delete fBitmap;
 }
 
 
-void BitmapView::AttachedToWindow() {
+void BitmapView::AttachedToWindow()
+{
 	if( Parent() )
 		SetViewColor( Parent()->ViewColor() );
 	else
@@ -156,9 +185,39 @@ void BitmapView::Draw( BRect updateRect ) {
 	// Make a new rect w/ those coordinates
 	BRect drawRect( LOffset, TOffset, Bounds().Width() - LOffset, Bounds().Height() - TOffset );
 
-	if ( Window()->Lock() )
+	if( fBitmap )
 	{
-		DrawBitmap( themap, drawRect );
-		Window()->Unlock();
+		if ( Window()->Lock() )
+		{
+			DrawBitmap( fBitmap, drawRect );	
+			Window()->Unlock();
+		}
 	}
+}
+
+BBitmap *BitmapView::GetBitmap(const char *name)
+{
+	BBitmap 	*bitmap = NULL;
+	size_t 		len = 0;
+	status_t 	error;	
+
+	const void *data = fResources->LoadResource('BBMP', name, &len);
+
+	BMemoryIO stream(data, len);
+	
+	BMessage archive;
+	error = archive.Unflatten(&stream);
+	if (error != B_OK)
+		return NULL;
+	bitmap = new BBitmap(&archive);
+	if(!bitmap)
+		return NULL;
+
+	if(bitmap->InitCheck() != B_OK)
+	{
+		delete bitmap;
+		return NULL;
+	}
+	
+	return bitmap;
 }

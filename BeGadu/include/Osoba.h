@@ -1,11 +1,17 @@
 /*
-	Osoba.h
-	Ten plik jest częscią kodu źródłowego BeGadu.
-	Homepage: http://gadu.beos.pl
-*/
+ * ============================================================================
+ *  Nazwa    : Osoba z Osoba.h
+ *  Projekt  : BeGadu
+ *  Authorzy : 
+ *		Artur Wyszynski <artur.wyszynski@bellstream.pl>
+ *  Opis:
+ *		Klasy zwiazane z obsluga userlist i osob
+ *  Version  : 1.2
+ * ============================================================================
+ */
 
-#ifndef _OSOBA_H
-#define _OSOBA_H
+#ifndef __BEGADU_OSOBA_H__
+#define __BEGADU_OSOBA_H__
 
 #include <List.h>
 #include <sys/types.h>
@@ -21,9 +27,8 @@
 #include <stdarg.h>
 #include <unistd.h>
 #include <time.h>
-extern "C" {
-#include "libgadu.h"
-}
+
+#include <libgadu.h>
 
 /* klasa pojedyńczej osoby */
 class Osoba
@@ -100,6 +105,7 @@ class Profil
 		void					SetPass(BString *password);
 		void					SetName(BString *name);
 		void 					SetRect(BRect rect);
+		void					SetDesc(BString *description);
 
 		Userlist			*	fUserlista;
 		BRect					fRect;
@@ -112,8 +118,9 @@ class Profil
 		BString				*	fNazwaProfilu;
 		BString				*	fTelefon;
 		BString				*	fEmail;
+		BString				*	fOpis;
 		bool					fNeedImport;
 };
 
 
-#endif // _OSOBA_H
+#endif /* __BEGADU_OSOBA_H__ */

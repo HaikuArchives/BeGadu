@@ -1,12 +1,23 @@
-#ifndef _PROFIL_WIZARD_H
-#define _PROFIL_WIZARD_H
+/*
+ * ============================================================================
+ *  Nazwa    : ProfilWizard z ProfilWizard.h
+ *  Projekt  : BeGadu
+ *  Authorzy : 
+ *		Artur Wyszynski <artur.wyszynski@bellstream.pl>
+ *  Opis:
+ *		Klasa kreatora profili
+ *  Version  : 1.2
+ * ============================================================================
+ */
+
+#ifndef __BEGADU_PROFILWIZARD_H__
+#define __BEGADU_PROFILWIZARD_H__
 
 #include <Window.h>
 
-extern "C" {
-#include "libgadu.h"
-}
+#include <libgadu.h>
 
+/* zewnetrzne klasy, includowane w zrodle */
 class BTextControl;
 class BView;
 class BButton;
@@ -66,4 +77,4 @@ class ProfilWizard : public BWindow
 		BButton			*	fAnuluj4;
 };
 
-#endif // _PROFIL_WIZARD_H
+#endif /* __BEGADU_PROFILWIZARD_H__ */

@@ -1,14 +1,14 @@
 #
 # BeGadu Jamrules, v1.0
 # Ten plik jest częścią kodu źródłowego BeGadu
-# Strona: http://www.begadu.prv.pl
+# http://begadu.sf.net
 #
 
-WERSJA = 20031217 ;
-C++FLAGS += -DWERSJA=\\\"$(WERSJA)\\\" -I./include -g -Wno-multichar ;
+WERSJA = 20050329 ;
+C++FLAGS += -I/boot/home/config/include -DDEBUG -DWERSJA=\\\"$(WERSJA)\\\" -I./include -g -Wno-multichar -O0 ;
 CCFLAGS = $(C++FLAGS) ;
 
-# po zlinkowaniu programu, dodaj res'a
+# po zlinkowaniu programu, dodaj resy
 actions Link bind NEEDLIBS
 {
 	$(LINK) $(LINKFLAGS) -o $(1) $(UNDEPS) $(2) $(NEEDLIBS) $(LINKLIBS)

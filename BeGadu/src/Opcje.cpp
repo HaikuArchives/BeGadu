@@ -1,12 +1,13 @@
 /*
 	Opcje.cpp
 	Ten plik jest częscią kodu źródłowego BeGadu.
-	Homepage: http://gadu.beos.pl
+	Homepage: http://begadu.sf.net
 */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <View.h>
+#include <String.h>
 #include <TextControl.h>
 #include <Button.h>
 #include <Bitmap.h>
@@ -27,17 +28,16 @@
 
 #define OPCJE_NAME "Ustawienia"
 
-Opcje::Opcje(Profil *profil, MainWindow *window, BRect rect) : BWindow(rect, OPCJE_NAME, B_FLOATING_WINDOW, B_NOT_RESIZABLE | B_NOT_ZOOMABLE | B_NOT_MOVABLE | B_ASYNCHRONOUS_CONTROLS)
+Opcje::Opcje(Profil *profil, MainWindow *window, BRect rect, BResources *res) : BWindow(rect, OPCJE_NAME, B_FLOATING_WINDOW, B_NOT_RESIZABLE | B_NOT_ZOOMABLE | B_NOT_MOVABLE | B_ASYNCHRONOUS_CONTROLS)
 {
 	fProfil	= profil;
 	fWindow = window;
+	fResources = res;
 	BRect r = Bounds();
 
-	fLogo	= LoadGFX("Logo.png");
-
-	fLogoView = new BitmapView( BRect( r.left + 25, r.top,
-									   r.left + 125, r.top + 100 ),
-									   fLogo );
+	fLogoView = new BitmapView( BRect( r.left , r.top,
+									   r.left + 600, r.top + 150 ),
+									   "logo", res );
 	AddChild(fLogoView);
 	
 	r.left = 20;
@@ -75,13 +75,11 @@ Opcje::Opcje(Profil *profil, MainWindow *window, BRect rect) : BWindow(rect, OPC
 
     if( fNumerControl->LockLooper() )
     {
-    	int numer = fProfil->fNumer;
-		char *a;
-//		a = (char*) calloc(15,1);
-		sprintf(a, "%d", numer);
-        fNumerControl->SetText(a);
+		BString a;
+		a << (int32)fProfil->fNumer;
+        fNumerControl->SetText(a.String());
         fHasloControl->SetText(fProfil->fHaslo->String());
-		fprintf(stderr,"numer: %s\nhaslo: %s\n", a, fProfil->fHaslo->String());
+		fprintf(stderr,"numer: %s\nhaslo: %s\n", a.String(), fProfil->fHaslo->String());
         fNumerControl->UnlockLooper();
     }    
 
@@ -94,7 +92,7 @@ void Opcje::MessageReceived(BMessage *mesg)
 		/* anuluj zmiany */
 		case OPCJE_ANULUJ:
 		{
-			PostMessage(B_QUIT_REQUESTED);
+			BMessenger(this).SendMessage(B_QUIT_REQUESTED);
 			break;
 		}
 		case OPCJE_OK:
@@ -109,12 +107,7 @@ void Opcje::MessageReceived(BMessage *mesg)
 				fProfil->fHaslo->SetTo(fHasloControl->Text());
 				fHasloControl->UnlockLooper();
 			}
-			PostMessage(B_QUIT_REQUESTED);
-			break;
-		}
-		case BEGG_ABOUT:
-		{
-			fWindow->PostMessage(BEGG_ABOUT);
+			BMessenger(this).SendMessage(B_QUIT_REQUESTED);
 			break;
 		}
 		default:
@@ -125,4 +118,31 @@ void Opcje::MessageReceived(BMessage *mesg)
 void Opcje::Show()
 {
     BWindow::Show();
+}
+
+BBitmap *Opcje::GetBitmap(const char *name)
+{
+	BBitmap 	*bitmap = NULL;
+	size_t 		len = 0;
+	status_t 	error;	
+
+	const void *data = fResources->LoadResource('BBMP', name, &len);
+
+	BMemoryIO stream(data, len);
+	
+	BMessage archive;
+	error = archive.Unflatten(&stream);
+	if (error != B_OK)
+		return NULL;
+	bitmap = new BBitmap(&archive);
+	if(!bitmap)
+		return NULL;
+
+	if(bitmap->InitCheck() != B_OK)
+	{
+		delete bitmap;
+		return NULL;
+	}
+	
+	return bitmap;
 }

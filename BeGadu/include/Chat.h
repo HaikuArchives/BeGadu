@@ -1,18 +1,22 @@
 /*
-	Chat.h - chat window for BeGadu
-	Code: aljen <aljen@gumisie.org>
-	Homepage: http://gadu.beos.pl
-*/
+ * ============================================================================
+ *  Nazwa    : Chat z Chat.h
+ *  Projekt  : BeGadu
+ *  Authorzy : 
+ *		Artur Wyszynski <artur.wyszynski@bellstream.pl>
+ *  Opis:
+ *		Klasa okienka z czatem
+ *  Version  : 1.2
+ * ============================================================================
+ */
 
-#ifndef _CHAT_WINDOW_H
-#define _CHAT_WINDOW_H
+#ifndef __BEGADU_CHATWINDOW_H__
+#define __BEGADU_CHATWINDOW_H__
 
 #include <Window.h>
+#include <libgadu.h>
 
-extern "C" {
-#include "libgadu.h"
-}
-
+/* zewnetrzne klasy, includowane w zrodle */
 class Siec;
 class MainWindow;
 class Osoba;
@@ -38,4 +42,4 @@ class ChatWindow : public BWindow
 		BTextView		*	fRozmowa;
 };
 
-#endif // _CHAT_WINDOW_H
+#endif // __BEGADU_CHATWINDOW_H__

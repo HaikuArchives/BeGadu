@@ -5,15 +5,14 @@
 #include <Screen.h>
 #include <Application.h>
 #include <Alert.h>
+#include <String.h>
+#include <libgadu.h>
 
 #include "Main.h"
 #include "Msg.h"
 #include "Osoba.h"
 #include "ProfilWizard.h"
 #include "GfxStuff.h"
-extern "C" {
-#include "libgadu.h"
-}
 
 #define PROFILWIZARD_RECT BRect(0,0,350,300)
 #define PROFILWIZARD_NAME "Utwórz profil..."
@@ -148,18 +147,18 @@ ProfilWizard::ProfilWizard() : BWindow(PROFILWIZARD_RECT, PROFILWIZARD_NAME, B_T
 	// nazwa profilu
 	fNazwa = new BTextControl(r, "fNazwa", "Nazwa profilu: ", "Nowy", NULL);
 	fNazwa->SetFont(font);
-	fNazwa->SetHighColor(255,255,255);
+	fNazwa->SetHighColor(0,0,0);
 	r.top = r.top + 30;
 	r.bottom = r.top + 25;
 	fNumer = new BTextControl(r, "fNumer", "Numer: ", "0", NULL);
 	fNumer->SetFont(font);
-	fNumer->SetHighColor(255,255,255);
+	fNumer->SetHighColor(0,0,0);
 	r.top = r.top + 30;
 	r.bottom = r.top + 25;
 	fHaslo = new BTextControl(r, "fNaslo", "Haslo ", "", NULL);
 	fHaslo->TextView()->HideTyping(true);
 	fHaslo->SetFont(font);
-	fHaslo->SetHighColor(255,255,255);
+	fHaslo->SetHighColor(0,0,0);
 	fPBox3->AddChild(fNazwa);
 	fPBox3->AddChild(fNumer);
 	fPBox3->AddChild(fHaslo);
@@ -259,7 +258,7 @@ void ProfilWizard::MessageReceived(BMessage *mesg)
 			fProfil->Save();
 			BMessage *mesg = new BMessage(PROFILE_CREATED);
 			mesg->AddString("ProfileName", *fProfil->fNazwaProfilu);
-			be_app->PostMessage(mesg);
+			BMessenger(be_app).SendMessage(mesg);
 			delete mesg;
 			BWindow::Quit();
 			break;

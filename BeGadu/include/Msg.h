@@ -1,9 +1,17 @@
 /*
-	Msg.h
-	Code: aljen <aljen@gumisie.org>
-	Based on Yahoo! Messenger by titer
-	Homepage: http://gadu.beos.pl
-*/
+ * ============================================================================
+ *  Nazwa    : Msg z Msg.h
+ *  Projekt  : BeGadu
+ *  Authorzy : 
+ *		Artur Wyszynski <artur.wyszynski@bellstream.pl>
+ *  Opis:
+ *		Rozne stale i definicje
+ *  Version  : 1.2
+ * ============================================================================
+ */
+
+#ifndef __BEGADU_MSG_H__
+#define __BEGADU_MSG_H__
 
 /* wiadomości od libgadu */
 #define MAM_WIADOMOSC		'mawi'
@@ -35,8 +43,10 @@
 #define SET_BRB				'sbrb'
 #define	SET_INVIS			'sinv'
 #define SET_NOT_AVAIL		'snav'
+#define SET_DESCRIPTION		'sdes'
 #define BEGG_IMPORT_LIST	'imli'
 #define BEGG_EXPORT_LIST	'exli'
+#define REMOVE_FROM_DESKBAR 'rfds'
 
 /* użyteczne :P */
 #define BEGG_CONNECTING		1234
@@ -45,3 +55,7 @@
 #define PROFILE_CREATED		'prcr'
 #define OPEN_PROFILE_WIZARD 'oppw'
 #define CONFIG_OK			'cfok'
+#define ONLINE_SOUND		"BeGadu zmiana stanu"
+#define MESSAGE_SOUND		"BeGadu nowa rozmowa"
+
+#endif /* __BEGADU_MSG_H__ */

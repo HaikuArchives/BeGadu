@@ -17,9 +17,7 @@
 #include "Siec.h"
 #include "Main.h"
 #include "Osoba.h"
-extern "C" {
-#include "libgadu.h"
-}
+#include <libgadu.h>
 
 #define CHATWIN_RECT BRect(100,100,500,400)
 #define CHATWIN_NAME "Rozmowa z "
@@ -31,13 +29,13 @@ ChatWindow::ChatWindow(Siec *siec, MainWindow *window, uin_t kto) : BWindow(CHAT
 	fKto	= kto;
 	SetSizeLimits(300,2000,200,2000);
 	
-	/* 
+	/*
 		poprawiamy tytuł, sprawdzamy czy dany numer mamy na liscie, jesli tak to dajemy
 		fDisplay
 	*/
 	Osoba *osoba;
 	BString tytul = Title();
-	BString *os;
+	BString *os = NULL;
 	for(int i = 0; i < fWindow->fProfil->fUserlista->fLista->CountItems(); i++)
 	{
 		osoba = (Osoba*) fWindow->fProfil->fUserlista->fLista->ItemAt(i);
@@ -46,12 +44,13 @@ ChatWindow::ChatWindow(Siec *siec, MainWindow *window, uin_t kto) : BWindow(CHAT
 			os = osoba->fDisplay;
 			break;
 		}
-		else
-		{
-			os = new BString();
-			os->SetTo("[Nieznajomy]");
-		}
 	}
+	if( !os )
+	{
+		os = new BString();
+		os->SetTo("[Nieznajomy]");
+	}
+
 	tytul.Append(os->String());
 	SetTitle(tytul.String());
 	
@@ -82,7 +81,7 @@ ChatWindow::ChatWindow(Siec *siec, MainWindow *window, uin_t kto) : BWindow(CHAT
 	r = siakisView->Bounds();
 	r.InsetBy(10,10);
 	r.top = r.bottom - 15;
-	fPowiedzControl = new BTextControl(r, "powiedz control", "Powiedz:", NULL, new BMessage(BEGG_WYSLIJ), B_FOLLOW_LEFT_RIGHT | B_FOLLOW_BOTTOM);
+	fPowiedzControl = new BTextControl(r, "powiedz control", "", NULL, new BMessage(BEGG_WYSLIJ), B_FOLLOW_LEFT_RIGHT | B_FOLLOW_BOTTOM);
 	fPowiedzControl->MakeFocus(true);
 	float width, height;
 	fPowiedzControl->GetPreferredSize(&width, &height);
@@ -101,20 +100,24 @@ void ChatWindow::MessageReceived(BMessage *message)
 			message->FindString("msg", &msg);
 			time_t _teraz = time(NULL);
 			struct tm *teraz = localtime(&_teraz);
-			BString str;
-			BString str2;
-			char *string;
-			Osoba *osoba;
+			BString *str = NULL;
+			BString *str2 = NULL;
+			char *string = NULL;
+			Osoba *osoba = NULL;
 			for(int i = 0; i < fWindow->fProfil->fUserlista->fLista->CountItems(); i++)
 			{
 				osoba = (Osoba*) fWindow->fProfil->fUserlista->fLista->ItemAt(i);
 				if(fKto == osoba->fUIN)
 				{
-					str.SetTo(osoba->fDisplay->String());
+					str = new BString();
+					str->SetTo( osoba->fDisplay->String() );
 					break;
 				}
-				else
-					str << (int32)fKto;
+			}
+			if( !str )
+			{
+				str = new BString();
+				*str << (int32)fKto;
 			}
 			BFont *font = new BFont(be_plain_font);
 			font->SetSize(16.0);
@@ -124,20 +127,21 @@ void ChatWindow::MessageReceived(BMessage *message)
 			rgb_color bialy = {255,255,255,0};
 			string = (char*)calloc(strlen("[00:00] "), 1);
 			sprintf(string, "[%02d:%02d] ", teraz->tm_hour, teraz->tm_min);
-			str2.SetTo(string);
+			str2 = new BString();
+			str2->SetTo( string );
 			free(string);
 //			str2 << "[" << (int32)now->tm_hour << ":" << now->tm_min << "] ";
-			fRozmowa->SetFontAndColor(fRozmowa->TextLength(), fRozmowa->TextLength() + str2.Length(), font, B_FONT_ALL, &zolty);
-			fRozmowa->Insert(fRozmowa->TextLength(), str2.String(), str2.Length());
-			str.Append(": ");
+			fRozmowa->SetFontAndColor(fRozmowa->TextLength(), fRozmowa->TextLength() + str2->Length(), font, B_FONT_ALL, &zolty);
+			fRozmowa->Insert(fRozmowa->TextLength(), str2->String(), str2->Length());
+			str->Append(": ");
 
-			fRozmowa->SetFontAndColor(fRozmowa->TextLength(), fRozmowa->TextLength() + str.Length(), font, B_FONT_ALL, &czerwony);
-			fRozmowa->Insert(fRozmowa->TextLength(), str.String(), str.Length());
+			fRozmowa->SetFontAndColor(fRozmowa->TextLength(), fRozmowa->TextLength() + str->Length(), font, B_FONT_ALL, &czerwony);
+			fRozmowa->Insert(fRozmowa->TextLength(), str->String(), str->Length());
 
-			str2.SetTo(msg);
-			str2.Append("\n");
-			fRozmowa->SetFontAndColor(fRozmowa->TextLength(), fRozmowa->TextLength() + str2.Length(), font, B_FONT_ALL, &bialy);
-			fRozmowa->Insert(fRozmowa->TextLength(), str2.String(), str2.Length());
+			str2->SetTo(msg);
+			str2->Append("\n");
+			fRozmowa->SetFontAndColor(fRozmowa->TextLength(), fRozmowa->TextLength() + str2->Length(), font, B_FONT_ALL, &bialy);
+			fRozmowa->Insert(fRozmowa->TextLength(), str2->String(), str2->Length());
 			BScrollBar * scrollBar = fScrollView->ScrollBar(B_VERTICAL);
 			if(scrollBar->LockLooper())
 			{
@@ -146,6 +150,8 @@ void ChatWindow::MessageReceived(BMessage *message)
 				scrollBar->SetValue(max);
 				scrollBar->UnlockLooper();
 			}
+			delete str;
+			delete str2;
 			break;			
 		}
 		case BEGG_WYSLIJ:
@@ -210,7 +216,7 @@ void ChatWindow::MessageReceived(BMessage *message)
 				nowawiadomosc = new BMessage(WYSLIJ_WIADOMOSC);
 				nowawiadomosc->AddInt32("kto", fKto);
 				nowawiadomosc->AddString("msg",fPowiedzControl->Text());
-				fSiec->PostMessage(nowawiadomosc);
+				BMessenger(fSiec).SendMessage(nowawiadomosc);
 				
 				/* wyczyśćmy pole tekstu */
 				fPowiedzControl->SetText(NULL);
@@ -220,7 +226,7 @@ void ChatWindow::MessageReceived(BMessage *message)
 		}
 		case BEGG_ABOUT:
 		{
-			fWindow->PostMessage(BEGG_ABOUT);
+			BMessenger(fWindow).SendMessage(BEGG_ABOUT);
 			break;
 		}
 		default:
@@ -233,7 +239,7 @@ bool ChatWindow::QuitRequested()
 {
 	BMessage *mesg = new BMessage(ZAMKNIJ_WIADOMOSC);
 	mesg->AddPointer("win",this);
-	fSiec->PostMessage(mesg);
+	BMessenger(fSiec).SendMessage(mesg);
 	delete mesg;
 	return false;
 }

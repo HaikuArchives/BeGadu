@@ -45,6 +45,17 @@
 #include "compat.h"
 #include "libgadu.h"
 
+
+#ifdef SO_ERROR
+#undef SO_ERROR
+#define SO_ERROR 0
+#endif
+
+#ifdef INADDR_NONE
+#undef INADDR_NONE
+#define INADDR_NONE 0xffffffff
+#endif
+        
 /*
  * gg_event_free()
  *
