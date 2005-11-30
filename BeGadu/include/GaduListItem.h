@@ -1,15 +1,14 @@
 /*
  * ============================================================================
- *  Nazwa    : GaduListItem z GaduListItem.h
- *  Projekt  : BeGadu
- *  Authorzy : 
- *		Artur Wyszynski <artur.wyszynski@bellstream.pl>
- *  Opis:
- *		Moja implementacja BListItem
+ *  Name     : GaduListItem from GaduListItem.h
+ *  Project  : BeGadu
+ *  Authors	 : 
+ *		Artur Wyszynski <artur.wyszynski@blstream.pl>
+ *  Description:
+ *		My version of BListItem
  *  Version  : 1.2
  * ============================================================================
  */
-
 
 #ifndef __BEGADU_GADULISTITEM_H__
 #define __BEGADU_GADULISTITEM_H__
@@ -17,7 +16,7 @@
 #include <ListItem.h>
 #include <Resources.h>
 
-/* zewnetrzne klasy, includowane w zrodle */
+/* external classes, included in src */
 class BBitmap;
 class BMessage;
 class BRect;
@@ -25,7 +24,7 @@ class BFont;
 class BString;
 
 class GaduListItem : public BListItem
-{
+	{
 	public:
 		GaduListItem( BString *aName,
 					  int aStatus,
@@ -35,11 +34,12 @@ class GaduListItem : public BListItem
 		void SetIcon( int aStatus );
 		virtual void DrawItem( BView *aOwner, BRect aFrame, bool aComplete );
 		virtual void Update( BView *aOwner, const BFont *aFont );
-		const BString getName() const;
-		const BString getDescription() const;
-		int	getState();
+		const BString GetName() const;
+		const BString GetDescription() const;
+		int	GetState();
+
 	private:
-		BBitmap	* getBitmap( const char *aName );
+		BBitmap	* GetBitmap( const char *aName );
 		BString	* iName;
 		BString	* iDescription;
 		BFont *	iNameFont;
@@ -48,6 +48,6 @@ class GaduListItem : public BListItem
 		BBitmap	* iIcon;
 		BResources *	iResources;
 		color_map iColorMap;
-};
+	};
 
 #endif /* __BEGADU_GADULISTITEM_H__ */

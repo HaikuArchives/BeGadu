@@ -1,11 +1,11 @@
-/*
+/**
  * ============================================================================
- *  Nazwa    : Main z Main.h
- *  Projekt  : BeGadu
- *  Authorzy : 
- *		Artur Wyszynski <artur.wyszynski@bellstream.pl>
- *  Opis:
- *		Glowne okno programu
+ *  Name     : Main from Main.h
+ *  Project  : BeGadu
+ *  Authors  : 
+ *		Artur Wyszynski <artur.wyszynski@blstream.com>
+ *  Description :
+ *		App main window
  *  Version  : 1.2
  * ============================================================================
  */
@@ -16,17 +16,17 @@
 #include <Window.h>
 #include <Resources.h>
 
-/* zewnetrzne klasy, includowane w zrodle */
-class Siec;
-class Opcje;
-class Lista;
+/* external classes, included in src */
+class Network;
+class Preferences;
+class List;
 class BStringView;
 class BMenuItem;
 class BMenu;
 class BBitmap;
 class BListItem;
 class BListView;
-class Profil;
+class Profile;
 class BPopUpMenu;
 class BMenuField;
 class GaduListItem;
@@ -34,57 +34,57 @@ class GaduMenuItem;
 class BScrollView;
 
 class MainWindow : public BWindow
-{
+	{
 	public:
-		MainWindow(BString *profil);
+		MainWindow( BString *aProfile );
 		virtual bool QuitRequested();
-		virtual void MessageReceived(BMessage *message);
-		void SetStatus(char *status);
-		void SetProfil( BString *profil );
-		static int SortUsers(const void *, const void *);
+		virtual void MessageReceived( BMessage *aMessage );
+		void SetStatus( char *aStatus );
+		void SetProfile( BString *aProfile );
+		static int SortUsers( const void *, const void * );
 		void LoadIcons();
-		BBitmap	*GetBitmap(const char *name);
+		BBitmap	*GetBitmap( const char *aName );
 
-		/* do gg */
-		Profil				*	fProfil;
-		Siec				*	fSiec;
+		/* to gg */
+		Profile				*	iProfile;
+		Network				*	iNetwork;
 
-		/* do interfejsu */
-		BResources				fResources;
-		BView				*	fGaduView;
-		BScrollView			*	fScrollView;
-		BListView			*	fListaView;
-		GaduListItem		*	fListaItem;
-		Lista				*	fListaItems;
-		BMenu				*	fSubMenu;
-		BMenuItem			*	fProfilItem;
+		/* to interfejsu */
+		BResources				iResources;
+		BView				*	iGaduView;
+		BScrollView			*	iScrollView;
+		BListView			*	iListView;
+		GaduListItem		*	iListItem;
+		List				*	iListItems;
+		BMenu				*	iSubMenu;
+		BMenuItem			*	iProfileItem;
 
-		BMenuItem			*	fListaMenu;
-		BMenuItem			*	fListaImport;
-		BMenuItem			*	fListaExport;
+		BMenuItem			*	iListMenu;
+		BMenuItem			*	iListImport;
+		BMenuItem			*	iListExport;
 
-		BMenuItem			*	fDodajOsobe;
-		BMenuItem			*	fUsunOsobe;
-		BMenuItem			*	fKatalog;
-		BMenuItem			*	fAbout;
-		BMenuItem			*	fOpcje;
-		BView				*	fIconsView;
+		BMenuItem			*	iAddPerson;
+		BMenuItem			*	iDelPerson;
+		BMenuItem			*	iCatalog;
+		BMenuItem			*	iAbout;
+		BMenuItem			*	iPreferences;
+		BView				*	iIconsView;
 
-		BMenuField			*	fStatus;
-		BPopUpMenu			*	fStatusMenu;
-		GaduMenuItem		*	fDostepny;
-		GaduMenuItem		*	fZarazWracam;
-		GaduMenuItem		*	fNiewidoczny;
-		GaduMenuItem		*	fNiedostepny;
-		GaduMenuItem		*	fZOpisem;
-		BBitmap				*	fIkonaDostepny;
-		BBitmap				*	fIkonaZarazWracam;
-		BBitmap				*	fIkonaNiewidoczny;
-		BBitmap				*	fIkonaNiedostepny;
-		BBitmap				*	fIkonaDostepnyOpis;
-		BBitmap				*	fIkonaZarazWracamOpis;
-		BBitmap				*	fIkonaNiewidocznyOpis;
-		BBitmap				*	fIkonaNiedostepnyOpis;
-};
+		BMenuField			*	iStatus;
+		BPopUpMenu			*	iStatusMenu;
+		GaduMenuItem		*	iAvail;
+		GaduMenuItem		*	iBrb;
+		GaduMenuItem		*	iInvis;
+		GaduMenuItem		*	iNotAvail;
+		GaduMenuItem		*	iDescr;
+		BBitmap				*	iIconAvail;
+		BBitmap				*	iIconBrb;
+		BBitmap				*	iIconInvis;
+		BBitmap				*	iIconNotAvail;
+		BBitmap				*	iIconAvailDescr;
+		BBitmap				*	iIconBrbDescr;
+		BBitmap				*	iIconInvisDescr;
+		BBitmap				*	iIconNotAvailDescr;
+	};
 
 #endif /* __BEGADU_MAINWINDOW_H__ */

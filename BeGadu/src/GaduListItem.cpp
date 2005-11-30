@@ -49,42 +49,42 @@ void GaduListItem::SetIcon( int aStatus )
 		{
 		case GG_STATUS_NOT_AVAIL:
 			{
-			iIcon = getBitmap( "NotAvail.png" );
+			iIcon = GetBitmap( "NotAvail.png" );
 			break;
 			}
 		case GG_STATUS_NOT_AVAIL_DESCR:
 			{
-			iIcon = getBitmap( "NotAvailDescr.png" );
+			iIcon = GetBitmap( "NotAvailDescr.png" );
 			break;
 			}
 		case GG_STATUS_INVISIBLE:
 			{
-			iIcon = getBitmap( "Invisible.png" );
+			iIcon = GetBitmap( "Invisible.png" );
 			break;
 			}
 		case GG_STATUS_INVISIBLE_DESCR:
 			{
-			iIcon = getBitmap( "InvisibleDescr.png" );
+			iIcon = GetBitmap( "InvisibleDescr.png" );
 			break;
 			}
 		case GG_STATUS_BUSY:
 			{
-			iIcon = getBitmap( "Busy.png" );
+			iIcon = GetBitmap( "Busy.png" );
 			break;
 			}
 		case GG_STATUS_BUSY_DESCR:
 			{
-			iIcon = getBitmap( "BusyDescr.png" );
+			iIcon = GetBitmap( "BusyDescr.png" );
 			break;
 			}
 		case GG_STATUS_AVAIL:
 			{
-			iIcon = getBitmap( "Avail.png" );
+			iIcon = GetBitmap( "Avail.png" );
 			break;
 			}
 		case GG_STATUS_AVAIL_DESCR:
 			{
-			iIcon = getBitmap( "AvailDescr.png" );
+			iIcon = GetBitmap( "AvailDescr.png" );
 			break;
 			}
 		}
@@ -158,22 +158,22 @@ void GaduListItem::Update(BView *aOwner, const BFont *aFont)
 	SetHeight( 35.0 );
 	}
 
-const BString GaduListItem::getName() const
+const BString GaduListItem::GetName() const
 	{
 	return *iName;
 	}
 
-const BString GaduListItem::getDescription() const
+const BString GaduListItem::GetDescription() const
 	{
 	return *iDescription;
 	}
 
-int GaduListItem::getState()
+int GaduListItem::GetState()
 	{
 	return iStatus;
 	}
 
-BBitmap* GaduListItem::getBitmap( const char *aName )
+BBitmap* GaduListItem::GetBitmap( const char *aName )
 	{
 	BBitmap 	*bitmap = NULL;
 	size_t 		len = 0;
