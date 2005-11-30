@@ -27,19 +27,27 @@ class BString;
 class GaduListItem : public BListItem
 {
 	public:
-		GaduListItem(BString *osoba, int status, BString *opis, BResources *res );
+		GaduListItem( BString *aName,
+					  int aStatus,
+					  BString *aDescription,
+					  BResources *aResources );
 		~GaduListItem();
-		void SetIcon(int status);
-		virtual void DrawItem(BView *owner, BRect frame, bool complete);
-		virtual void Update(BView *owner, const BFont *font);
-		BBitmap	*GetBitmap(const char *name);
-		BString		*	fNazwa;
-		BString		*	fOpis;
-		BFont		*	fNazwaFont;
-		BFont		*	fOpisFont;
-		int 			fStatus;
-		BBitmap		*	fIkona;
-		BResources	*	fResources;
+		void SetIcon( int aStatus );
+		virtual void DrawItem( BView *aOwner, BRect aFrame, bool aComplete );
+		virtual void Update( BView *aOwner, const BFont *aFont );
+		const BString getName() const;
+		const BString getDescription() const;
+		int	getState();
+	private:
+		BBitmap	* getBitmap( const char *aName );
+		BString	* iName;
+		BString	* iDescription;
+		BFont *	iNameFont;
+		BFont *	iDescriptionFont;
+		int iStatus;
+		BBitmap	* iIcon;
+		BResources *	iResources;
+		color_map iColorMap;
 };
 
 #endif /* __BEGADU_GADULISTITEM_H__ */

@@ -228,7 +228,7 @@ void MainWindow::MessageReceived(BMessage *message)
 			for(int i = 0; i < fProfil->fUserlista->fLista->CountItems(); i++)
 			{
 				osoba = (Osoba*) fProfil->fUserlista->fLista->ItemAt(i);
-				if(!osoba->fDisplay->Compare( kto->fNazwa->String() ) )
+				if(!osoba->fDisplay->Compare( kto->getName().String() ) )
 					break;
 			}
 			break;
@@ -243,7 +243,7 @@ void MainWindow::MessageReceived(BMessage *message)
 			for(int i = 0; i < fProfil->fUserlista->fLista->CountItems(); i++)
 			{
 				osoba = (Osoba*) fProfil->fUserlista->fLista->ItemAt(i);
-				if(!osoba->fDisplay->Compare(kto->fNazwa->String()))
+				if(!osoba->fDisplay->Compare(kto->getName().String()))
 					break;
 			}
 			if(osoba->fUIN == fProfil->fNumer)
@@ -433,8 +433,8 @@ int MainWindow::SortUsers(const void *left, const void *right)
 						**secondItem((const GaduListItem **) right);
 	BString users[2];
 	
-	users[0] = (*firstItem)->fNazwa->String();
-	users[1] = (*secondItem)->fNazwa->String();
+	users[0] = (*firstItem)->getName().String();
+	users[1] = (*secondItem)->getName().String();
 	return users[0].ICompare(users[1]);
 }
 

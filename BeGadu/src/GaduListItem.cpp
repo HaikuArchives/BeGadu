@@ -17,162 +17,184 @@ extern "C" {
 #include "libgadu.h"
 }
 
-GaduListItem::GaduListItem(BString *osoba, int status, BString *opis, BResources *res) : BListItem()
-{
-	fResources = res;
-	fStatus = status;
-	SetIcon(fStatus);
-	fNazwa = osoba;
-	fOpis = opis;
-	fNazwaFont = new BFont(be_plain_font);
-	fNazwaFont->SetSize(15.0);
-	fOpisFont = new BFont(be_plain_font);
-	fOpisFont->SetSize(10.0);
-	float woi = fNazwaFont->StringWidth(fNazwa->String());
-	SetWidth(woi);
-	SetHeight(35.0);
-}
+GaduListItem::GaduListItem( BString *aName,
+							int aStatus,
+							BString *aDescription,
+							BResources *aResources) : BListItem()
+	{
+	iResources = aResources;
+	iStatus = aStatus;
+	SetIcon( iStatus );
+	iName = aName;
+	iDescription = aDescription;
+	iNameFont = new BFont( be_plain_font );
+	iNameFont->SetSize( 15.0 );
+	iDescriptionFont = new BFont( be_plain_font );
+	iDescriptionFont->SetSize( 10.0 );
+	float woi = iNameFont->StringWidth( iName->String() );
+	SetWidth( woi );
+	SetHeight( 35.0 );
+	}
 
 GaduListItem::~GaduListItem()
-{
-	if( fIkona )
-		delete fIkona;
-}
-
-void GaduListItem::SetIcon(int status)
-{
-	switch(status)
 	{
+	if( iIcon )
+		delete iIcon;
+		iIcon = NULL;
+	}
+
+void GaduListItem::SetIcon( int aStatus )
+	{
+	switch( aStatus )
+		{
 		case GG_STATUS_NOT_AVAIL:
-		{
-			fIkona = GetBitmap("NotAvail.png");
+			{
+			iIcon = getBitmap( "NotAvail.png" );
 			break;
-		}
+			}
 		case GG_STATUS_NOT_AVAIL_DESCR:
-		{
-			fIkona = GetBitmap("NotAvailDescr.png");
+			{
+			iIcon = getBitmap( "NotAvailDescr.png" );
 			break;
-		}
+			}
 		case GG_STATUS_INVISIBLE:
-		{
-			fIkona = GetBitmap("Invisible.png");
+			{
+			iIcon = getBitmap( "Invisible.png" );
 			break;
-		}
+			}
 		case GG_STATUS_INVISIBLE_DESCR:
-		{
-			fIkona = GetBitmap("InvisibleDescr.png");
+			{
+			iIcon = getBitmap( "InvisibleDescr.png" );
 			break;
-		}
+			}
 		case GG_STATUS_BUSY:
-		{
-			fIkona = GetBitmap("Busy.png");
+			{
+			iIcon = getBitmap( "Busy.png" );
 			break;
-		}
+			}
 		case GG_STATUS_BUSY_DESCR:
-		{
-			fIkona = GetBitmap("BusyDescr.png");
+			{
+			iIcon = getBitmap( "BusyDescr.png" );
 			break;
-		}
+			}
 		case GG_STATUS_AVAIL:
-		{
-			fIkona = GetBitmap("Avail.png");
+			{
+			iIcon = getBitmap( "Avail.png" );
 			break;
-		}
+			}
 		case GG_STATUS_AVAIL_DESCR:
-		{
-			fIkona = GetBitmap("AvailDescr.png");
+			{
+			iIcon = getBitmap( "AvailDescr.png" );
 			break;
+			}
 		}
 	}
-}
 
-void GaduListItem::DrawItem(BView *owner, BRect frame, bool complete)
-{
-	rgb_color kolor;
-	rgb_color kolor_nazwa;
-	rgb_color kolor_opis;
-	if(IsSelected() || complete)
+void GaduListItem::DrawItem( BView *aOwner, BRect aFrame, bool aComplete )
 	{
-		if(IsSelected())
+	rgb_color color;
+	rgb_color color_name;
+	rgb_color color_desc;
+
+	if( IsSelected() || aComplete )
 		{
-			kolor.red = kolor.green = kolor.blue = 100;
-		}
+		if( IsSelected() )
+			{
+			color.red = color.green = color.blue = 100;
+			}
 		else
-		{
-			kolor = owner->ViewColor();
+			{
+			color = aOwner->ViewColor();
+			}
 		}
-	}
 	else
-	{
-		kolor = owner->ViewColor();
-	}
-	owner->SetHighColor(kolor);
-	owner->FillRect(frame);
-	if(fIkona)
-	{
-		frame.left += 2;
-		frame.top += 8;
-		frame.bottom = frame.top + 20;
-		BRect r( frame.left,
-				 frame.top,
-				 frame.left + 18,
-				 frame.top + 16);
-		owner->SetDrawingMode(B_OP_ALPHA);
-		owner->SetLowColor(255, 255, 255, 0);
-		owner->DrawBitmap(fIkona, r);
-	}
-	if(IsSelected())
-	{
-		kolor_nazwa.red = kolor_nazwa.blue = kolor_nazwa.green = kolor_nazwa.alpha = 255;
-		kolor_opis.red = kolor_opis.blue = kolor_opis.green = kolor_opis.alpha = 175;
-	}
+		{
+		color = aOwner->ViewColor();
+		}
+
+	aOwner->SetHighColor( color );
+	aOwner->FillRect( aFrame );
+
+	if( iIcon )
+		{
+		aFrame.left += 2;
+		aFrame.top += 8;
+		aFrame.bottom = aFrame.top + 20;
+		BRect r( aFrame.left,
+				 aFrame.top,
+				 aFrame.left + 18,
+				 aFrame.top + 16 );
+		aOwner->SetDrawingMode( B_OP_ALPHA );
+		aOwner->SetLowColor( 255, 255, 255, 0 );
+		aOwner->DrawBitmap( iIcon, r );
+		}
+
+	if( IsSelected() )
+		{
+		color_name.red = color_name.blue = color_name.green = color_name.alpha = 255;
+		color_desc.red = color_desc.blue = color_desc.green = color_desc.alpha = 175;
+		}
 	else
-	{
-		kolor_nazwa.red = kolor_nazwa.blue = kolor_nazwa.green = kolor_nazwa.alpha = 0;
-		kolor_opis.red = kolor_opis.blue = kolor_opis.green = kolor_opis.alpha = 50;
+		{
+		color_name.red = color_name.blue = color_name.green = color_name.alpha = 0;
+		color_desc.red = color_desc.blue = color_desc.green = color_desc.alpha = 50;
+		}
+
+	aOwner->SetDrawingMode( B_OP_OVER );
+	// aOwner->MovePenTo( aFrame.left + 21, ( ( ( aFrame.bottom + aFrame.top ) / 2.0 ) ) +4.0 );
+	aOwner->SetFont( iNameFont );
+	aOwner->MovePenTo( aFrame.left + 21, aFrame.top + 9 );
+	aOwner->SetHighColor( color_name );
+	aOwner->DrawString( iName->String() );
+	aOwner->SetFont( iDescriptionFont );
+	aOwner->SetHighColor( color_desc );
+	aOwner->MovePenTo( aFrame.left + 21, aFrame.top + 21 );
+	aOwner->DrawString( iDescription->String() );	
 	}
-	owner->SetDrawingMode(B_OP_OVER);
-//	owner->MovePenTo(frame.left + 21, (((frame.bottom+frame.top)/2.0))+4.0);
-	owner->SetFont(fNazwaFont);
-	owner->MovePenTo(frame.left + 21, frame.top + 9 );
-	owner->SetHighColor(kolor_nazwa);
-	owner->DrawString(fNazwa->String());
-	owner->SetFont(fOpisFont);
-	owner->SetHighColor(kolor_opis);
-	owner->MovePenTo(frame.left + 21, frame.top + 21);
-	owner->DrawString(fOpis->String());	
-}
 
-void GaduListItem::Update(BView *owner, const BFont *font)
-{
-	BListItem::Update(owner, font);
-	SetHeight(35.0);
-//	Invalidate();
-}
+void GaduListItem::Update(BView *aOwner, const BFont *aFont)
+	{
+	BListItem::Update( aOwner, aFont);
+	SetHeight( 35.0 );
+	}
 
-BBitmap *GaduListItem::GetBitmap(const char *name)
-{
+const BString GaduListItem::getName() const
+	{
+	return *iName;
+	}
+
+const BString GaduListItem::getDescription() const
+	{
+	return *iDescription;
+	}
+
+int GaduListItem::getState()
+	{
+	return iStatus;
+	}
+
+BBitmap* GaduListItem::getBitmap( const char *aName )
+	{
 	BBitmap 	*bitmap = NULL;
 	size_t 		len = 0;
 	status_t 	error;	
 
-	const void *data = fResources->LoadResource('BBMP', name, &len);
+	const void *data = iResources->LoadResource( 'BBMP', aName, &len );
 
-	BMemoryIO stream(data, len);
+	BMemoryIO stream( data, len );
 	
 	BMessage archive;
-	error = archive.Unflatten(&stream);
-	if (error != B_OK)
+	error = archive.Unflatten( &stream );
+	if( error != B_OK )
 		return NULL;
-	bitmap = new BBitmap(&archive);
-	if(!bitmap)
+	bitmap = new BBitmap( &archive );
+	if( !bitmap )
 		return NULL;
 
-	if(bitmap->InitCheck() != B_OK)
-	{
+	if( bitmap->InitCheck() != B_OK )
+		{
 		delete bitmap;
 		return NULL;
-	}
-	
+		}
 	return bitmap;
-}
+	}
