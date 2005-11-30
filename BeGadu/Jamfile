@@ -10,19 +10,19 @@ RESOURCE = BeGadu.rsrc Resources.rsrc ;
 
 Main BeGadu :
 	src/BeGadu.cpp src/Main.cpp src/Chat.cpp
-	src/Debug.cpp src/Siec.cpp src/SiecHandler.cpp
-	src/SiecLib.cpp src/SiecInt.cpp src/Osoba.cpp
-	src/Opcje.cpp src/GaduListItem.cpp src/GfxStuff.cpp
-	src/GaduMenuItem.cpp src/ProfilWizard.cpp
+	src/Debug.cpp src/Siec.cpp src/NetworkHandler.cpp
+	src/Network.cpp src/Person.cpp
+	src/Preferences.cpp src/GaduListItem.cpp src/GfxStuff.cpp
+	src/GaduMenuItem.cpp src/ProfileWizard.cpp
 	src/TabItem.cpp src/BGDeskbar.cpp
 	src/xmalloc.c src/dynstuff.c src/strlcpy.c ;
 
-BinPackage BeGadu-$(WERSJA)-bin.zip ;
-Depends BeGadu-$(WERSJA).zip-bin : BeGadu ;
-SourcePackage BeGadu-$(WERSJA).zip ;
-Depends BeGadu-$(WERSJA).zip : BeGadu ;
+BinPackage BeGadu-$(VERSION)-bin.zip ;
+Depends BeGadu-$(VERSION).zip-bin : BeGadu ;
+SourcePackage BeGadu-$(VERSION).zip ;
+Depends BeGadu-$(VERSION).zip : BeGadu ;
 
 NotFile package ;
 Depends package :
-	BeGadu-$(WERSJA)-bin.zip
-	BeGadu-$(WERSJA).zip ;
+	BeGadu-$(VERSION)-bin.zip
+	BeGadu-$(VERSION).zip ;

@@ -4,8 +4,8 @@
 # http://begadu.sf.net
 #
 
-WERSJA = 20050329 ;
-C++FLAGS += -I/boot/home/config/include -DDEBUG -DWERSJA=\\\"$(WERSJA)\\\" -I./include -g -Wno-multichar -O0 ;
+VERSION = 20051130 ;
+C++FLAGS += -I/boot/home/config/include -DDEBUG -DVERSION=\\\"$(VERSION)\\\" -I./include -g -Wno-multichar -O0 ;
 CCFLAGS = $(C++FLAGS) ;
 
 # po zlinkowaniu programu, dodaj resy
@@ -23,14 +23,14 @@ rule BinPackage
 
 actions BuildBinPackage
 {
-	rm -rf tmp BeGadu-$(WERSJA)-bin
+	rm -rf tmp BeGadu-$(VERSION)-bin
 	mkdir tmp
 	cp BeGadu tmp
 	strip tmp/BeGadu
 	mimeset -f tmp/*
-	mv tmp BeGadu-$(WERSJA)-bin
-	zip -r -9 $(1) BeGadu-$(WERSJA)-bin
-	rm -rf BeGadu-$(WERSJA)-bin
+	mv tmp BeGadu-$(VERSION)-bin
+	zip -r -9 $(1) BeGadu-$(VERSION)-bin
+	rm -rf BeGadu-$(VERSION)-bin
 }
 
 rule SourcePackage
@@ -40,7 +40,7 @@ rule SourcePackage
 
 actions BuildSourcePackage
 {
-	rm -rf tmp BeGadu-$(WERSJA)
+	rm -rf tmp BeGadu-$(VERSION)
 	mkdir tmp
 	mkdir tmp/include
 	mkdir tmp/lib
@@ -50,8 +50,8 @@ actions BuildSourcePackage
 	cp src/*.cpp tmp/src
 	cp src/*.c tmp/src
 	cp Jamrules Jamfile BeGadu.rsrc tmp/
-	mv tmp BeGadu-$(WERSJA)
-	zip -r -9 $(1) BeGadu-$(WERSJA)
-	rm -rf BeGadu-$(WERSJA)
+	mv tmp BeGadu-$(VERSION)
+	zip -r -9 $(1) BeGadu-$(VERSION)
+	rm -rf BeGadu-$(VERSION)
 }
 	

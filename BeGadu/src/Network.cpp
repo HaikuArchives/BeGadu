@@ -209,3 +209,152 @@ Osoba * Siec::GetOsobaForUser(uin_t kto)
 
 	return NULL;
 }
+
+void Siec::Login()
+{
+	fprintf( stderr, "Siec::Login()\n" );
+	/* ustawiamy status na "Łączenie" */
+	fStatus = BEGG_CONNECTING;
+	if(fWindow)
+		BMessenger(fWindow).SendMessage(BEGG_UPDATE_STATUS);
+	/* ustawiamy pola potrzebne do połączenia z gg */
+	memset(&fLoginParam, 0, sizeof(fLoginParam));
+	fLoginParam.uin = fProfil->fNumer;
+	fLoginParam.password = (char*)fProfil->fHaslo->String();
+	fLoginParam.async = 1;
+	fLoginParam.status = fProfil->fAutoStatus;
+//	gg_debug_level = ~0;
+	BMessenger(this).SendMessage(DODAJ_HANDLER);
+	if(fWindow)
+		BMessenger(fWindow).SendMessage(BEGG_UPDATE_STATUS);
+}
+
+void Siec::Login(int status)
+{
+	fprintf( stderr, "Siec::Login(%d)\n", status );
+	/* ustawiamy status na "Łączenie" */
+	fStatus = status;
+	if(fWindow)
+		BMessenger(fWindow).SendMessage(BEGG_UPDATE_STATUS);
+	/* ustawiamy pola potrzebne do połączenia z gg */
+	memset(&fLoginParam, 0, sizeof(fLoginParam));
+	fLoginParam.uin = fProfil->fNumer;
+	fLoginParam.password = (char*)fProfil->fHaslo->String();
+	fLoginParam.async = 1;
+	fLoginParam.status = fStatus;
+//	gg_debug_level = ~0;
+	BMessenger(this).SendMessage(DODAJ_HANDLER);
+	if(fWindow)
+		BMessenger(fWindow).SendMessage(BEGG_UPDATE_STATUS);
+}
+
+void Siec::Logout()
+{
+	fprintf( stderr, "Siec::Logout()\n" );
+	/* poprostu sie wylogowujemy */
+	if(fSesja)
+	{
+		fStatus = GG_STATUS_NOT_AVAIL;
+		gg_logoff(fSesja);
+		gg_free_session(fSesja);
+		fSesja = NULL;
+		/* zatrzymujemy wszystkie handlery */
+		SiecHandler *handler;
+		for(int i=fHandlerList->CountItems(); i>0; i--)
+		{
+			handler = (SiecHandler*) fHandlerList->ItemAt(i-1);
+			RemoveHandler(handler->fFd);
+		}
+		/* uaktualniamy statusy ludzi z listy */
+		if(fWindow)
+		{
+			Osoba *osoba = NULL;
+			for(int i = 0; i < fWindow->fListaItems->CountItems(); i++)
+			{
+				osoba = (Osoba*) fWindow->fListaItems->ItemAt(i);
+				osoba->fStatus = GG_STATUS_NOT_AVAIL;
+			}
+		
+			/* uaktualniamy liste */
+			if(fWindow->fListaView->LockLooper())
+			{
+				fWindow->fListaView->MakeEmpty();
+		 		fWindow->fListaView->UnlockLooper();
+		 	}
+			BMessenger(fWindow).SendMessage(BEGG_UPDATE_LISTY);
+		}
+		
+		/* uaktualniamy status */
+		if(fWindow)
+			BMessenger(fWindow).SendMessage(BEGG_UPDATE_STATUS);
+	}
+}
+
+/* wysyłamy wiadomość */
+void Siec::SendMsg(uin_t komu, const char *wiadomosc)
+{
+	fprintf( stderr, "Siec::SendMsg()\n" );
+	if(fSesja)
+	{
+		if(gg_send_message(fSesja, GG_CLASS_CHAT, komu, (unsigned char*)wiadomosc) == -1)
+		{	
+			gg_free_session(fSesja);
+			perror("polaczenie zerwane");
+		}
+//		else
+//			fprintf(stderr,"Wysłałem wiadomość o treści %s do %d\n", komu, wiadomosc);
+	}
+}
+
+void Siec::GotMsg(uin_t odkogo, const char *msg)
+{
+	fprintf( stderr, "Siec::GotMsg()\n" );
+	/* sprawdzamy czy mamy aktualnie otwarte okno dla tej osoby :) */
+	ChatWindow	*win = NULL;
+	for( int i = 0; i < fWinList->CountItems(); i++)
+	{
+		win = (ChatWindow*) fWinList->ItemAt(i);
+		if( win->fKto == odkogo)
+			break;
+	}
+	if( win && ( win->fKto == odkogo ) )
+	{
+//		win->Activate();
+	}
+	else
+	{
+		win = new ChatWindow(this, fWindow, odkogo);
+		fWinList->AddItem(win);
+		win->Show();
+	}
+	/* i pokazujemy je :P */
+	BMessage	*	wiadomosc = new BMessage(POKAZ_WIADOMOSC);
+	wiadomosc->AddString("msg", msg);
+	BMessenger(win).SendMessage(wiadomosc);
+	delete wiadomosc;
+}
+
+void Siec::AddHandler(int fd, int cond, void *data)
+{
+	fprintf(stderr, "Siec::AddHandler(fd=%d, cond=%d)\n", fd, cond );
+	SiecHandler * handler = new SiecHandler(this, fId, fd, cond, data);
+	fHandlerList->AddItem(handler);
+	handler->Run();
+}
+
+void Siec::RemoveHandler(int fd)
+{
+	fprintf( stderr, "Siec::RemoveHandler(fd=%d)\n", fd );
+	SiecHandler *handler = NULL;
+	for(int i=0; i<fHandlerList->CountItems();i++)
+	{
+		handler = (SiecHandler*) fHandlerList->ItemAt(i);
+		if(handler->fFd == fd)
+			break;
+	}
+	if(!handler || handler->fFd != fd)
+		return;
+	handler->Stop();
+	fHandlerList->RemoveItem(handler);
+	delete handler;
+}

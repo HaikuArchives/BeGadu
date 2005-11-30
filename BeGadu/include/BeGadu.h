@@ -20,21 +20,21 @@ class DebugWindow;
 class MainWindow;
 
 class BeGadu : public BApplication
-{
+	{
 	public:
 		BeGadu();
 		virtual bool QuitRequested();
-		virtual void MessageReceived(BMessage *message);
+		virtual void MessageReceived( BMessage *aMessage );
 		virtual void ReadyToRun();
 		void AddDeskbarIcon();
 		void DelDeskbarIcon();
 
 	private:
-		MainWindow  	*	mWindow;
-		DebugWindow 	*	dWindow;
-		bool				fFirstRun;
-		bool				fHideAtStart;
-		BString			*	fLastProfile;
-};
+		MainWindow * mWindow;
+		DebugWindow * dWindow;
+		bool iFirstRun;
+		bool iHideAtStart;
+		BString	* iLastProfile;
+	};
 
 #endif /* __BEGADU_H__ */
