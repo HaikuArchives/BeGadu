@@ -35,7 +35,6 @@ GaduListItem::GaduListItem(BString *osoba, int status, BString *opis, BResources
 
 GaduListItem::~GaduListItem()
 {
-//	fprintf( stderr, "GaduListItem destruktor %p\n", fIkona );
 	if( fIkona )
 		delete fIkona;
 }
@@ -95,12 +94,20 @@ void GaduListItem::DrawItem(BView *owner, BRect frame, bool complete)
 	if(IsSelected() || complete)
 	{
 		if(IsSelected())
+		{
 			kolor.red = kolor.green = kolor.blue = 100;
+		}
 		else
+		{
 			kolor = owner->ViewColor();
-		owner->SetHighColor(kolor);
-		owner->FillRect(frame);
+		}
 	}
+	else
+	{
+		kolor = owner->ViewColor();
+	}
+	owner->SetHighColor(kolor);
+	owner->FillRect(frame);
 	if(fIkona)
 	{
 		frame.left += 2;
