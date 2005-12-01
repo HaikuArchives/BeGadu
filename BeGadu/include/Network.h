@@ -10,8 +10,8 @@
  * ============================================================================
  */
 
-#ifndef __BEGADU_SIEC_H__
-#define __BEGADU_SIEC_H__
+#ifndef __BEGADU_NETWORK_H__
+#define __BEGADU_NETWORK_H__
 
 #include <Looper.h>
 #include <libgadu.h>
@@ -19,59 +19,62 @@
 /* zewnetrzne klasy, includowane w zrodle */
 class MainWindow;
 class ChatWindow;
-class Lista;
-class Osoba;
-class Profil;
+class List;
+class Person;
+class Profile;
 
-class Siec : public BLooper
-{
+class Network : public BLooper
+	{
 	public:
-		Siec(Profil *profil, Lista *lista);
+		Network( Profile* aProfile, List* aList );
 		virtual void Quit();
-		virtual void MessageReceived(BMessage *message);
-		void GotWindow(MainWindow *window);
-		int GetIdent()
-			{ return fIdent; }
-		int GetStatus()
-			{ return fStatus; }
+		virtual void MessageReceived( BMessage* aMessage );
+		void GotWindow( MainWindow* aWindow );
+		inline int GetIdent()
+			{
+			return iIdent;
+			}
+		inline int GetStatus()
+			{
+			return iStatus;
+			}
 		/* funkcje wywoływane z interfejsu */
 		void Login();
-		void Login(int status);
+		void Login( int aStatus );
 		void Logout();
-		void AddPerson(uin_t kogo);
-		void RemovePerson(uin_t kogo);
-		void GotMsg(uin_t odkogo, const char *msg);
-		void SendMsg(uin_t komu, const char *msg);
+		void AddPerson( uin_t aWho );
+		void RemovePerson( uin_t aWho );
+		void GotMsg( uin_t aFrom, const char* aMessage );
+		void SendMsg( uin_t aWho, const char* aMessage );
+		struct gg_session* Session() const;
+		void SetStatus( int aStatus );
 
+		struct gg_session 	*	iSession;
+		struct gg_login_params	iLoginParam;
+		struct gg_event		*	iEvent;
+		MainWindow			*	iWindow;
+		int						iStatus;
 
-		struct gg_session 	*	fSesja;
-		struct gg_login_params	fLoginParam;
-		struct gg_event		*	fZdarzenie;
-		MainWindow			*	fWindow;
-		int						fStatus;
-
-	
 	private:
 		/* klasy globalne */
-		Profil		*fProfil;
-		Lista		*fLista;
+		Profile		* iProfile;
+		List		* iList;
 		
 		/* klasy lokalne */
-		BList 			*fHandlerList;
-		BList			*fWinList;
+		BList 			* iHandlerList;
+		BList			* iWinList;
 		
 		/* informacje o połączeniu */
-		int						fId;
-		int						fIdent;
+		int						iId;
+		int						iIdent;
 		
 		/* dodatki */
-		ChatWindow	*GetMesgWinForUser(uin_t kto);
-		Osoba		*GetOsobaForUser(uin_t kto);
+		ChatWindow	* GetMesgWinForUser( uin_t aWho );
+		Person		* GetPersonForUser( uin_t aWho );
 		
 		/* te funkcje robią to co libgadu chce by było zrobione */
-		void AddHandler(int fd, int cond, void *data);
-		void RemoveHandler(int fd);		
+		void AddHandler( int fd, int cond, void* data );
+		void RemoveHandler( int fd );
+	};
 
-};
-
-#endif /* __BEGADU_SIEC_H__ */
+#endif /* __BEGADU_NETWORK_H__ */

@@ -10,37 +10,37 @@
  * ============================================================================
  */
 
-#ifndef __BEGADU_OPCJE_H__
-#define __BEGADU_OPCJE_H__
+#ifndef __BEGADU_PREFERENCES_H__
+#define __BEGADU_PREFERENCES_H__
 
 #include <Window.h>
 #include <Resources.h>
 
 /* zewnetrzne klasy, includowane w zrodle */
-class Profil;
+class Profile;
 class BTextControl;
 class BCheckBox;
 class MainWindow;
-class Siec;
-class Osoba;
+class Network;
+class Person;
 class BBitmap;
 class BitmapView;
 
-class Opcje : public BWindow
-{
+class Preferences : public BWindow
+	{
 	public:
-		Opcje(Profil *profil, MainWindow *window, BRect rect, BResources *res);
-		virtual void MessageReceived(BMessage *message);
+		Preferences( Profile* aProfile, MainWindow* aWindow, BRect aRect, BResources* aRes );
+		virtual void MessageReceived( BMessage* aMessage );
 		virtual void Show();
-		BBitmap	*GetBitmap(const char *name);
+		BBitmap* GetBitmap( const char* aName );
 		
-		Profil				*	fProfil;
-		MainWindow			*	fWindow;
-		BBitmap				*	fLogo;
-		BitmapView			*	fLogoView;
-		BTextControl		*	fNumerControl;
-		BTextControl		*	fHasloControl;
-		BResources			*	fResources;
-};
+		Profile				*	iProfile;
+		MainWindow			*	iWindow;
+		BBitmap				*	iLogo;
+		BitmapView			*	iLogoView;
+		BTextControl		*	iNumberControl;
+		BTextControl		*	iPasswordControl;
+		BResources			*	iResources;
+	};
 
-#endif /* __BEGADU_OPCJE_H__ */
+#endif /* __BEGADU_PREFERENCES_H__ */

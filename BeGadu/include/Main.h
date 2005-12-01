@@ -1,11 +1,11 @@
-/**
+/*
  * ============================================================================
- *  Name     : Main from Main.h
- *  Project  : BeGadu
- *  Authors  : 
- *		Artur Wyszynski <artur.wyszynski@blstream.com>
- *  Description :
- *		App main window
+ *  Nazwa    : Main z Main.h
+ *  Projekt  : BeGadu
+ *  Authorzy : 
+ *		Artur Wyszynski <artur.wyszynski@bellstream.pl>
+ *  Opis:
+ *		Glowne okno programu
  *  Version  : 1.2
  * ============================================================================
  */
@@ -16,7 +16,7 @@
 #include <Window.h>
 #include <Resources.h>
 
-/* external classes, included in src */
+/* Forward references */
 class Network;
 class Preferences;
 class List;
@@ -36,20 +36,27 @@ class BScrollView;
 class MainWindow : public BWindow
 	{
 	public:
-		MainWindow( BString *aProfile );
+		MainWindow( BString* aProfile );
 		virtual bool QuitRequested();
-		virtual void MessageReceived( BMessage *aMessage );
-		void SetStatus( char *aStatus );
-		void SetProfile( BString *aProfile );
-		static int SortUsers( const void *, const void * );
+		virtual void MessageReceived( BMessage* aMessage );
+		void SetStatus( char* aStatus );
+		void SetProfile( BString* aProfile );
+		void SetMessenger( BMessenger& aMessenger );
+		static int SortUsers( const void*, const void* );
 		void LoadIcons();
-		BBitmap	*GetBitmap( const char *aName );
+		BBitmap* GetBitmap( const char* aName );
+		Profile* GetProfile() const;
+		Network* GetNetwork() const;
+		BListView* ListView() const;
+		GaduListItem* ListItem() const;
+		List* ListItems() const;
 
+	private:
 		/* to gg */
 		Profile				*	iProfile;
 		Network				*	iNetwork;
 
-		/* to interfejsu */
+		/* to interface */
 		BResources				iResources;
 		BView				*	iGaduView;
 		BScrollView			*	iScrollView;
@@ -73,18 +80,19 @@ class MainWindow : public BWindow
 		BMenuField			*	iStatus;
 		BPopUpMenu			*	iStatusMenu;
 		GaduMenuItem		*	iAvail;
-		GaduMenuItem		*	iBrb;
-		GaduMenuItem		*	iInvis;
+		GaduMenuItem		*	iBRB;
+		GaduMenuItem		*	iInvisible;
 		GaduMenuItem		*	iNotAvail;
 		GaduMenuItem		*	iDescr;
 		BBitmap				*	iIconAvail;
-		BBitmap				*	iIconBrb;
-		BBitmap				*	iIconInvis;
+		BBitmap				*	iIconBRB;
+		BBitmap				*	iIconInvisible;
 		BBitmap				*	iIconNotAvail;
 		BBitmap				*	iIconAvailDescr;
-		BBitmap				*	iIconBrbDescr;
-		BBitmap				*	iIconInvisDescr;
+		BBitmap				*	iIconBRBDescr;
+		BBitmap				*	iIconInvisibleDescr;
 		BBitmap				*	iIconNotAvailDescr;
+		BMessenger				iDeskbarMessenger;
 	};
 
 #endif /* __BEGADU_MAINWINDOW_H__ */

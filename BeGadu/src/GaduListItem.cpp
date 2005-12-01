@@ -17,15 +17,13 @@ extern "C" {
 #include "libgadu.h"
 }
 
-GaduListItem::GaduListItem( BString *aName,
-							int aStatus,
-							BString *aDescription,
-							BResources *aResources) : BListItem()
+GaduListItem::GaduListItem( BString *aPerson, int aStatus, BString *aDescription, BResources *aRes ) : BListItem()
 	{
-	iResources = aResources;
+	iResources = aRes;
 	iStatus = aStatus;
+	iIcon = NULL;
 	SetIcon( iStatus );
-	iName = aName;
+	iName = aPerson;
 	iDescription = aDescription;
 	iNameFont = new BFont( be_plain_font );
 	iNameFont->SetSize( 15.0 );
@@ -33,69 +31,92 @@ GaduListItem::GaduListItem( BString *aName,
 	iDescriptionFont->SetSize( 10.0 );
 	float woi = iNameFont->StringWidth( iName->String() );
 	SetWidth( woi );
-	SetHeight( 35.0 );
 	}
 
 GaduListItem::~GaduListItem()
 	{
 	if( iIcon )
+		{
 		delete iIcon;
 		iIcon = NULL;
+		}
+	if( iNameFont )
+		{
+		delete iNameFont;
+		iNameFont = NULL;
+		}
+	if( iDescriptionFont )
+		{
+		delete iDescriptionFont;
+		iDescriptionFont = NULL;
+		}
 	}
 
 void GaduListItem::SetIcon( int aStatus )
 	{
+	if( iIcon )
+		{
+		delete iIcon;
+		iIcon = NULL;
+		}
+		
 	switch( aStatus )
 		{
 		case GG_STATUS_NOT_AVAIL:
 			{
-			iIcon = GetBitmap( "NotAvail.png" );
+			iIcon = GetBitmap( "offline" );
 			break;
 			}
+			
 		case GG_STATUS_NOT_AVAIL_DESCR:
 			{
-			iIcon = GetBitmap( "NotAvailDescr.png" );
+			iIcon = GetBitmap( "offline_d" );
 			break;
 			}
+			
 		case GG_STATUS_INVISIBLE:
 			{
-			iIcon = GetBitmap( "Invisible.png" );
+			iIcon = GetBitmap( "invisible" );
 			break;
 			}
+		
 		case GG_STATUS_INVISIBLE_DESCR:
 			{
-			iIcon = GetBitmap( "InvisibleDescr.png" );
+			iIcon = GetBitmap( "invisible_d" );
 			break;
 			}
+		
 		case GG_STATUS_BUSY:
 			{
-			iIcon = GetBitmap( "Busy.png" );
+			iIcon = GetBitmap( "busy" );
 			break;
 			}
+		
 		case GG_STATUS_BUSY_DESCR:
 			{
-			iIcon = GetBitmap( "BusyDescr.png" );
+			iIcon = GetBitmap( "busy_d" );
 			break;
 			}
+			
 		case GG_STATUS_AVAIL:
 			{
-			iIcon = GetBitmap( "Avail.png" );
+			iIcon = GetBitmap( "online" );
 			break;
 			}
+			
 		case GG_STATUS_AVAIL_DESCR:
 			{
-			iIcon = GetBitmap( "AvailDescr.png" );
+			iIcon = GetBitmap( "online_d" );
 			break;
 			}
 		}
 	}
 
-void GaduListItem::DrawItem( BView *aOwner, BRect aFrame, bool aComplete )
+void GaduListItem::DrawItem( BView* aOwner, BRect aFrame, bool aComplete )
 	{
 	rgb_color color;
 	rgb_color color_name;
-	rgb_color color_desc;
-
+	rgb_color color_description;
 	if( IsSelected() || aComplete )
 		{
 		if( IsSelected() )
@@ -106,14 +127,17 @@ void GaduListItem::DrawItem( BView *aOwner, BRect aFrame, bool aComplete )
 			{
 			color = aOwner->ViewColor();
 			}
+//		aOwner->SetLowColor( color );
+		aOwner->SetHighColor( color );
+		aOwner->FillRect( aFrame );
 		}
 	else
 		{
 		color = aOwner->ViewColor();
+//		aOwner->SetLowColor( color );
+		aOwner->SetHighColor( color );
+		aOwner->FillRect( aFrame );
 		}
-
-	aOwner->SetHighColor( color );
-	aOwner->FillRect( aFrame );
 
 	if( iIcon )
 		{
@@ -128,52 +152,34 @@ void GaduListItem::DrawItem( BView *aOwner, BRect aFrame, bool aComplete )
 		aOwner->SetLowColor( 255, 255, 255, 0 );
 		aOwner->DrawBitmap( iIcon, r );
 		}
-
-	if( IsSelected() )
+	if(	IsSelected() )
 		{
 		color_name.red = color_name.blue = color_name.green = color_name.alpha = 255;
-		color_desc.red = color_desc.blue = color_desc.green = color_desc.alpha = 175;
+		color_description.red = color_description.blue = color_description.green = color_description.alpha = 175;
 		}
 	else
 		{
 		color_name.red = color_name.blue = color_name.green = color_name.alpha = 0;
-		color_desc.red = color_desc.blue = color_desc.green = color_desc.alpha = 50;
+		color_description.red = color_description.blue = color_description.green = color_description.alpha = 50;
 		}
-
 	aOwner->SetDrawingMode( B_OP_OVER );
-	// aOwner->MovePenTo( aFrame.left + 21, ( ( ( aFrame.bottom + aFrame.top ) / 2.0 ) ) +4.0 );
+//	aOwner->MovePenTo(frame.left + 21, (((frame.bottom+frame.top)/2.0))+4.0);
 	aOwner->SetFont( iNameFont );
 	aOwner->MovePenTo( aFrame.left + 21, aFrame.top + 9 );
 	aOwner->SetHighColor( color_name );
 	aOwner->DrawString( iName->String() );
 	aOwner->SetFont( iDescriptionFont );
-	aOwner->SetHighColor( color_desc );
+	aOwner->SetHighColor( color_description );
 	aOwner->MovePenTo( aFrame.left + 21, aFrame.top + 21 );
-	aOwner->DrawString( iDescription->String() );	
+	aOwner->DrawString( iDescription->String() );
 	}
 
-void GaduListItem::Update(BView *aOwner, const BFont *aFont)
+void GaduListItem::Update( BView* aOwner, const BFont* aFont )
 	{
-	BListItem::Update( aOwner, aFont);
 	SetHeight( 35.0 );
 	}
 
-const BString GaduListItem::GetName() const
-	{
-	return *iName;
-	}
-
-const BString GaduListItem::GetDescription() const
-	{
-	return *iDescription;
-	}
-
-int GaduListItem::GetState()
-	{
-	return iStatus;
-	}
-
-BBitmap* GaduListItem::GetBitmap( const char *aName )
+BBitmap *GaduListItem::GetBitmap( const char* aName )
 	{
 	BBitmap 	*bitmap = NULL;
 	size_t 		len = 0;
@@ -196,5 +202,6 @@ BBitmap* GaduListItem::GetBitmap( const char *aName )
 		delete bitmap;
 		return NULL;
 		}
+	
 	return bitmap;
 	}

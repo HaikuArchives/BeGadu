@@ -16,21 +16,21 @@
 #include <View.h>
 #include <Resources.h>
 
-/* zewnetrzne klasy, inkludujemy w zrodle */
+/* Forward references */
 class BBitmap;
 class BPopUpMenu;
 class BMessage;
 //class ProfileWizard;
 
-class BGDeskbar : public BView
-{
+class _EXPORT BGDeskbar : public BView
+	{
 	public:
 		BGDeskbar();
 		BGDeskbar( BMessage *aMessage );
 		virtual ~BGDeskbar();
 
 		virtual	status_t Archive( BMessage *aMessage, bool aDeep = true ) const;
-		static BGDeskbar *Instantiate( BMessage *aData );
+		static BArchivable *Instantiate( BMessage *aData );
 		virtual	void AttachedToWindow();
 		virtual void DetachedFromWindow();
 		virtual void Draw( BRect aRect );
@@ -39,23 +39,23 @@ class BGDeskbar : public BView
 		virtual void MouseDown( BPoint aWhere );
 		void Initialize();
 		void Remove();
-		BBitmap	*GetBitmap(const char *name);
+		BBitmap	*GetBitmap( const char *name );
 		
 	private:
-		BPopUpMenu	*	iMenu;
-		BBitmap		*	iIcon;
-		BBitmap		*	iIconAvail;
-		BBitmap		*	iIconBusy;
-		BBitmap		*	iIconInvisible;
-		BBitmap		*	iIconNotAvail;
-		BBitmap		*	iIconAvailDescr;
-		BBitmap		*	iIconBusyDescr;
-		BBitmap		*	iIconInvisibleDescr;
-		BBitmap		*	iIconNotAvailDescr;
-		BBitmap		*	iIconNewMessage;
-		BBitmap		*	iIconQuit;
-		time_t			iMesgAnimate;
-		BResources		fResources;
-};
+		BPopUpMenu		*	iMenu;
+		BBitmap			*	iIcon;
+		BBitmap			*	iIconAvail;
+		BBitmap			*	iIconBusy;
+		BBitmap			*	iIconInvisible;
+		BBitmap			*	iIconNotAvail;
+		BBitmap			*	iIconAvailDescr;
+		BBitmap			*	iIconBusyDescr;
+		BBitmap			*	iIconInvisibleDescr;
+		BBitmap			*	iIconNotAvailDescr;
+		BBitmap			*	iIconNewMessage;
+		BBitmap			*	iIconQuit;
+		time_t				iMesgAnimate;
+		BResources			iResources;
+	};
 
 #endif /* __BEGADU_DESKBAR_H__ */

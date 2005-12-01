@@ -24,7 +24,7 @@ class BString;
 class BMessage;
 
 class GaduMenuItem : public BMenuItem
-{
+	{
 	public:
 		GaduMenuItem( BBitmap *aIcon, const char *aLabel, BMessage *aMessage );
 		~GaduMenuItem();
@@ -32,6 +32,6 @@ class GaduMenuItem : public BMenuItem
 		virtual void GetContentSize( float *aWidth, float *aHeight );
 		BBitmap		*	iIcon;
 		BString		*	iLabel;
-};
+	};
 
 #endif // __BEGADU_GADUMENUITEM_H__

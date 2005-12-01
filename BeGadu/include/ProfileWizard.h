@@ -35,46 +35,47 @@ class BBox;
 #define GO_BACK4 	'gba4'
 #define GO_CANCEL	'goca'
 
-class ProfilWizard : public BWindow
-{
+class ProfileWizard : public BWindow
+	{
 	public:
-		ProfilWizard();
-		~ProfilWizard();
-		virtual void MessageReceived(BMessage *mesg);
+		ProfileWizard();
+		~ProfileWizard();
+		virtual void MessageReceived( BMessage* aMessage );
 		virtual void Show();
-		bool	fBreak;
-		Profil	*fProfil;
+		bool iBreak;
+		Profile* iProfile;
+	
 	private:
-		BView			*	fPage1;
-		BView			*	fPage2;
-		BView			*	fPage3;
-		BView			*	fPage4;
-		BBox			*	fPBox1;
-		BBox			*	fPBox2;
-		BBox			*	fPBox3;
-		BBox			*	fPBox4;
+		BView			*	iPage1;
+		BView			*	iPage2;
+		BView			*	iPage3;
+		BView			*	iPage4;
+		BBox			*	iPBox1;
+		BBox			*	iPBox2;
+		BBox			*	iPBox3;
+		BBox			*	iPBox4;
 		
 
-		BRadioButton	*	fMam;
-		BRadioButton	*	fNowy;
+		BRadioButton	*	iHave;
+		BRadioButton	*	iNew;
 
-		BTextControl	*	fNazwa;
-		BTextControl	*	fNumer;
-		BTextControl	*	fHaslo;
-		BTextControl	*	fEmail;
+		BTextControl	*	iName;
+		BTextControl	*	iNumber;
+		BTextControl	*	iPassword;
+		BTextControl	*	iEmail;
 
-		BButton			*	fDalej1;
-		BButton			*	fWroc1;
-		BButton			*	fAnuluj1;
-		BButton			*	fDalej2;
-		BButton			*	fWroc2;
-		BButton			*	fAnuluj2;
-		BButton			*	fDalej3;
-		BButton			*	fWroc3;
-		BButton			*	fAnuluj3;
-		BButton			*	fDalej4;
-		BButton			*	fWroc4;
-		BButton			*	fAnuluj4;
-};
+		BButton			*	iNext1;
+		BButton			*	iBack1;
+		BButton			*	iCancel1;
+		BButton			*	iNext2;
+		BButton			*	iBack2;
+		BButton			*	iCancel2;
+		BButton			*	iNext3;
+		BButton			*	iBack3;
+		BButton			*	iCancel3;
+		BButton			*	iNext4;
+		BButton			*	iBack4;
+		BButton			*	iCancel4;
+	};
 
 #endif /* __BEGADU_PROFILWIZARD_H__ */

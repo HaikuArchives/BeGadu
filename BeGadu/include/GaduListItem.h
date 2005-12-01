@@ -1,14 +1,15 @@
 /*
  * ============================================================================
- *  Name     : GaduListItem from GaduListItem.h
- *  Project  : BeGadu
- *  Authors	 : 
- *		Artur Wyszynski <artur.wyszynski@blstream.pl>
- *  Description:
- *		My version of BListItem
+ *  Nazwa    : GaduListItem z GaduListItem.h
+ *  Projekt  : BeGadu
+ *  Authorzy : 
+ *		Artur Wyszynski <artur.wyszynski@bellstream.pl>
+ *  Opis:
+ *		Moja implementacja BListItem
  *  Version  : 1.2
  * ============================================================================
  */
+
 
 #ifndef __BEGADU_GADULISTITEM_H__
 #define __BEGADU_GADULISTITEM_H__
@@ -16,7 +17,7 @@
 #include <ListItem.h>
 #include <Resources.h>
 
-/* external classes, included in src */
+/* Forward references */
 class BBitmap;
 class BMessage;
 class BRect;
@@ -26,28 +27,19 @@ class BString;
 class GaduListItem : public BListItem
 	{
 	public:
-		GaduListItem( BString *aName,
-					  int aStatus,
-					  BString *aDescription,
-					  BResources *aResources );
+		GaduListItem( BString* aPerson, int aStatus, BString* aDescription, BResources* aRes );
 		~GaduListItem();
-		void SetIcon( int aStatus );
-		virtual void DrawItem( BView *aOwner, BRect aFrame, bool aComplete );
-		virtual void Update( BView *aOwner, const BFont *aFont );
-		const BString GetName() const;
-		const BString GetDescription() const;
-		int	GetState();
-
-	private:
-		BBitmap	* GetBitmap( const char *aName );
-		BString	* iName;
-		BString	* iDescription;
-		BFont *	iNameFont;
-		BFont *	iDescriptionFont;
-		int iStatus;
-		BBitmap	* iIcon;
-		BResources *	iResources;
-		color_map iColorMap;
+		void SetIcon( int status );
+		virtual void DrawItem( BView* aOwner, BRect aFrame, bool aComplete = false );
+		virtual void Update( BView* aOwner, const BFont* aFont );
+		BBitmap	*GetBitmap( const char* aName );
+		BString		*	iName;
+		BString		*	iDescription;
+		BFont		*	iNameFont;
+		BFont		*	iDescriptionFont;
+		int 			iStatus;
+		BBitmap		*	iIcon;
+		BResources	*	iResources;
 	};
 
 #endif /* __BEGADU_GADULISTITEM_H__ */

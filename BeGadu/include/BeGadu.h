@@ -15,7 +15,7 @@
 
 #include <Application.h>
 
-/* zewnetrzne klasy, includowane w zrodle */
+/* Forward classes */
 class DebugWindow;
 class MainWindow;
 
@@ -24,17 +24,23 @@ class BeGadu : public BApplication
 	public:
 		BeGadu();
 		virtual bool QuitRequested();
-		virtual void MessageReceived( BMessage *aMessage );
+		virtual void MessageReceived(BMessage *message);
 		virtual void ReadyToRun();
 		void AddDeskbarIcon();
 		void DelDeskbarIcon();
+		MainWindow*	GetMainWindow() const;
+		DebugWindow* GetDebugWindow() const;
+		bool FirstRun();
+		bool HideAtStart();
+		BString* LastProfile();
 
 	private:
-		MainWindow * mWindow;
-		DebugWindow * dWindow;
-		bool iFirstRun;
-		bool iHideAtStart;
-		BString	* iLastProfile;
-	};
+		MainWindow  	*	iWindow;
+		DebugWindow 	*	iDebugWindow;
+		bool				iFirstRun;
+		bool				iHideAtStart;
+		BString			*	iLastProfile;
+		bool				iReadyToRun;
+};
 
 #endif /* __BEGADU_H__ */

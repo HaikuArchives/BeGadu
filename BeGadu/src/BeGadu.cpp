@@ -15,206 +15,293 @@
 
 #include "Msg.h"
 #include "BeGadu.h"
-#include "Siec.h"
+#include "Network.h"
 #include "Main.h"
-#include "Osoba.h"
+#include "Person.h"
 #include "Debug.h"
-#include "Opcje.h"
-#include "ProfilWizard.h"
+#include "Preferences.h"
+#include "ProfileWizard.h"
 
-BeGadu::BeGadu() : BApplication("application/x-vnd.BeGadu")
-{
-	/* sprawdzamy konfiguracje */
-	fFirstRun = false;
-	fHideAtStart = false;
-	fLastProfile = new BString();
-	fLastProfile->SetTo("");
+BeGadu::BeGadu() : BApplication( "application/x-vnd.BeGadu" )
+	{
+	/* we're checking configuration */
+	iFirstRun = false;
+	iHideAtStart = false;
+	iLastProfile = new BString();
+	iLastProfile->SetTo( "" );
+	iReadyToRun = false;
 	BPath path;
 	BEntry entry;
 	status_t error;
-	find_directory(B_USER_SETTINGS_DIRECTORY, &path);
-	BDirectory * bg_conf = new BDirectory(path.Path());
-	if(bg_conf->FindEntry("BeGadu", &entry) != B_OK)
-	{
-		path.Append("BeGadu");
-		bg_conf->CreateDirectory(path.Path(), bg_conf);
-	}
-	if(bg_conf->FindEntry("Profile", &entry) != B_OK)
-	{
-		
-		find_directory(B_USER_SETTINGS_DIRECTORY, &path);
-		path.Append("BeGadu/Profile");
-		error = bg_conf->CreateDirectory(path.Path(), bg_conf);
-		fFirstRun = true;
-	}
-	find_directory(B_USER_SETTINGS_DIRECTORY, &path);
-	path.Append("BeGadu/Profile");
-	bg_conf->SetTo(path.Path());
-	if(bg_conf->CountEntries() == 0)
-		fFirstRun = true;
-	else
-		fFirstRun = false;	
-
-	/* laduje config */
-	find_directory(B_USER_SETTINGS_DIRECTORY, &path);
-	path.Append("BeGadu/Config");
-	BFile file(path.Path(), B_READ_ONLY);
-	fprintf(stderr, "Laduje config z %s\n", path.Path());
-	BMessage *cfgmesg = new BMessage();
-	if(file.InitCheck() == B_OK)
-	{
-		cfgmesg->Unflatten(&file);
-		file.Unset();
-	}
-	if( cfgmesg->FindBool("fFirstRun", &fFirstRun) != B_OK )
-		fFirstRun =  true;
-	if( cfgmesg->FindString("fLastProfile", fLastProfile) != B_OK )
-		fLastProfile->SetTo("");
-	delete cfgmesg;
-
-	if(fFirstRun)
-	{
-		fprintf(stderr, "Pierwsze uruchomienie, startuje Kreator Profili\n");
-		BMessenger(this).SendMessage(new BMessage(OPEN_PROFILE_WIZARD));
-	}
-	else
-	{
-		fprintf(stderr, "Konfig ok :)\n");
-		BMessenger(this).SendMessage(new BMessage(CONFIG_OK));
-	}
-}
-
-void BeGadu::MessageReceived(BMessage *message)
-{
-	switch(message->what)
-	{
-		/* sending mesgs from libgadu to network */
-		case MAM_WIADOMOSC:
-		case DODAJ_HANDLER:
-		case USUN_HANDLER:
+	find_directory( B_USER_SETTINGS_DIRECTORY, &path );
+	BDirectory * bg_conf = new BDirectory( path.Path() );
+	
+	if( bg_conf->FindEntry( "BeGadu", &entry ) != B_OK )
 		{
-			BMessenger(mWindow->fSiec).SendMessage(message);
-			break;
+		path.Append( "BeGadu" );
+		bg_conf->CreateDirectory( path.Path(), bg_conf );
 		}
+	
+	if( bg_conf->FindEntry( "Profiles", &entry ) != B_OK )
+		{
+		find_directory( B_USER_SETTINGS_DIRECTORY, &path );
+		path.Append( "BeGadu/Profiles" );
+		error = bg_conf->CreateDirectory( path.Path(), bg_conf );
+		iFirstRun = true;
+		}
+	
+	find_directory( B_USER_SETTINGS_DIRECTORY, &path );
+	path.Append( "BeGadu/Profiles" );
+	bg_conf->SetTo( path.Path() );
+	
+	if( bg_conf->CountEntries() == 0 )
+		{
+		iFirstRun = true;
+		}
+	else
+		{
+		iFirstRun = false;	
+		}
+	
+	/* loading configuration */
+	find_directory( B_USER_SETTINGS_DIRECTORY, &path );
+	path.Append( "BeGadu/Config" );
+	BFile file( path.Path(), B_READ_ONLY );
+	fprintf( stderr, "Loading configuration from %s\n", path.Path() );
+	BMessage *cfgmesg = new BMessage();
+	if( file.InitCheck() == B_OK )
+		{
+		cfgmesg->Unflatten( &file );
+		file.Unset();
+		}
+	if( cfgmesg->FindBool( "iFirstRun", &iFirstRun ) != B_OK )
+		{
+		iFirstRun =  true;
+		}
+	if( cfgmesg->FindString( "iLastProfile", iLastProfile ) != B_OK )
+		{
+		iLastProfile->SetTo( "" );
+		}
+		
+	delete cfgmesg;
+	delete bg_conf;
+	
+	if( iFirstRun )
+		{
+		fprintf( stderr, "First run, starting Profile Wizard...\n" );
+		BMessenger( this ).SendMessage( new BMessage( OPEN_PROFILE_WIZARD ) );
+		}
+	else
+		{
+		fprintf( stderr, "Configuration ok.\n" );
+		BMessenger( this ).SendMessage( new BMessage( CONFIG_OK ) );
+		}
+	}
+
+void BeGadu::MessageReceived( BMessage *aMessage )
+	{
+	switch( aMessage->what )
+		{
+		/* sending mesgs from libgadu to network */
+		case GOT_MESSAGE:
+		case ADD_HANDLER:
+		case DEL_HANDLER:
+			{
+			BMessenger( iWindow->GetNetwork() ).SendMessage( aMessage );
+			break;
+			}
+		
+		case ADD_MESSENGER:
+			{
+			fprintf( stderr, "BeGadu::MessageReceived( ADD_MESSENGER )\n" );
+			BMessenger messenger;
+			aMessage->FindMessenger( "messenger", &messenger );
+			if( iWindow )
+				{
+				iWindow->SetMessenger( messenger );
+				}
+			break;
+			}
+			
 		case SET_AVAIL:
 		case SET_BRB:
 		case SET_INVIS:
 		case SET_NOT_AVAIL:
 		case SET_DESCRIPTION:
 		case BEGG_ABOUT:
-		{
-			if(mWindow)
-				BMessenger(mWindow).SendMessage(message);
+		case SHOW_MAIN_WINDOW:
+			{
+			if( iWindow )
+				{
+				BMessenger( iWindow ).SendMessage( aMessage );
+				}
 			break;
-		}
+			}
+		
 		case OPEN_PROFILE_WIZARD:
-		{
-			ProfilWizard *pw = new ProfilWizard();
+			{
+			ProfileWizard *pw = new ProfileWizard();
 			pw->Show();
 			break;
-		}
+			}
 
 		case CONFIG_OK:
-		{
-			mWindow = new MainWindow(fLastProfile);
-			if( !fHideAtStart )
 			{
-				mWindow->Show();
-			}
+			iReadyToRun = true;
+			AddDeskbarIcon();
+			iWindow = new MainWindow( iLastProfile );
+			if( !iHideAtStart )
+				{
+				if( iWindow->LockLooper() )
+					{
+					iWindow->Show();
+					iWindow->UnlockLooper();
+					}
+				}
 			else
-			{
-				mWindow->Show();
-				mWindow->Hide();
-			}
+				{
+				if( iWindow->LockLooper() )
+					{
+					iWindow->Show();
+					iWindow->Hide();
+					iWindow->UnlockLooper();
+					}
+				}
 			break;
-		}
+			}
+		
 		case PROFILE_CREATED:
-		{
-			message->FindString("ProfileName", fLastProfile);
-			fprintf(stderr, "Ustawiam ostatni profil na %s\n", fLastProfile->String());
-			fFirstRun = false;
-			mWindow = new MainWindow(fLastProfile);
-			if(mWindow->IsHidden())
 			{
-				mWindow->Show();
+			iReadyToRun = true;
+			AddDeskbarIcon();
+			aMessage->FindString( "ProfileName", iLastProfile );
+			fprintf( stderr, "Setting last profile to %s\n", iLastProfile->String() );
+			iFirstRun = false;
+			iWindow = new MainWindow( iLastProfile );
+			if( iWindow->LockLooper() )
+				{
+				if( iWindow->IsHidden() )
+					{
+					iWindow->Show();
+					}
+				else
+					{
+					iWindow->Activate();
+					}
+				iWindow->UnlockLooper();
+				}
+			break;
 			}
-			else
-				mWindow->Activate();
+
+		case BEGG_QUIT:
+			{
+			BMessenger( iWindow ).SendMessage( aMessage );
 			break;
-		}
-		case REMOVE_FROM_DESKBAR:
-		{
-			BMessenger(this).SendMessage( B_QUIT_REQUESTED );
-			break;
-		}
+			}
+
 		default:
-			BApplication::MessageReceived(message);
+			{
+			BApplication::MessageReceived( aMessage );
 			break;
+			}
+		}
 	}
-}
 
 void BeGadu::ReadyToRun()
-{
+	{
 	fprintf( stderr, "BeGadu::ReadyToRun()\n" );
-	AddDeskbarIcon();
-}
+	if( iReadyToRun )
+		AddDeskbarIcon();
+	}
 
 bool BeGadu::QuitRequested()
-{
-	DelDeskbarIcon();
-	if(mWindow->Lock())
-		mWindow->Quit();
-	/* zapisujemy konfig */
-	BMessage * cfgmesg = new BMessage();
-	cfgmesg->AddBool("fFirstRun", fFirstRun);
-	cfgmesg->AddBool("fHideAtStart", fHideAtStart);
-	cfgmesg->AddString("fLastProfile", *fLastProfile);
-	BPath path;
-	find_directory(B_USER_SETTINGS_DIRECTORY, &path);
-	path.Append("BeGadu/Config");
-	fprintf(stderr, "Ostatni profil %s\n", fLastProfile->String());
-	fprintf(stderr, "Zapisuje konfig do %s\n", path.Path());
-	BFile file(path.Path(), B_WRITE_ONLY | B_CREATE_FILE | B_ERASE_FILE);
-	if(file.InitCheck() == B_OK)
 	{
-		cfgmesg->Flatten(&file);
+	DelDeskbarIcon();
+	if( iWindow->Lock() )
+		{
+		iWindow->Quit();
+		}
+		
+	/* saving configuration */
+	BMessage * cfgmesg = new BMessage();
+	cfgmesg->AddBool( "iFirstRun", iFirstRun );
+	cfgmesg->AddBool( "iHideAtStart", iHideAtStart );
+	cfgmesg->AddString( "iLastProfile", *iLastProfile );
+	
+	BPath path;
+	find_directory( B_USER_SETTINGS_DIRECTORY, &path );
+	path.Append( "BeGadu/Config" );
+	fprintf( stderr, "Last profile: %s\n", iLastProfile->String() );
+	fprintf( stderr, "Saving configuration to %s\n", path.Path() );
+	BFile file( path.Path(), B_WRITE_ONLY | B_CREATE_FILE | B_ERASE_FILE );
+	if( file.InitCheck() == B_OK )
+		{
+		cfgmesg->Flatten( &file );
 		file.Unset();
-	}
+		}
+	
 	delete cfgmesg;
 	BApplication::QuitRequested();
 	return true;
-}
+	}
 
 void BeGadu::AddDeskbarIcon()
-{
+	{
 	fprintf( stderr, "BeGadu::AddDeskbarIcon()\n" );
 	BDeskbar deskbar;
 	if( !deskbar.HasItem( "BGDeskbar" ) )
-	{
+		{
 		BRoster roster;
 		entry_ref ref;
 		status_t status = roster.FindApp( "application/x-vnd.BeGadu", &ref );
 		if( status != B_OK )
-		{
+			{
 			fprintf( stderr, "Can't find BeGadu running %s\n", strerror( status ) );
 			return;
-		}
+			}
 		status = deskbar.AddItem( &ref );
 		if( status != B_OK )
-		{
-			fprintf( stderr, "Can't put BeGadu into Deskbar %s\n", strerror( status ) );
+			{
+			fprintf( stderr, "Can't put BeGadu into Deskbar: %s\n", strerror( status ) );
 			return;
+			}
 		}
 	}
-}
 
 void BeGadu::DelDeskbarIcon()
-{
+	{
 	fprintf( stderr, "BeGadu::DelDeskbarIcon()\n" );
 	BDeskbar deskbar;
 	if( deskbar.HasItem( "BGDeskbar" ) )
+		{
 		deskbar.RemoveItem( "BGDeskbar" );
-}
+		}
+	}
+
+MainWindow* BeGadu::GetMainWindow() const
+	{
+	return iWindow;
+	}
+	
+DebugWindow* BeGadu::GetDebugWindow() const
+	{
+	return iDebugWindow;
+	}
+
+bool BeGadu::FirstRun()
+	{
+	return iFirstRun;
+	}
+
+bool BeGadu::HideAtStart()
+	{
+	return iHideAtStart;
+	}
+
+BString* BeGadu::LastProfile()
+	{
+	return iLastProfile;
+	}
 
 int main()
 {

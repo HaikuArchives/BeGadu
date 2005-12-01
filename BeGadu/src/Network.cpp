@@ -12,349 +12,377 @@
 #include <Path.h>
 #include <FindDirectory.h>
 #include <Message.h>
-#include <Roster.h>
 #include <String.h>
+#include <OutlineListView.h>
 #include "Msg.h"
-#include "Siec.h"
+#include "Network.h"
 #include "Main.h"
 #include "Chat.h"
-#include "Osoba.h"
-#include "Handler.h"
-extern "C" {
+#include "Person.h"
+#include "NetworkHandler.h"
+extern "C"
+{
 #include "libgadu.h"
 }
 
-
-Siec::Siec(Profil *profil, Lista *lista) : BLooper("Petla sieci")
-{
-	fprintf( stderr, "Siec::Siec()\n" );
+Network::Network( Profile* aProfile, List* aList ) : BLooper( "Network Loop" )
+	{
+	fprintf( stderr, "Network::Network()\n" );
 	/* inicjalizacja */
-	fProfil			= profil;
-	fLista			= lista;
-	fWindow			= NULL;
-	fHandlerList	= new BList(256);
-	fWinList		= new BList(512);
-	fIdent			= 0;
-	fSesja			= NULL;
-	fStatus			= GG_STATUS_NOT_AVAIL;
+	iProfile		= aProfile;
+	iList			= aList;
+	iWindow			= NULL;
+	iHandlerList	= new BList( 256 );
+	iWinList		= new BList( 512 );
+	iIdent			= 0;
+	iSession		= NULL;
+	iStatus			= GG_STATUS_NOT_AVAIL;
 	
 	/* czekamy na wiadomości :)) */
 	Run();
-}
+	}
 
-void Siec::Quit()
-{
-	fprintf( stderr, "Siec::Quit()\n" );
+void Network::Quit()
+	{
+	fprintf( stderr, "Network::Quit()\n" );
 	/* Rozłączamy się */
-	if((fStatus != GG_STATUS_NOT_AVAIL) || (fStatus != GG_STATUS_NOT_AVAIL_DESCR))
+	if( ( iStatus != GG_STATUS_NOT_AVAIL ) || ( iStatus != GG_STATUS_NOT_AVAIL_DESCR ) )
 		Logout();
 	Lock();
 	BLooper::Quit();
-}
+	}
 
-void Siec::MessageReceived(BMessage *message)
-{
-	switch(message->what)
+void Network::MessageReceived( BMessage* aMessage )
 	{
+	switch( aMessage->what )
+		{
 		/*
 			wiadomości otrzymane od libgadu callback
 			cała obsługa jest w SiecLib.cpp, my tylko
 			wywołujemy je stąd :)
 		*/
-		case DODAJ_HANDLER:
-		{
-			fprintf( stderr, "Siec::MessageReceived( DODAJ_HANDLER )\n" );
+		case ADD_HANDLER:
+			{
+			fprintf( stderr, "Network::MessageReceived( ADD_HANDLER )\n" );
 			int fd, cond;
 			void *data;
-			message->FindInt32("fd", (int32*)&fd);
-			message->FindInt32("cond", (int32*)&cond);
-			message->FindPointer("data", &data);
-			AddHandler(fd,cond,data);
+			aMessage->FindInt32( "fd", ( int32* ) &fd );
+			aMessage->FindInt32( "cond", ( int32* ) &cond );
+			aMessage->FindPointer( "data", &data );
+			AddHandler( fd, cond, data );
 			break;
-		}
-		case USUN_HANDLER:
-		{
-			fprintf( stderr, "Siec::MessageReceived( USUN_HANDLER )\n" );
+			}
+			
+		case DEL_HANDLER:
+			{
+			fprintf( stderr, "Network::MessageReceived( DEL_HANDLER )\n" );
 			int fd;
-			message->FindInt32("fd", (int32*)&fd);
-			RemoveHandler(fd);
+			aMessage->FindInt32( "fd", ( int32* ) &fd );
+			RemoveHandler( fd );
 			break;
-		}
-		case MAM_WIADOMOSC:
-		{
-			fprintf( stderr, "Siec::MessageReceived( MAM_WIADOMOSC )\n" );
-			int				kto;
+			}
+			
+		case GOT_MESSAGE:
+			{
+			fprintf( stderr, "Network::MessageReceived( GOT_MESSAGE )\n" );
+			int				who;
 			const char *	msg;
-			message->FindInt32("kto", (int32*)&kto);
-			message->FindString("msg", &msg);
-			GotMsg(kto, msg);
+			aMessage->FindInt32( "who", ( int32* ) &who );
+			aMessage->FindString("msg", &msg );
+			GotMsg( who, msg );
 			break;
-		}
+			}
+
 		/*
 			wiadomości otrzymane od interfejsu
 			cała obsługa jest w SiecInt.cpp, my tylko
 			wywołujemy je stąd :)
 		*/
-		case LOGIN:
-		{
-			fprintf( stderr, "Siec::MessageReceived( LOGIN )\n" );
+		
+		case DO_LOGIN:
+			{
+			fprintf( stderr, "Network::MessageReceived( DO_LOGIN )\n" );
 			Login();
 			break;
-		}
-		case LOGOUT:
-		{
-			fprintf( stderr, "Siec::MessageReceived( LOGOUT )\n" );
+			}
+			
+		case DO_LOGOUT:
+			{
+			fprintf( stderr, "Network::MessageReceived( DO_LOGOUT )\n" );
 			Logout();
 			break;
-		}
-		case DODAJ_OSOBE:
-		{
-			fprintf( stderr, "Siec::MessageReceived( DODAJ_OSOBE )\n" );
+			}
+			
+		case ADD_PERSON:
+			{
+			fprintf( stderr, "Network::MessageReceived( ADD_PERSON )\n" );
 			// do zaimplementowania
 			break;
-		}
-		case USUN_OSOBE:
-		{
-			fprintf( stderr, "Siec::MessageReceived( USUN_OSOBE )\n" );
+			}
+			
+		case DEL_PERSON:
+			{
+			fprintf( stderr, "Network::MessageReceived( DEL_PERSON )\n" );
 			// do zaimplementowania
 			break;
-		}
-		case OTWORZ_WIADOMOSC:
-		{
-			fprintf( stderr, "Siec::MessageReceived( OTWORZ_WIADOMOSC )\n" );
-			int	kto;
-			message->FindInt32("kto", (int32*)&kto);
+			}
+			
+		case OPEN_MESSAGE:
+			{
+			fprintf( stderr, "Network::MessageReceived( OPEN_MESSAGE )\n" );
+			int	who;
+			aMessage->FindInt32( "who", ( int32* ) &who );
 			ChatWindow *win;
 			// jeśli mamy już otwarte okno z tą osobą, przejdźmy do niego
-			if( (win = GetMesgWinForUser(kto)))
-				win->Activate();
-			else // a jeśli nie, tworzymy nowe :)
-			{
-				win = new ChatWindow(this, fWindow, kto);
-				fWinList->AddItem(win);
-				Osoba	*osoba;
-				if((osoba = GetOsobaForUser(kto)))
+			if( ( win = GetMesgWinForUser( who ) ) )
 				{
-					BMessage *newmessage = new BMessage(BEGG_UPDATE_STATUS);
-					newmessage->AddInt32("status", osoba->fStatus);
-					BMessenger(win).SendMessage(newmessage);
-					delete newmessage;
+				if( win->LockLooper() )
+					{
+					win->Activate();
+					win->UnlockLooper();
+					}
 				}
+			else // a jeśli nie, tworzymy nowe :)
+				{
+				win = new ChatWindow( this, iWindow, who );
+				iWinList->AddItem( win );
+				Person* person;
+				if( ( person = GetPersonForUser( who ) ) )
+					{
+					BMessage *newmessage = new BMessage( UPDATE_STATUS );
+					newmessage->AddInt32( "status", person->iStatus );
+					BMessenger( win ).SendMessage( newmessage );
+					delete newmessage;
+					}
 				win->Show();
+				}
+			break;
 			}
-			break;
-		}
-		case WYSLIJ_WIADOMOSC:
-		{
-			fprintf( stderr, "Siec::MessageReceived( WYSLIJ_WIADOMOSC )\n" );
-			int 			komu;
+			
+		case SEND_MESSAGE:
+			{
+			fprintf( stderr, "Network::MessageReceived( SEND_MESSAGE )\n" );
+			int 			who;
 			const char *	msg;
-			message->FindInt32("kto", (int32*)&komu);
-			message->FindString("msg", &msg);
-			SendMsg(komu, msg);
+			aMessage->FindInt32( "who", ( int32* ) &who );
+			aMessage->FindString( "msg", &msg );
+			SendMsg( who, msg );
 			break;
-		}
-		case ZAMKNIJ_WIADOMOSC:
-		{
-			fprintf( stderr, "Siec::MessageReceived( ZAMKNIJ_WIADOMOSC )\n" );
+			}
+			
+		case CLOSE_MESSAGE:
+			{
+			fprintf( stderr, "Network::MessageReceived( CLOSE_MESSAGE )\n" );
 			ChatWindow	*win;
-			message->FindPointer("win",(void**)&win);
-			fWinList->RemoveItem(win);
-			if(win->Lock())
+			aMessage->FindPointer( "win", ( void** ) &win );
+			iWinList->RemoveItem( win );
+			if( win->Lock() )
 				win->Quit();
-		}
+			}
+			
 		default:
-			BLooper::MessageReceived(message);
+			BLooper::MessageReceived( aMessage );
+		}
 	}
-}
 
-void Siec::GotWindow(MainWindow *window)
-{
-	fprintf( stderr, "Siec::GotWindow(%p)\n", window );
-	if((fWindow = window))
-		BMessenger(fWindow).SendMessage(BEGG_UPDATE_STATUS);
-}
+void Network::GotWindow( MainWindow* aWindow )
+	{
+	fprintf( stderr, "Network::GotWindow( %p )\n", aWindow );
+	iWindow = aWindow;
+//	if( ( iWindow = aWindow ) ) // or =
+//		BMessenger( iWindow ).SendMessage( UPDATE_STATUS );
+	}
 
 /* zwracamy wskaznik do okna jesli rozmowcy jesli z nim juz rozmawiamy */
-ChatWindow * Siec::GetMesgWinForUser(uin_t kto)
-{
-	fprintf( stderr, "Siec::GotMesgWinForUser(%d)\n", kto );
-	ChatWindow *win = NULL;
-	for(int i = 0; i < fWinList->CountItems(); i++)
+ChatWindow* Network::GetMesgWinForUser( uin_t aWho )
 	{
-		win = (ChatWindow*) fWinList->ItemAt(i);
-		if(win->fKto == kto)
+	fprintf( stderr, "Network::GotMesgWinForUser( %d )\n", aWho );
+	ChatWindow *win = NULL;
+	for( int i = 0; i < iWinList->CountItems(); i++ )
+		{
+		win = ( ChatWindow* ) iWinList->ItemAt( i );
+		if( win->iWho == aWho )
 			break;
-	}
+		}
 	
-	if(win && (win->fKto == kto))
+	if( win && (win->iWho == aWho ) )
 		return win;
 	
 	return NULL;
-}
+	}
 
 /* zwracamy wskaznik do osoby jesli z taka rozmawiamy */
-Osoba * Siec::GetOsobaForUser(uin_t kto)
-{
-	fprintf( stderr, "Siec::GotOsobaForUser(%d)\n", kto );
-	Osoba *osoba = NULL;
-	for(int i = 0; i < fWindow->fProfil->fUserlista->fLista->CountItems(); i++)
+Person* Network::GetPersonForUser( uin_t aWho )
 	{
-		osoba = (Osoba*) fWindow->fProfil->fUserlista->fLista->ItemAt(i);
-		if(osoba->fUIN == kto)
+	fprintf( stderr, "Network::GotPersonForUser( %d )\n", aWho );
+	Person* person = NULL;
+	for( int i = 0; i < iWindow->GetProfile()->GetUserlist()->GetList()->CountItems(); i++ )
+		{
+		person = ( Person* ) iWindow->GetProfile()->GetUserlist()->GetList()->ItemAt( i );
+		if( person->iUIN == aWho )
 			break;
-	}
-	if(osoba && (osoba->fUIN == kto))
-		return osoba;
+		}
+	if( person && ( person->iUIN == aWho ) )
+		return person;
 
 	return NULL;
-}
+	}
 
-void Siec::Login()
-{
-	fprintf( stderr, "Siec::Login()\n" );
-	/* ustawiamy status na "Łączenie" */
-	fStatus = BEGG_CONNECTING;
-	if(fWindow)
-		BMessenger(fWindow).SendMessage(BEGG_UPDATE_STATUS);
-	/* ustawiamy pola potrzebne do połączenia z gg */
-	memset(&fLoginParam, 0, sizeof(fLoginParam));
-	fLoginParam.uin = fProfil->fNumer;
-	fLoginParam.password = (char*)fProfil->fHaslo->String();
-	fLoginParam.async = 1;
-	fLoginParam.status = fProfil->fAutoStatus;
-//	gg_debug_level = ~0;
-	BMessenger(this).SendMessage(DODAJ_HANDLER);
-	if(fWindow)
-		BMessenger(fWindow).SendMessage(BEGG_UPDATE_STATUS);
-}
-
-void Siec::Login(int status)
-{
-	fprintf( stderr, "Siec::Login(%d)\n", status );
-	/* ustawiamy status na "Łączenie" */
-	fStatus = status;
-	if(fWindow)
-		BMessenger(fWindow).SendMessage(BEGG_UPDATE_STATUS);
-	/* ustawiamy pola potrzebne do połączenia z gg */
-	memset(&fLoginParam, 0, sizeof(fLoginParam));
-	fLoginParam.uin = fProfil->fNumer;
-	fLoginParam.password = (char*)fProfil->fHaslo->String();
-	fLoginParam.async = 1;
-	fLoginParam.status = fStatus;
-//	gg_debug_level = ~0;
-	BMessenger(this).SendMessage(DODAJ_HANDLER);
-	if(fWindow)
-		BMessenger(fWindow).SendMessage(BEGG_UPDATE_STATUS);
-}
-
-void Siec::Logout()
-{
-	fprintf( stderr, "Siec::Logout()\n" );
-	/* poprostu sie wylogowujemy */
-	if(fSesja)
+void Network::Login()
 	{
-		fStatus = GG_STATUS_NOT_AVAIL;
-		gg_logoff(fSesja);
-		gg_free_session(fSesja);
-		fSesja = NULL;
+	fprintf( stderr, "Network::Login()\n" );
+	/* ustawiamy status na "Łączenie" */
+	iStatus = BEGG_CONNECTING;
+//	if( iWindow )
+//		BMessenger( iWindow ).SendMessage( UPDATE_STATUS );
+	/* ustawiamy pola potrzebne do połączenia z gg */
+	memset( &iLoginParam, 0, sizeof( iLoginParam ) );
+	iLoginParam.uin = iProfile->iNumber;
+	iLoginParam.password = ( char* ) iProfile->iPassword->String();
+	iLoginParam.async = 1;
+	iLoginParam.status = iProfile->AutoStatus();
+//	gg_debug_level = ~0;
+	BMessenger( this ).SendMessage( ADD_HANDLER );
+	if( iWindow )
+		BMessenger( iWindow ).SendMessage( UPDATE_STATUS );
+	}
+
+void Network::Login( int status )
+	{
+	fprintf( stderr, "Network::Login(%d)\n", status );
+	/* ustawiamy status na "Łączenie" */
+	iStatus = status;
+//	if( iWindow )
+//		BMessenger( iWindow ).SendMessage( UPDATE_STATUS );
+	/* ustawiamy pola potrzebne do połączenia z gg */
+	memset( &iLoginParam, 0, sizeof( iLoginParam ) );
+	iLoginParam.uin = iProfile->iNumber;
+	iLoginParam.password = ( char* ) iProfile->iPassword->String();
+	iLoginParam.async = 1;
+	iLoginParam.status = iStatus;
+//	gg_debug_level = ~0;
+	BMessenger( this ).SendMessage( ADD_HANDLER );
+	if( iWindow )
+	 	BMessenger( iWindow ).SendMessage( UPDATE_STATUS );
+	}
+
+void Network::Logout()
+	{
+	fprintf( stderr, "Network::Logout()\n" );
+	/* poprostu sie wylogowujemy */
+	if( iSession )
+		{
+		iStatus = GG_STATUS_NOT_AVAIL;
+		gg_logoff( iSession );
+		gg_free_session( iSession );
+		iSession = NULL;
 		/* zatrzymujemy wszystkie handlery */
-		SiecHandler *handler;
-		for(int i=fHandlerList->CountItems(); i>0; i--)
-		{
-			handler = (SiecHandler*) fHandlerList->ItemAt(i-1);
-			RemoveHandler(handler->fFd);
-		}
-		/* uaktualniamy statusy ludzi z listy */
-		if(fWindow)
-		{
-			Osoba *osoba = NULL;
-			for(int i = 0; i < fWindow->fListaItems->CountItems(); i++)
+		NetworkHandler *handler;
+		for( int i = iHandlerList->CountItems(); i > 0; i-- )
 			{
-				osoba = (Osoba*) fWindow->fListaItems->ItemAt(i);
-				osoba->fStatus = GG_STATUS_NOT_AVAIL;
+			handler = ( NetworkHandler* ) iHandlerList->ItemAt( i - 1 );
+			RemoveHandler( handler->iFd );
+			}
+		/* uaktualniamy statusy ludzi z listy */
+		if( iWindow )
+			{
+			Person* p = NULL;
+			for( int i = 0; i < iWindow->ListItems()->CountItems(); i++ )
+				{
+				p = ( Person* ) iWindow->ListItems()->ItemAt( i );
+				p->iStatus = GG_STATUS_NOT_AVAIL;
 			}
 		
 			/* uaktualniamy liste */
-			if(fWindow->fListaView->LockLooper())
-			{
-				fWindow->fListaView->MakeEmpty();
-		 		fWindow->fListaView->UnlockLooper();
-		 	}
-			BMessenger(fWindow).SendMessage(BEGG_UPDATE_LISTY);
-		}
+			if( iWindow->ListView()->LockLooper() )
+				{
+				iWindow->ListView()->MakeEmpty();
+		 		iWindow->ListView()->UnlockLooper();
+		 		}
+			BMessenger( iWindow ).SendMessage( UPDATE_LIST );
+			}
 		
 		/* uaktualniamy status */
-		if(fWindow)
-			BMessenger(fWindow).SendMessage(BEGG_UPDATE_STATUS);
+		if( iWindow )
+			BMessenger( iWindow ).SendMessage( UPDATE_STATUS );
+		}
 	}
-}
 
 /* wysyłamy wiadomość */
-void Siec::SendMsg(uin_t komu, const char *wiadomosc)
-{
-	fprintf( stderr, "Siec::SendMsg()\n" );
-	if(fSesja)
+void Network::SendMsg( uin_t aWho, const char* aMessage )
 	{
-		if(gg_send_message(fSesja, GG_CLASS_CHAT, komu, (unsigned char*)wiadomosc) == -1)
-		{	
-			gg_free_session(fSesja);
-			perror("polaczenie zerwane");
-		}
+	fprintf( stderr, "Network::SendMsg()\n" );
+	if( iSession )
+		{
+		if( gg_send_message( iSession, GG_CLASS_CHAT, aWho, ( unsigned char* ) aMessage ) == -1 )
+			{	
+			gg_free_session( iSession );
+			perror( "Connection lost." );
+			}
 //		else
 //			fprintf(stderr,"Wysłałem wiadomość o treści %s do %d\n", komu, wiadomosc);
+		}
 	}
-}
 
-void Siec::GotMsg(uin_t odkogo, const char *msg)
-{
-	fprintf( stderr, "Siec::GotMsg()\n" );
+void Network::GotMsg( uin_t aWho, const char* aMessage )
+	{
+	fprintf( stderr, "Network::GotMsg()\n" );
 	/* sprawdzamy czy mamy aktualnie otwarte okno dla tej osoby :) */
-	ChatWindow	*win = NULL;
-	for( int i = 0; i < fWinList->CountItems(); i++)
-	{
-		win = (ChatWindow*) fWinList->ItemAt(i);
-		if( win->fKto == odkogo)
+	ChatWindow* win = NULL;
+	for( int i = 0; i < iWinList->CountItems(); i++ )
+		{
+		win = ( ChatWindow* ) iWinList->ItemAt( i );
+		if( win->iWho == aWho )
 			break;
-	}
-	if( win && ( win->fKto == odkogo ) )
-	{
+		}
+	if( win && ( win->iWho == aWho ) )
+		{
 //		win->Activate();
-	}
+		}
 	else
-	{
-		win = new ChatWindow(this, fWindow, odkogo);
-		fWinList->AddItem(win);
+		{
+		win = new ChatWindow( this, iWindow, aWho );
+		iWinList->AddItem( win );
 		win->Show();
-	}
+		}
 	/* i pokazujemy je :P */
-	BMessage	*	wiadomosc = new BMessage(POKAZ_WIADOMOSC);
-	wiadomosc->AddString("msg", msg);
-	BMessenger(win).SendMessage(wiadomosc);
+	BMessage* wiadomosc = new BMessage( SHOW_MESSAGE );
+	wiadomosc->AddString( "msg", aMessage );
+	BMessenger( win ).SendMessage( wiadomosc );
 	delete wiadomosc;
-}
-
-void Siec::AddHandler(int fd, int cond, void *data)
-{
-	fprintf(stderr, "Siec::AddHandler(fd=%d, cond=%d)\n", fd, cond );
-	SiecHandler * handler = new SiecHandler(this, fId, fd, cond, data);
-	fHandlerList->AddItem(handler);
-	handler->Run();
-}
-
-void Siec::RemoveHandler(int fd)
-{
-	fprintf( stderr, "Siec::RemoveHandler(fd=%d)\n", fd );
-	SiecHandler *handler = NULL;
-	for(int i=0; i<fHandlerList->CountItems();i++)
-	{
-		handler = (SiecHandler*) fHandlerList->ItemAt(i);
-		if(handler->fFd == fd)
-			break;
 	}
-	if(!handler || handler->fFd != fd)
+
+void Network::AddHandler( int fd, int cond, void* data )
+	{
+	fprintf( stderr, "Network::AddHandler( fd=%d, cond=%d )\n", fd, cond );
+	NetworkHandler* handler = new NetworkHandler( this, iId, fd, cond, data );
+	iHandlerList->AddItem( handler );
+	handler->Run();
+	}
+
+void Network::RemoveHandler( int fd )
+	{
+	fprintf( stderr, "Network::RemoveHandler( fd=%d )\n", fd );
+	NetworkHandler* handler = NULL;
+	for( int i = 0; i < iHandlerList->CountItems(); i++ )
+		{
+		handler = ( NetworkHandler* ) iHandlerList->ItemAt( i );
+		if( handler->iFd == fd )
+			break;
+		}
+	if( !handler || ( handler->iFd != fd ) )
 		return;
 	handler->Stop();
-	fHandlerList->RemoveItem(handler);
+	iHandlerList->RemoveItem( handler );
 	delete handler;
-}
+	}
+
+void Network::SetStatus( int aStatus )
+	{
+	iStatus = aStatus;
+	}
+
+struct gg_session* Network::Session() const
+	{
+	return iSession;
+	}

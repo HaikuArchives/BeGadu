@@ -14,276 +14,275 @@
 #include <String.h>
 #include "Msg.h"
 #include "Chat.h"
-#include "Siec.h"
+#include "Network.h"
 #include "Main.h"
-#include "Osoba.h"
+#include "Person.h"
 #include <libgadu.h>
 
 #define CHATWIN_RECT BRect(100,100,500,400)
-#define CHATWIN_NAME "Rozmowa z "
+#define CHATWIN_NAME ""
 
-ChatWindow::ChatWindow(Siec *siec, MainWindow *window, uin_t kto) : BWindow(CHATWIN_RECT, CHATWIN_NAME, B_FLOATING_WINDOW_LOOK, B_NORMAL_WINDOW_FEEL, B_NOT_ZOOMABLE)
-{
-	fSiec 	= siec;
-	fWindow	= window;
-	fKto	= kto;
-	SetSizeLimits(300,2000,200,2000);
+ChatWindow::ChatWindow( Network *aNetwork, MainWindow *aWindow, uin_t aWho )
+	: BWindow( CHATWIN_RECT, CHATWIN_NAME,
+			   B_FLOATING_WINDOW_LOOK, B_NORMAL_WINDOW_FEEL, B_NOT_ZOOMABLE )
+	{
+	iNetwork = aNetwork;
+	iWindow	= aWindow;
+	iWho = aWho;
+	SetSizeLimits( 300, 2000, 200, 2000 );
 	
 	/*
-		poprawiamy tytuł, sprawdzamy czy dany numer mamy na liscie, jesli tak to dajemy
-		fDisplay
+		we're fixing a title and checking that we have that number in our people list
+		if true, set to iDisplay
 	*/
-	Osoba *osoba;
-	BString tytul = Title();
-	BString *os = NULL;
-	for(int i = 0; i < fWindow->fProfil->fUserlista->fLista->CountItems(); i++)
-	{
-		osoba = (Osoba*) fWindow->fProfil->fUserlista->fLista->ItemAt(i);
-		if(kto == osoba->fUIN)
+	Person *person;
+	BString title = Title();
+	BString *pe = NULL;
+	for( int i = 0; i < iWindow->GetProfile()->GetUserlist()->GetList()->CountItems(); i++ )
 		{
-			os = osoba->fDisplay;
+		person = ( Person* ) iWindow->GetProfile()->GetUserlist()->GetList()->ItemAt( i );
+		if( aWho == person->iUIN )
+			{
+			pe = person->iDisplay;
 			break;
+			}
 		}
-	}
-	if( !os )
-	{
-		os = new BString();
-		os->SetTo("[Nieznajomy]");
-	}
+	if( !pe )
+		{
+		pe = new BString();
+		pe->SetTo( "[Nieznajomy]" );
+		}
 
-	tytul.Append(os->String());
-	SetTitle(tytul.String());
+	title.Append( pe->String() );
+	SetTitle( title.String());
 	
-	/* robimy defaultowe tło */
+	/* making a default background */
 	BRect r = Bounds();
-	BView *siakisView;
-	siakisView = new BView(r, "siakis view", B_FOLLOW_ALL, B_WILL_DRAW);
-	siakisView->SetViewColor(60,60,60);
-	AddChild(siakisView);
+	BView *someView;
+	someView = new BView( r, "some view", B_FOLLOW_ALL, B_WILL_DRAW );
+	someView->SetViewColor( 60, 60, 60 );
+	AddChild( someView );
 	
-	/* 'rozmowa' na bazie BTextView */
-	r = siakisView->Bounds();
-	r.InsetBy(10,10);
+	/* 'chat' at base of BTextView */
+	r = someView->Bounds();
+	r.InsetBy( 10, 10 );
 	r.right -= B_V_SCROLL_BAR_WIDTH;
 	r.bottom -= 25;
-	BRect tekstRect = BRect(5,5,r.Width() - 5, r.Height() - 5);
-	fRozmowa = new BTextView(r, "rozmowa view", tekstRect, B_FOLLOW_ALL, B_WILL_DRAW);
-	fRozmowa->MakeEditable(false);
-	fRozmowa->SetStylable(true);
-	BFont *font = new BFont(be_plain_font);
-	font->SetSize(15.0);
-	font->SetEncoding(B_ISO_8859_2);
-	fRozmowa->SetFontAndColor(font);
-	fScrollView = new BScrollView("scroll view", fRozmowa, B_FOLLOW_ALL, 0, false, true);
-	siakisView->AddChild(fScrollView);
-	fRozmowa->SetViewColor(70,70,70);	
-	/* pole do pisania treści wiadomości */
-	r = siakisView->Bounds();
-	r.InsetBy(10,10);
+	BRect textRect = BRect( 5, 5, r.Width() - 5, r.Height() - 5 );
+	iChat = new BTextView( r, "chat view", textRect, B_FOLLOW_ALL, B_WILL_DRAW );
+	iChat->MakeEditable( false );
+	iChat->SetStylable( true );
+	BFont *font = new BFont( be_plain_font );
+	font->SetSize( 15.0 );
+	font->SetEncoding( B_ISO_8859_2 );
+	iChat->SetFontAndColor( font );
+	iScrollView = new BScrollView( "scroll view", iChat, B_FOLLOW_ALL, 0, false, true );
+	someView->AddChild( iScrollView );
+	iChat->SetViewColor( 70, 70, 70 );	
+	/* new message edit box */
+	r = someView->Bounds();
+	r.InsetBy( 10, 10 );
 	r.top = r.bottom - 15;
-	fPowiedzControl = new BTextControl(r, "powiedz control", "", NULL, new BMessage(BEGG_WYSLIJ), B_FOLLOW_LEFT_RIGHT | B_FOLLOW_BOTTOM);
-	fPowiedzControl->MakeFocus(true);
+	iSayControl = new BTextControl( r, "say control", "", NULL, new BMessage( BEGG_SEND ), B_FOLLOW_LEFT_RIGHT | B_FOLLOW_BOTTOM );
+	iSayControl->MakeFocus( true );
 	float width, height;
-	fPowiedzControl->GetPreferredSize(&width, &height);
-	fPowiedzControl->SetDivider(width/2);
-	fPowiedzControl->SetFont(font);
-	siakisView->AddChild(fPowiedzControl);
-}
+	iSayControl->GetPreferredSize( &width, &height );
+	iSayControl->SetDivider( width / 2 );
+	iSayControl->SetFont( font );
+	someView->AddChild( iSayControl );
+	}
 
-void ChatWindow::MessageReceived(BMessage *message)
-{
-	switch(message->what)
+void ChatWindow::MessageReceived( BMessage* aMessage )
 	{
-		case POKAZ_WIADOMOSC:
+	switch( aMessage->what )
 		{
+		case SHOW_MESSAGE:
+			{
 			const char *msg;
-			message->FindString("msg", &msg);
-			time_t _teraz = time(NULL);
-			struct tm *teraz = localtime(&_teraz);
+			aMessage->FindString( "msg", &msg );
+			time_t _now = time( NULL );
+			struct tm *now = localtime( &_now );
 			BString *str = NULL;
 			BString *str2 = NULL;
 			char *string = NULL;
-			Osoba *osoba = NULL;
-			for(int i = 0; i < fWindow->fProfil->fUserlista->fLista->CountItems(); i++)
-			{
-				osoba = (Osoba*) fWindow->fProfil->fUserlista->fLista->ItemAt(i);
-				if(fKto == osoba->fUIN)
+			Person *person = NULL;
+			for( int i = 0; i < iWindow->GetProfile()->GetUserlist()->GetList()->CountItems(); i++ )
 				{
+				person = ( Person* ) iWindow->GetProfile()->GetUserlist()->GetList()->ItemAt( i );
+				if( iWho == person->iUIN )
+					{
 					str = new BString();
-					str->SetTo( osoba->fDisplay->String() );
+					str->SetTo( person->iDisplay->String() );
 					break;
+					}
 				}
-			}
 			if( !str )
-			{
+				{
 				str = new BString();
-				*str << (int32)fKto;
-			}
-			BFont *font = new BFont(be_plain_font);
-			font->SetSize(16.0);
-			font->SetEncoding(B_ISO_8859_2);
-			rgb_color zolty = {255,255,0,0};
-			rgb_color czerwony = {255,0,0,0};
-			rgb_color bialy = {255,255,255,0};
-			string = (char*)calloc(strlen("[00:00] "), 1);
-			sprintf(string, "[%02d:%02d] ", teraz->tm_hour, teraz->tm_min);
+				*str << ( int32 ) iWho;
+				}
+			BFont *font = new BFont( be_plain_font );
+			font->SetSize( 16.0 );
+			font->SetEncoding( B_ISO_8859_2 );
+			rgb_color yellow = { 255, 255, 0, 0 };
+			rgb_color red = { 255, 0, 0, 0 };
+			rgb_color white = { 255, 255, 255, 0 };
+			string = ( char* ) calloc( strlen( "[00:00] " ), 1 );
+			sprintf( string, "[%02d:%02d] ", now->tm_hour, now->tm_min);
 			str2 = new BString();
 			str2->SetTo( string );
-			free(string);
+			free( string );
 //			str2 << "[" << (int32)now->tm_hour << ":" << now->tm_min << "] ";
-			fRozmowa->SetFontAndColor(fRozmowa->TextLength(), fRozmowa->TextLength() + str2->Length(), font, B_FONT_ALL, &zolty);
-			fRozmowa->Insert(fRozmowa->TextLength(), str2->String(), str2->Length());
-			str->Append(": ");
+			iChat->SetFontAndColor( iChat->TextLength(), iChat->TextLength() + str2->Length(), font, B_FONT_ALL, &yellow );
+			iChat->Insert( iChat->TextLength(), str2->String(), str2->Length() );
+			str->Append( ": " );
 
-			fRozmowa->SetFontAndColor(fRozmowa->TextLength(), fRozmowa->TextLength() + str->Length(), font, B_FONT_ALL, &czerwony);
-			fRozmowa->Insert(fRozmowa->TextLength(), str->String(), str->Length());
+			iChat->SetFontAndColor( iChat->TextLength(), iChat->TextLength() + str->Length(), font, B_FONT_ALL, &red );
+			iChat->Insert( iChat->TextLength(), str->String(), str->Length() );
 
-			str2->SetTo(msg);
-			str2->Append("\n");
-			fRozmowa->SetFontAndColor(fRozmowa->TextLength(), fRozmowa->TextLength() + str2->Length(), font, B_FONT_ALL, &bialy);
-			fRozmowa->Insert(fRozmowa->TextLength(), str2->String(), str2->Length());
-			BScrollBar * scrollBar = fScrollView->ScrollBar(B_VERTICAL);
-			if(scrollBar->LockLooper())
-			{
+			str2->SetTo( msg );
+			str2->Append( "\n" );
+			iChat->SetFontAndColor( iChat->TextLength(), iChat->TextLength() + str2->Length(), font, B_FONT_ALL, &white );
+			iChat->Insert( iChat->TextLength(), str2->String(), str2->Length() );
+			BScrollBar * scrollBar = iScrollView->ScrollBar( B_VERTICAL );
+			if( scrollBar->LockLooper() )
+				{
 				float max,min;
-				scrollBar->GetRange(&min, &max);
-				scrollBar->SetValue(max);
+				scrollBar->GetRange( &min, &max );
+				scrollBar->SetValue( max );
 				scrollBar->UnlockLooper();
-			}
+				}
 			delete str;
 			delete str2;
 			break;			
-		}
-		case BEGG_WYSLIJ:
-		{
-			if(fPowiedzControl->LockLooper())
+			}
+			
+		case BEGG_SEND:
 			{
-				if(!*fPowiedzControl->Text())
+			if( iSayControl->LockLooper())
 				{
-					/* nic nie wysyłamy */
-					fPowiedzControl->UnlockLooper();
+				if( !(*iSayControl->Text() ) )
+					{
+					/* nothing to send */
+					iSayControl->UnlockLooper();
 					break;
-				}
+					}
 				
-				/* najpierw dodajemy wiadomośc lokalnie do rozmowy */
-				time_t _teraz = time(NULL);
-				struct tm * teraz = localtime(&_teraz);
+				/* first we add message into chat window */
+				time_t _now = time( NULL );
+				struct tm * now = localtime( &_now );
 				BString str;
 				BString str2;
 				char *string;
-				int id = fSiec->GetIdent();
+				int id = iNetwork->GetIdent();
 
-				BFont *font = new BFont(be_plain_font);
-				font->SetSize(16.0);
-				font->SetEncoding(B_ISO_8859_2);
-				rgb_color zolty = {255,255,0,0};
-				rgb_color zielony = {0,255,0,0};
-				rgb_color bialy = {255,255,255,0};
-				string = (char*)calloc(strlen("[00:00] "), 1);
-				sprintf(string, "[%02d:%02d] ", teraz->tm_hour, teraz->tm_min);
-				str2.SetTo(string);
-				free(string);
-				fRozmowa->SetFontAndColor(fRozmowa->TextLength(), fRozmowa->TextLength() + str2.Length(), font, B_FONT_ALL, &zolty);
-				fRozmowa->Insert(fRozmowa->TextLength(), str2.String(), str2.Length());
+				BFont *font = new BFont( be_plain_font );
+				font->SetSize( 16.0 );
+				font->SetEncoding( B_ISO_8859_2 );
+				rgb_color yellow = { 255, 255, 0, 0 };
+				rgb_color green = { 0, 255, 0, 0 };
+				rgb_color white = { 255, 255, 255, 0 };
+				string = ( char* ) calloc( strlen( "[00:00] " ), 1 );
+				sprintf( string, "[%02d:%02d] ", now->tm_hour, now->tm_min );
+				str2.SetTo( string );
+				free( string );
+				iChat->SetFontAndColor( iChat->TextLength(), iChat->TextLength() + str2.Length(), font, B_FONT_ALL, &yellow );
+				iChat->Insert( iChat->TextLength(), str2.String(), str2.Length() );
 
-				str.SetTo(fWindow->fProfil->fNazwaProfilu->String());
-				str.Append(": ");
-				fRozmowa->SetFontAndColor(fRozmowa->TextLength(), fRozmowa->TextLength() + str.Length(), font, B_FONT_ALL, &zielony);
-				fRozmowa->Insert(fRozmowa->TextLength(), str.String(), str.Length());
+				str.SetTo( iWindow->GetProfile()->iProfileName->String() );
+				str.Append( ": " );
+				iChat->SetFontAndColor( iChat->TextLength(), iChat->TextLength() + str.Length(), font, B_FONT_ALL, &green );
+				iChat->Insert( iChat->TextLength(), str.String(), str.Length() );
 
-				str2.SetTo(fPowiedzControl->Text());
-				str2.Append("\n");
-				fRozmowa->SetFontAndColor(fRozmowa->TextLength(), fRozmowa->TextLength() + str2.Length(), font, B_FONT_ALL, &bialy);
-				fRozmowa->Insert(fRozmowa->TextLength(), str2.String(), str2.Length());
+				str2.SetTo( iSayControl->Text() );
+				str2.Append( "\n" );
+				iChat->SetFontAndColor( iChat->TextLength(), iChat->TextLength() + str2.Length(), font, B_FONT_ALL, &white );
+				iChat->Insert( iChat->TextLength(), str2.String(), str2.Length() );
 
 //				string = (char*)calloc(strlen(" [00:00]\n%s\n") + 1 + fWindow->fProfil->fNazwaProfilu->Length() + strlen(fPowiedzControl->Text()), 1);
 //				sprintf(string, "%s [%02d:%02d]\n%s\n", fWindow->fProfil->fNazwaProfilu->String(), teraz->tm_hour, teraz->tm_min, fPowiedzControl->Text());
 //				fRozmowa->Insert(fRozmowa->TextLength(), string, strlen(string));
 //				free(string);
 				
-				/* przewiń na dół */
-				BScrollBar * scrollBar = fScrollView->ScrollBar(B_VERTICAL);
-				if(scrollBar->LockLooper())
-				{
+				/* scroll down */
+				BScrollBar * scrollBar = iScrollView->ScrollBar( B_VERTICAL );
+				if( scrollBar->LockLooper() )
+					{
 					float max,min;
-					scrollBar->GetRange(&min, &max);
-					scrollBar->SetValue(max);
+					scrollBar->GetRange( &min, &max );
+					scrollBar->SetValue( max );
 					scrollBar->UnlockLooper();
+					}
+				
+				/* sending... */
+				BMessage *newmessage;
+				newmessage = new BMessage( SEND_MESSAGE );
+				newmessage->AddInt32( "who", iWho );
+				newmessage->AddString( "msg", iSayControl->Text());
+				BMessenger( iNetwork ).SendMessage( newmessage );
+				delete newmessage;
+				/* clearing edit box */
+				iSayControl->SetText( NULL );
+				iSayControl->UnlockLooper();
 				}
-				
-				/* no i w końcu wysyłamy :) */
-				BMessage *nowawiadomosc;
-				nowawiadomosc = new BMessage(WYSLIJ_WIADOMOSC);
-				nowawiadomosc->AddInt32("kto", fKto);
-				nowawiadomosc->AddString("msg",fPowiedzControl->Text());
-				BMessenger(fSiec).SendMessage(nowawiadomosc);
-				
-				/* wyczyśćmy pole tekstu */
-				fPowiedzControl->SetText(NULL);
-				fPowiedzControl->UnlockLooper();
+			break;
 			}
-			break;
-		}
-		case BEGG_ABOUT:
-		{
-			BMessenger(fWindow).SendMessage(BEGG_ABOUT);
-			break;
-		}
+			
 		default:
-			BWindow::MessageReceived(message);
+			BWindow::MessageReceived( aMessage );
 			break;
+		}
 	}
-}
 
 bool ChatWindow::QuitRequested()
-{
-	BMessage *mesg = new BMessage(ZAMKNIJ_WIADOMOSC);
-	mesg->AddPointer("win",this);
-	BMessenger(fSiec).SendMessage(mesg);
+	{
+	BMessage *mesg = new BMessage( CLOSE_MESSAGE );
+	mesg->AddPointer( "win", this );
+	BMessenger( iNetwork ).SendMessage( mesg );
 	delete mesg;
 	return false;
-}
-
-void ChatWindow::FrameResized(float width, float height)
-{
-	BWindow::FrameResized(width,height);
-	BRect	r = fRozmowa->Bounds();
-	r.InsetBy(10,10);
-	fRozmowa->SetTextRect(r);
-	BScrollBar *scrollBar = fScrollView->ScrollBar(B_VERTICAL);
-	if(scrollBar->LockLooper())
-	{
-		float min, max;
-		scrollBar->GetRange(&min,&max);
-		scrollBar->SetValue(max);
-		scrollBar->UnlockLooper();
 	}
-}
+
+void ChatWindow::FrameResized( float width, float height )
+	{
+	BWindow::FrameResized( width, height );
+	BRect	r = iChat->Bounds();
+	r.InsetBy( 10, 10 );
+	iChat->SetTextRect( r );
+	BScrollBar *scrollBar = iScrollView->ScrollBar( B_VERTICAL );
+	if( scrollBar->LockLooper() )
+		{
+		float min, max;
+		scrollBar->GetRange( &min, &max );
+		scrollBar->SetValue( max );
+		scrollBar->UnlockLooper();
+		}
+	}
 
 void ChatWindow::Show()
-{
-	/* wyciągamy okno na wierzch */
+	{
+	/* focusing window */
 	BPoint point;
-	point.x = fWindow->Frame().left + 
-				(fWindow->Frame().Width() - Frame().Width())/2;
-	point.y = fWindow->Frame().top +
-				(fWindow->Frame().Height() - Frame().Height())/2;
+	point.x = iWindow->Frame().left + 
+				( iWindow->Frame().Width() - Frame().Width() ) / 2;
+	point.y = iWindow->Frame().top +
+				( iWindow->Frame().Height() - Frame().Height() ) / 2;
 	BScreen _screen;
 	BRect screen = _screen.Frame();
-	point.x = MIN(point.x, screen.right - Frame().Width());
-	point.x = MAX(point.x, screen.left);
-	point.y = MIN(point.y, screen.bottom - Frame().Height());
-	point.y = MAX(point.y, screen.top);
-	MoveTo(point);
-	fPowiedzControl->MakeFocus();
+	point.x = MIN( point.x, screen.right - Frame().Width() );
+	point.x = MAX( point.x, screen.left );
+	point.y = MIN( point.y, screen.bottom - Frame().Height() );
+	point.y = MAX( point.y, screen.top );
+	MoveTo( point );
+	iSayControl->MakeFocus();
 	BWindow::Show();
-}
-
-void ChatWindow::WindowActivated(bool activated)
-{
-	if(activated)
-	{
-		fPowiedzControl->MakeFocus(true);
 	}
-	BWindow::WindowActivated(activated);
-}
+
+void ChatWindow::WindowActivated( bool aActivated )
+	{
+	if( aActivated )
+		{
+		iSayControl->MakeFocus( true );
+		}
+	BWindow::WindowActivated( aActivated );
+	}

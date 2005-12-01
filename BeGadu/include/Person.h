@@ -1,10 +1,10 @@
 /*
  * ============================================================================
- *  Name     : Person from Person.h
- *  Project  : BeGadu
- *  Authors  : 
- *		Artur Wyszynski <artur.wyszynski@blstream.pl>
- *  Description :
+ *  Nazwa    : Osoba z Osoba.h
+ *  Projekt  : BeGadu
+ *  Authorzy : 
+ *		Artur Wyszynski <artur.wyszynski@bellstream.pl>
+ *  Opis:
  *		Klasy zwiazane z obsluga userlist i osob
  *  Version  : 1.2
  * ============================================================================
@@ -30,49 +30,27 @@
 
 #include <libgadu.h>
 
-/* klasa pojedynczej osoby */
 class Person
 	{
 	public:
-		Person();
-		
-		// setters & getters
-		const BString GetName() const;
-		const BString GetSurname() const;
-		const BString GetNick() const;
-		const BString GetDisplay() const;
-		const BString GetPhone() const;
-		const BString GetEmail() const;
-		uin_t GetUIN();
-		int GetStatus();
-		const BString GetDescription() const;
-		struct in_addr GetIP();
-		unsigned short GetPort();
-		int GetProtocol();
-		time_t GetLastSeen();
-		const BString GetLastDescription() const;
-		struct in_addr GetLastIp();
-		unsigned short GetLastPort();
-		int GetImageSize();
-	
-	private:
-		BString	* iName;
-		BString	* iSurname;
-		BString	* iNick;
-		BString	* iDisplay;
-		BString	* iPhone;
-		BString	* iEmail;
-		uin_t iUIN;
-		int	iStatus;
-		BString	* iDescription;
-		struct in_addr iIP;
-		unsigned short iPort;
-		int	iProtocol;
-		time_t iLastSeen;
-		BString * iLastDescr;
-		struct in_addr iLastIP;
-		unsigned short iLastPort;
-		int iImgSize;
+							Person();
+		BString			*	iName;					/* Imię */
+		BString			*	iSurname;				/* Nazwisko */
+		BString			*	iNick;					/* Pseudonim */
+		BString			*	iDisplay;				/* Wyświetl jako */
+		BString			*	iMobile;				/* Telefon */
+		BString			*	iEmail;					/* E-Mail */
+		uin_t				iUIN;					/* Numer GG */
+		int					iStatus;				/* Aktualny status */
+		BString			*	iDescription;					/* Aktualny opis */
+		struct in_addr		iIP;					/* Adres IP osoby */
+		unsigned short		iPort;					/* Port osoby */
+		int					iProtocol;				/* Wersja protokołu */
+		time_t				iLastSeen;				/* Jeśli jest niedost./ukryty, to od kiedy */
+		BString			*	iLastDescr;				/* J.w. ostatni opis */
+		struct in_addr		iLastIP;				/* J.w. ostatni IP */
+		unsigned short		iLastPort;				/* J.w. ostatni port */
+		int 				iImgSize;				/* Maksymalny rozmiar obrazków */
 	};
 
 class List : public BList
@@ -80,7 +58,7 @@ class List : public BList
 	public:
 		List( int aSize );
 		bool IsValid();
-		void SetValid( bool aValid );
+		void SetValid( bool aIsValid );
 	
 	private:
 		bool iIsValid;
@@ -90,71 +68,68 @@ class List : public BList
 class Userlist
 	{
 	public:
-		Userlist();
-		void Add( uin_t aUIN,
-				  BString *aName,
-				  BString *aSurname,
-				  BString *aNick,
-				  BString *aDisplay,
-				  BString *aPhone,
-				  BString *aEmail ); 
-		void Remove( Person *aPerson );
-		void Replace( Person *aPerson );
-		void Import( struct gg_session *aSession, List *aList );
-		void Export( struct gg_session *aSession, List *aList );
-		bool IsValid();
-		void SetValid( bool aValid );
-		Person * Find( uin_t aUIN );
-		Person * FindMobile( const char *aPhone );
-		int	* Set( const char *aContacts );
-		const List GetList() const;
-		
-	private:
-		int	Read( BString *aName );
-		void ClearStatus( Person *aPerson );
-		void Send( struct gg_session *aSession );
-		char * Dump();
-		void Clear();
-		const char * FormatUser( uin_t aUIN );
-		char * ReadLine( FILE *aFile );
-		List * iList;
-		bool iIsValid;
+						Userlist();						 /* Konstruktor */
+		int				Read( BString* aName );			 /* Ładuje userliste z pliku */
+		int				Write( BString* aName );			 /* Zapisuje ją do pliku */
+		void			ClearStatus( Person* aPerson );		 /* Czyści status danej osobie */
+		void			Add( uin_t aNumber,
+							 BString* aName,
+							 BString* aSurname,
+							 BString* aNick,
+							 BString* aDisplay,
+							 BString* aMobile,
+							 BString* aEmail ); 
+		void			Remove( Person* aPerson );			 /* Usuwa osobę */
+		void			Replace( Person* aPerson );			 /* Podmienia osobę */
+		void			Import( struct gg_session* aSession, List* aList );
+														 /* Importuje z servera */
+		void			Export( struct gg_session* aSession, List* aList );
+														 /* Eksportuje na server */
+		void			Send( struct gg_session* aSession );	 /* Wysyła liste na server */
+		bool			IsValid();
+		void			SetValid( bool aValid );
+		Person		*	Find( uin_t aNumber );					 /* Szuka osoby */
+		Person		*	FindMobile( const char* aMobile );	 /* Szuka osoby po telefonie */
+		char		*	Dump();							 /* Zrzuca */
+		void			Clear();						 /* Czyści */
+		int			*	Set( const char* aContacts ); 		 /* Ustawia */
+		const char 	*	FormatUser( uin_t aUIN );			 /* Formatuje */
+		char 		*	ReadLine( FILE* aFile );				 /* Wczytuje/zwraca linijke tekstu z pliku */
+		List		*	GetList() const;
+				
+		List		*	iList;
+		bool			iIsValid;
 	};
 
 class Profile
 	{
 	public:
-		Profile();
-		void Load( BString *aProfile );
-		void Save();
-		void SetUIN( uin_t aUIN );
-		uin_t GetUIN();
-		void SetPassword( BString *aPassword );
-		const BString GetPassword() const;
-		void SetProfileName( BString *aName );
-		const BString GetProfileName() const;
-		void SetRect( BRect aRect );
-		const BRect GetRect() const;
-		void SetDescription( BString *aDescription );
-		const BString GetDescription() const;
-		const Userlist GetUserlist() const;
-		int GetAutoStatus();
-		bool NeedImport();
-
-	private:
-		Userlist * iUserlist;
-		BRect iRect;
-		uin_t iUIN;
-		BString	* iPassword;
-		int	iAutoStatus;
-		BString	* iName;
-		BString * iSurname;
-		BString * iNick;
-		BString	* iProfileName;
-		BString	* iPhone;
-		BString	* iEmail;
-		BString	* iDescription;
-		bool iNeedImport;
+								Profile();
+		void					Load( BString* aProfile );
+		void					Save();
+		void					SetUIN( uin_t aNumber );
+		void					SetPass( BString* aPassword );
+		void					SetName( BString* aName );
+		void 					SetRect( BRect aRect );
+		void					SetDesc( BString* aDescription );
+		Userlist			*	GetUserlist() const;
+		BString				*	ProfileName() const;
+		int						AutoStatus();
+		
+		Userlist			*	iUserlist;
+		BRect					iRect;
+		uin_t					iNumber;
+		BString				*	iPassword;
+		int						iAutoStatus;
+		BString				*	iName;
+		BString				*	iSurname;
+		BString				*	iNick;
+		BString				*	iProfileName;
+		BString				*	iMobile;
+		BString				*	iEmail;
+		BString				*	iDescription;
+		bool					iNeedImport;
 	};
 
-#endif /* __BEGADU_PERSON_H__ */
+
+#endif /* __BEGADU_OSOBA_H__ */

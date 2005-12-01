@@ -131,20 +131,7 @@ BBitmap* LoadBMP(char* filename)
 
 BBitmap *LoadGFX(const char *filename)
 {
-	BBitmap *bitmap = NULL;
-	bitmap = BTranslationUtils::GetBitmap(filename);
-	if( !bitmap )
-	{
-		fprintf( stderr, "!bitmap\n" );
-		return NULL;
-	}
-	if( bitmap->InitCheck() != B_OK )
-	{
-		fprintf( stderr, "bitmap->InitCheck() != B_OK \n" );
-		return NULL;
-	}
-	fprintf( stderr, "return bitmap (%p)\n", bitmap );
-	return bitmap;
+	return BTranslationUtils::GetBitmap(filename);
 }
 	
 BitmapView::BitmapView( BRect frame, const char *name, BResources *res )

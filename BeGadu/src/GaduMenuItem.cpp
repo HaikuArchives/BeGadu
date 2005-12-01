@@ -32,7 +32,8 @@ GaduMenuItem::GaduMenuItem(  BBitmap *aIcon, const char *aLabel, BMessage *aMess
 
 GaduMenuItem::~GaduMenuItem()
 {
-//	delete iIcon;
+	//delete iIcon;
+	delete iLabel;
 }
 
 void GaduMenuItem::DrawContent()

@@ -18,13 +18,13 @@
 #include <TextView.h>
 
 class DebugWindow : public BWindow
-{
+	{
 	private:
 		BTextView	*dview;
 	public:
 		DebugWindow();
 		void AddLog(char *entry);
 		virtual void MessageReceived(BMessage *message);
-};
+	};
 
 #endif /* __BEGADU_DEBUG_H__ */

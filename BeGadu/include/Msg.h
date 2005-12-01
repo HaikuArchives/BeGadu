@@ -13,49 +13,53 @@
 #ifndef __BEGADU_MSG_H__
 #define __BEGADU_MSG_H__
 
-/* wiadomości od libgadu */
-#define MAM_WIADOMOSC		'mawi'
-#define MAM_LUDZI			'malu'
-#define DODAJ_HANDLER		'doha'
-#define USUN_HANDLER		'usha'
+/* messages from libgadu */
+#define GOT_MESSAGE				'gome'
+#define GOT_PEOPLE				'gope'
+#define ADD_HANDLER				'adha'
+#define DEL_HANDLER				'deha'
 
-/* wiadomości do interfejsu */
-#define BEGG_UPDATE_STATUS	'upst'
-#define BEGG_UPDATE_LISTY	'upli'
-#define POKAZ_WIADOMOSC		'powi'
+/* messages to interface */
+#define UPDATE_STATUS			'upst'
+#define UPDATE_LIST				'upli'
+#define SHOW_MESSAGE			'shme'
 
-/* wiadomości z interfejsu */
-#define LOGIN				'logi'
-#define LOGOUT				'logo'
-#define DODAJ_OSOBE			'doos'
-#define USUN_OSOBE			'usos'
-#define OTWORZ_WIADOMOSC	'otwi'
-#define WYSLIJ_WIADOMOSC	'wywi'
-#define ZAMKNIJ_WIADOMOSC	'zawi'
+/* messages from interface */
+#define DO_LOGIN				'logi'
+#define DO_LOGOUT				'logo'
+#define ADD_PERSON				'adpe'
+#define DEL_PERSON				'depe'
+#define OPEN_MESSAGE			'opme'
+#define SEND_MESSAGE			'seme'
+#define CLOSE_MESSAGE			'clme'
 
-/* wiadomości lokalne interfejsu */
-#define BEGG_OPCJE			'beop'
-#define BEGG_ABOUT			'beab'
-#define BEGG_OSOBA_ZAZN		'osza'
-#define	BEGG_OSOBA_OTRO		'osor'
-#define BEGG_WYSLIJ			'bewy'
-#define SET_AVAIL			'sava'
-#define SET_BRB				'sbrb'
-#define	SET_INVIS			'sinv'
-#define SET_NOT_AVAIL		'snav'
-#define SET_DESCRIPTION		'sdes'
-#define BEGG_IMPORT_LIST	'imli'
-#define BEGG_EXPORT_LIST	'exli'
-#define REMOVE_FROM_DESKBAR 'rfds'
+/* local messages from interface */
+#define BEGG_PREFERENCES		'bepe'
+#define BEGG_ABOUT				'beab'
+#define BEGG_PERSON_SELECTED	'pese'
+#define	BEGG_PERSON_ACTION		'peac'
+#define BEGG_SEND				'bese'
+#define SET_AVAIL				'sava'
+#define SET_BRB					'sbrb'
+#define	SET_INVIS				'sinv'
+#define SET_NOT_AVAIL			'snav'
+#define SET_DESCRIPTION			'sdes'
+#define BEGG_IMPORT_LIST		'imli'
+#define BEGG_EXPORT_LIST		'exli'
+#define BEGG_QUIT				'bggq'
 
-/* użyteczne :P */
+/* misc */
 #define BEGG_CONNECTING		1234
-#define OPCJE_OK			'opok'
-#define OPCJE_ANULUJ		'opan'
+#define PREFERENCES_OK		'peok'
+#define PREFERENCES_CANCEL	'peca'
 #define PROFILE_CREATED		'prcr'
 #define OPEN_PROFILE_WIZARD 'oppw'
 #define CONFIG_OK			'cfok'
-#define ONLINE_SOUND		"BeGadu zmiana stanu"
-#define MESSAGE_SOUND		"BeGadu nowa rozmowa"
+#define ONLINE_SOUND		"BeGadu state changed"
+#define MESSAGE_SOUND		"BeGadu new message"
+#define SHOW_MAIN_WINDOW	'bsmw'
+#define BGDESKBAR_CHSTATE	'chst'
+#define ADD_MESSENGER		'adme'
+#define DEL_MESSENGER		'deme'
 
 #endif /* __BEGADU_MSG_H__ */
