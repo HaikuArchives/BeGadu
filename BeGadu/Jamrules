@@ -4,8 +4,8 @@
 # http://begadu.sf.net
 #
 
-WERSJA = 20050613 ;
-C++FLAGS += -g -I/boot/home/config/include -DDEBUG -DWERSJA=\\\"$(WERSJA)\\\" -I./include -Wno-multichar -O3 ;
+WERSJA = 20051201 ;
+C++FLAGS += -g -I/boot/home/config/include -I./include -DDEBUG -DWERSJA=\\\"$(WERSJA)\\\"  -Wno-multichar -DZETA -O0 ;
 CCFLAGS = $(C++FLAGS) ;
 
 # po zlinkowaniu programu, dodaj resy

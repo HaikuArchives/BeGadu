@@ -1,0 +1,90 @@
+# Localization file for Zeta BeGadu [plPL]
+
+# BeGadu.cpp
+"Loading configuration from %s\n"					"Ładuję ustawienia z %s\n"
+"First run, starting Profile Wizard...\n"			"Pierwsze uruchomienie, startuje Profile Wizard...\n"
+"Configuration OK.\n"								"Konfiguracja OK.\n"
+"Setting last profile to %s\n"						"Ustawiam ostatni profil na %s\n"
+"Last profile %s\n"									"Ostatni profil %s\n"
+"Saving configuration to %s\n"						"Zapisuje konfiguracje do %s\n"
+"Can't find BeGadu running: %s\n"					"Nie znalazłem uruchomionego BeGadu: %s\n"
+"Can't put BeGadu into Deskbar: %s\n"				"Nie mogłem umieścić BeGadu na Deskbarze: %s\n"
+
+# BGDeskbar.cpp
+"BGDeskbar: Found running BeGadu...\n"				"BGDeskbar: Znalazłem uruchomione BeGadu...\n"
+"BGDeskbar: BeGadu not runned, launching it...\n"	"BGDeskbar: BeGadu nie uruchomione, odpalam je...\n"
+
+"Availble"											"Dostępny"
+"Be right back"										"Zaraz wracam"
+"Invisible"											"Niewidoczny"
+"Not availble"										"Niedostępny"
+"Change description"								"Zmień opis"
+"About BeGadu"										"O BeGadu"
+"Exit"												"Zakończ"
+"Can't find 'iStatus' in message...\n"				"Nie znalazłem 'iStatus' w BMessage...\n"
+
+# Chat.cpp
+"[Stranger]"										"[Nieznajomy]"
+
+# Main.cpp
+"Menu"												"Menu"
+"Profiles"											"Profile"
+"Userlist"											"Lista"
+"Import"											"Importuj"
+"Export"											"Eksportuj"
+"Preferences"										"Ustawienia"
+"About.."											"O programie.."
+"Exit"												"Zakończ"
+"Availble"											"Dostępny"
+"Be right back"										"Zaraz wracam"
+"Invisible"											"Niewidoczny"
+"Not availble"										"Niedostępny"
+"Description.."										"Z opisem.."
+"Status:"											"Status:"
+"Profile %s loaded.\n"								"Profil %s załadowany.\n"
+"Userlist"											"Lista"
+"To import/export userlist You must be connected"	"Musisz być zalogowany by zaimportować/wyeksportować listę"
+"Ok"												"Ok"
+
+# NetworkHandler.cpp
+"NetworkHandler=> Checking userlist... "			"NetworkHandler=> Sprawdzam listę... "
+"need import.\n"									"potrzeba importu.\n"
+"Ok.\n"												"Ok.\n"
+"Sending userlist..."								"Wysyłam listę..."
+"Ok.\n"												"Ok.\n"
+"Userlist"											"Lista"
+"Userlist has been successfuly imported"			"Zaimportowano listę kontaktów"
+"Ok"												"Ok"
+
+# Person.cpp
+"Loading %s profile...\n"							"Ładuję profil %s...\n"
+"Saving %s profile...\n"							"Zapisuje profil %s...\n"
+
+# Preferences.cpp
+"Preferences"										"Ustawienia"
+"Number GG:"										"Numer GG:"
+"Password:"											"Hasło:"
+"Ok"												"Ok"
+"Cancel"											"Anuluj"
+
+# ProfileWizard.cpp
+"Profile Wizard"									"Kreator Profilu"
+"Welcome in Profile Wizard\n"						"Witaj w Kreatorze Profilu\n"
+"\n\nThis wizard helps You configure your existing account "	"\n\nTen kreator pomoże Ci skonfigurować istniejące konto "
+"on GaduGadu server or let You create a new one.\n\n"			"na serwerze GaduGadu lub stworzyć nowe.\n\n"
+
+"To continue, press "								"By kontynuować, wciśnij "
+"Next."												"Dalej."
+"Cancel"											"Anuluj"
+"Back"												"Wróć"
+"Next"												"Dalej"
+"Finish"											"Zakończ"
+"What you want to do ?"								"Co chcesz zrobić ?"
+"Configure an existing account"						"Skonfigurować istniejące konto"
+"Create a new one (not implemented)"				"Stworzyć nowe"
+"Profile name:"										"Nazwa profilu:"
+"New"												"Nowy"
+"Number: "											"Numer: "
+"Password: "										"Hasło: "
+"Sorry, but BeGadu needs at least one account configured"	"BeGadu potrzebuję przynajmniej jedno konto skonfigurowane by działać"
+"Ok"												"Ok"

@@ -1,0 +1,88 @@
+# Localization file for Zeta BeGadu [enUS]
+
+# BeGadu.cpp
+"Loading configuration from %s\n"
+"First run, starting Profile Wizard...\n"
+"Configuration OK.\n"
+"Setting last profile to %s\n"
+"Last profile %s\n"
+"Saving configuration to %s\n"
+"Can't find BeGadu running: %s\n"
+"Can't put BeGadu into Deskbar: %s\n"
+
+# BGDeskbar.cpp
+"BGDeskbar: Found running BeGadu...\n"
+"BGDeskbar: BeGadu not runned, launching it...\n"
+"Availble"
+"Be right back"
+"Invisible"
+"Not availble"
+"Change description"
+"About BeGadu"
+"Exit"
+"Can't find 'iStatus' in message...\n"
+
+# Chat.cpp
+"[Stranger]"
+
+# Main.cpp
+"Menu"
+"Profiles"
+"Userlist"
+"Import"
+"Export"
+"Preferences"
+"About.."
+"Exit"
+"Availble"
+"Be right back"
+"Invisible"
+"Not availble"
+"Description.."
+"Status:"
+"Profile %s loaded.\n"
+"Userlist"
+"To import/export userlist You must be connected"
+"Ok"
+
+# NetworkHandler.cpp
+"NetworkHandler=> Checking userlist... "
+"need import.\n"
+"Ok.\n"
+"Sending userlist..."
+"Ok.\n"
+"Userlist"
+"Userlist has been successfuly imported"
+"Ok"
+
+# Person.cpp
+"Loading %s profile...\n"
+"Saving %s profile...\n"
+
+# Preferences.cpp
+"Preferences"
+"Number GG:"
+"Password:"
+"Ok"
+"Cancel"
+
+# ProfileWizard.cpp
+"Profile Wizard"
+"Welcome in Profile Wizard\n"
+"\n\nThis wizard helps You configure your existing account "
+"on GaduGadu server or let You create a new one.\n\n"
+"To continue, press "
+"Next."
+"Cancel"
+"Back"
+"Next"
+"Finish"
+"What you want to do ?"
+"Configure an existing account"
+"Create a new one (not implemented)"
+"Profile name:"
+"New"
+"Number: "
+"Password: "
+"Sorry, but BeGadu needs at least one account configured"
+"Ok"

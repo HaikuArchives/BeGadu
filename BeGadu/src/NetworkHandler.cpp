@@ -5,6 +5,7 @@
 */
 
 #include <OS.h>
+#include <Application.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/socket.h>
@@ -14,6 +15,7 @@
 #include <OutlineListView.h>
 #include <String.h>
 #include <Roster.h>
+#include <Path.h>
 
 #include "Main.h"
 #include "Msg.h"
@@ -23,6 +25,12 @@
 #include "GaduListItem.h"
 
 #include <libgadu.h>
+
+#ifdef ZETA
+#include <locale/Locale.h>
+#else
+#define _T(str) (str)
+#endif
 
 static time_t 	curTime = 0;
 static time_t 	pingTimer = 0;
@@ -103,6 +111,24 @@ NetworkHandler::NetworkHandler( Network* aNetwork, int id, int fd, int cond, voi
 	iFd		= fd;
 	iCond	= cond;
 	iData	= data;
+	
+#ifdef ZETA
+	app_info appinfo;
+	be_app->GetAppInfo( &appinfo );
+	BPath localization;
+	BEntry entryloc( &appinfo.ref, true );
+	entryloc.GetPath( &localization );
+	localization.GetParent( &localization );
+	localization.Append( "Language/Dictionaries/BeGadu" );
+	BString localization_string;
+	if( localization.InitCheck() != B_OK )
+		localization_string.SetTo( "Language/Dictionaries/BeGadu" );
+	else
+		localization_string.SetTo( localization.Path() );
+	fprintf( stderr, localization_string.String() );
+	be_locale.LoadLanguageFile( localization_string.String() );
+#endif
+
 	}
 
 void NetworkHandler::Run()
@@ -188,17 +214,17 @@ void NetworkHandler::HandleEvent( struct gg_event *event )
 void NetworkHandler::HandleEventConnected( struct gg_event *event )
 	{
 	fprintf( stderr, "NetworkHandler::HandleEventConnected()\n" );
-	fprintf( stderr, "NetworkHandler=> Checking userlist... " );
+	fprintf( stderr, _T("NetworkHandler=> Checking userlist... ") );
 	if( iNetwork->iWindow->GetProfile()->GetUserlist()->IsValid() == false ||
 		iNetwork->iWindow->GetProfile()->iNeedImport == true )
 		{
-		fprintf( stderr, "need import.\n");
+		fprintf( stderr, _T("need import.\n") );
 		iNetwork->iWindow->GetProfile()->GetUserlist()->Import( iNetwork->Session(), iNetwork->iWindow->GetProfile()->GetUserlist()->GetList() );
 		iNetwork->iWindow->GetProfile()->iNeedImport = false;
 		}
 	else
 		{
-		fprintf( stderr, "Ok.\n");
+		fprintf( stderr, _T("Ok.\n") );
 		iNetwork->iWindow->GetProfile()->GetUserlist()->Send( iNetwork->Session() );
 		}
 	BMessenger( iNetwork->iWindow ).SendMessage( UPDATE_STATUS );
@@ -261,13 +287,13 @@ void NetworkHandler::HandleEventUserlist( struct gg_event *event )
 				}
 			iNetwork->iWindow->ListItems()->MakeEmpty();
 			userlist->Set( iNetwork->iEvent->event.userlist.reply );
-			fprintf( stderr, "sending userlist...\n" );
+			fprintf( stderr, "Sending userlist..." );
 			userlist->Send( iNetwork->Session() );
-			fprintf( stderr, "sent\n" );
+			fprintf( stderr, "Ok.\n" );
 			BMessenger( iNetwork->iWindow ).SendMessage( UPDATE_LIST );
-			BAlert* alert = new BAlert( "Lista",
-										"Lista kontaktow zostala zaladowana z servera",
-										"OK" );
+			BAlert* alert = new BAlert( _T("Userlist"),
+										_T("Userlist has been successfuly imported"),
+										_T("Ok") );
 			alert->Go();
 			}
 		}

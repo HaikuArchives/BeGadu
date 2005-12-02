@@ -4,20 +4,32 @@
 	Homepage: http://gadu.beos.pl
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <OS.h>
+#include <Application.h>
+#include <Path.h>
 #include <TextControl.h>
 #include <ScrollView.h>
 #include <TextView.h>
 #include <Screen.h>
 #include <String.h>
+#include <Roster.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "Msg.h"
 #include "Chat.h"
 #include "Network.h"
 #include "Main.h"
 #include "Person.h"
+
 #include <libgadu.h>
+
+#ifdef ZETA
+#include <locale/Locale.h>
+#else
+#define _T(str) (str)
+#endif
 
 #define CHATWIN_RECT BRect(100,100,500,400)
 #define CHATWIN_NAME ""
@@ -26,6 +38,24 @@ ChatWindow::ChatWindow( Network *aNetwork, MainWindow *aWindow, uin_t aWho )
 	: BWindow( CHATWIN_RECT, CHATWIN_NAME,
 			   B_FLOATING_WINDOW_LOOK, B_NORMAL_WINDOW_FEEL, B_NOT_ZOOMABLE )
 	{
+
+#ifdef ZETA
+	app_info appinfo;
+	be_app->GetAppInfo( &appinfo );
+	BPath localization;
+	BEntry entryloc( &appinfo.ref, true );
+	entryloc.GetPath( &localization );
+	localization.GetParent( &localization );
+	localization.Append( "Language/Dictionaries/BeGadu" );
+	BString localization_string;
+	if( localization.InitCheck() != B_OK )
+		localization_string.SetTo( "Language/Dictionaries/BeGadu" );
+	else
+		localization_string.SetTo( localization.Path() );
+	fprintf( stderr, localization_string.String() );
+	be_locale.LoadLanguageFile( localization_string.String() );
+#endif
+
 	iNetwork = aNetwork;
 	iWindow	= aWindow;
 	iWho = aWho;
@@ -50,7 +80,7 @@ ChatWindow::ChatWindow( Network *aNetwork, MainWindow *aWindow, uin_t aWho )
 	if( !pe )
 		{
 		pe = new BString();
-		pe->SetTo( "[Nieznajomy]" );
+		pe->SetTo( _T("[Stranger]") );
 		}
 
 	title.Append( pe->String() );

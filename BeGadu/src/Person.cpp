@@ -167,6 +167,7 @@ void Profile::Save()
 		file.Unset();
 		}
 	delete cfgmesg;
+	fprintf(stderr, "Saving %s profile...\n", path.Path());
 	iUserlist->Write( iProfileName );
 	}
 

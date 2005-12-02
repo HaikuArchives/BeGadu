@@ -34,6 +34,12 @@
 #include "Msg.h"
 #include "ProfileWizard.h"
 
+#ifdef ZETA
+#include <locale/Locale.h>
+#else
+#define _T(str) (str)
+#endif
+
 extern "C" _EXPORT BView* instantiate_deskbar_item();
 
 BView *instantiate_deskbar_item( void )
@@ -48,6 +54,13 @@ BGDeskbar::BGDeskbar() : BView( BRect( 0, 0, 15, 15),
 								B_WILL_DRAW | B_PULSE_NEEDED )
 	{
 	fprintf( stderr, "BGDeskbar()\n" );
+
+#ifdef ZETA
+	BPath localization( "/boot/apps/Internet/BeGadu/Language/Dictionaries/BeGadu" );
+	if( localization.InitCheck() == B_OK )
+		be_locale.LoadLanguageFile( localization.Path() );
+#endif
+
 	iIcon = NULL;
 	iIconAvail = NULL;
 	iIconAvailDescr = NULL;
@@ -65,6 +78,13 @@ BGDeskbar::BGDeskbar() : BView( BRect( 0, 0, 15, 15),
 BGDeskbar::BGDeskbar( BMessage *aMessage ) : BView( aMessage )
 	{
 	fprintf( stderr, "BGDeskbar( aMessage )\n" );
+	
+#ifdef ZETA
+	BPath localization( "/boot/apps/Internet/BeGadu/Translations/BeGadu" );
+	if( localization.InitCheck() == B_OK )
+		be_locale.LoadLanguageFile( localization.Path() );
+#endif
+
 	iIcon = NULL;
 	iIconAvail = NULL;
 	iIconAvailDescr = NULL;
@@ -153,7 +173,7 @@ void BGDeskbar::Initialize()
 	BFile resfile;
 	if( roster.IsRunning( "application/x-vnd.BeGadu" ) )
 		{
-		fprintf( stderr, "BGDeskbar: Jest BeGadu :D\n" );
+		fprintf( stderr, _T("BGDeskbar: Found running BeGadu...\n") );
 		roster.FindApp( "application/x-vnd.BeGadu", &ref );
 		resfile.SetTo( &ref, B_READ_ONLY );	
 		iResources.SetTo( &resfile );
@@ -171,24 +191,24 @@ void BGDeskbar::Initialize()
 		}
 	else
 		{
-		fprintf(stderr, "BGDeskbar: Nie ma BeGadu :(\n" );
+		fprintf(stderr, _T("BGDeskbar: BeGadu not runned, launching it...\n") );
 		be_roster->Launch( "application/x-vnd.BeGadu" );
 		}
 	iMenu = new BPopUpMenu( "BGDeskbarMenu", true, true );
-	GaduMenuItem *availItem = new GaduMenuItem( iIconAvail, "Dostepny", new BMessage( SET_AVAIL ) );
+	GaduMenuItem *availItem = new GaduMenuItem( iIconAvail, _T("Availble"), new BMessage( SET_AVAIL ) );
 	iMenu->AddItem( availItem );
-	GaduMenuItem *busyItem = new GaduMenuItem( iIconBusy, "Zaraz wracam", new BMessage( SET_BRB ) );
+	GaduMenuItem *busyItem = new GaduMenuItem( iIconBusy, _T("Be right back"), new BMessage( SET_BRB ) );
 	iMenu->AddItem( busyItem );
-	GaduMenuItem *invisibleItem = new GaduMenuItem( iIconInvisible, "Niewidoczny", new BMessage( SET_INVIS ) );
+	GaduMenuItem *invisibleItem = new GaduMenuItem( iIconInvisible, _T("Invisible"), new BMessage( SET_INVIS ) );
 	iMenu->AddItem( invisibleItem );
-	GaduMenuItem *notavailItem = new GaduMenuItem( iIconNotAvail, "Niedostepny", new BMessage( SET_NOT_AVAIL ) );
+	GaduMenuItem *notavailItem = new GaduMenuItem( iIconNotAvail, _T("Not availble"), new BMessage( SET_NOT_AVAIL ) );
 	iMenu->AddItem( notavailItem );
-	GaduMenuItem *descrItem = new GaduMenuItem( iIconAvailDescr, "Zmien opis", new BMessage( SET_DESCRIPTION ) );
+	GaduMenuItem *descrItem = new GaduMenuItem( iIconAvailDescr, _T("Change description"), new BMessage( SET_DESCRIPTION ) );
 	iMenu->AddItem( descrItem );
 	iMenu->AddSeparatorItem();
-	GaduMenuItem *aboutItem = new GaduMenuItem( iIconAvail, "O BeGadu..", new BMessage( BEGG_ABOUT ) );
+	GaduMenuItem *aboutItem = new GaduMenuItem( iIconAvail, _T("About BeGadu"), new BMessage( BEGG_ABOUT ) );
 	iMenu->AddItem( aboutItem );
-	GaduMenuItem *quitItem = new GaduMenuItem( iIconQuit, "Zakoncz", new BMessage( BEGG_QUIT ) );
+	GaduMenuItem *quitItem = new GaduMenuItem( iIconQuit, _T("Exit"), new BMessage( BEGG_QUIT ) );
 	iMenu->AddItem( quitItem );
 
 //	if( iMenu->SetTargetForItems( this ) == B_OK )
@@ -227,7 +247,7 @@ void BGDeskbar::MessageReceived( BMessage *aMessage )
 			int16 status;
 			if( aMessage->FindInt16( "iStatus", &status ) != B_OK )
 				{
-				fprintf( stderr, "\tcan't find 'iStatus' in message...\n" );
+				fprintf( stderr, _T("Can't find 'iStatus' in message...\n") );
 				break;
 				}
 			else

@@ -35,6 +35,12 @@
 #include "Preferences.h"
 #include "Person.h"
 
+#ifdef ZETA
+#include <locale/Locale.h>
+#else
+#define _T(str) (str)
+#endif
+
 #define MAINWINDOW_RECT BRect(50,50,300,350)
 #define MAINWINDOW_NAME	"BeGadu " WERSJA
 
@@ -44,6 +50,25 @@ MainWindow::MainWindow( BString* aProfile )
  			   B_NOT_ZOOMABLE | B_ASYNCHRONOUS_CONTROLS )
 	{
 	fprintf( stderr, "MainWindow::MainWindow( %s )\n", aProfile->String() );
+
+#ifdef ZETA
+	app_info appinfo;
+	be_app->GetAppInfo( &appinfo );
+	BPath localization;
+	BEntry entryloc( &appinfo.ref, true );
+	entryloc.GetPath( &localization );
+	localization.GetParent( &localization );
+	localization.Append( "Language/Dictionaries/BeGadu" );
+	BString localization_string;
+	if( localization.InitCheck() != B_OK )
+		localization_string.SetTo( "Language/Dictionaries/BeGadu" );
+	else
+		localization_string.SetTo( localization.Path() );
+	fprintf( stderr, localization_string.String() );
+	be_locale.LoadLanguageFile( localization_string.String() );
+#endif
+
+
 	iProfile = new Profile();
 	iProfile->Load( aProfile );
 	SetTitle( aProfile->String() );
@@ -66,8 +91,8 @@ MainWindow::MainWindow( BString* aProfile )
 	BRect r = Bounds();
 	BMenuBar *menuBar = new BMenuBar( r, "menu bar" );
 	BMenu *menu;
-	menu = new BMenu( "Menu" );
-	iSubMenu = new BMenu( "Profiles" );
+	menu = new BMenu( _T("Menu") );
+	iSubMenu = new BMenu( _T("Profiles") );
 	BMenuItem *item = new BMenuItem( "Siakis profil", new BMessage() );
 	iSubMenu->AddItem( item );
 	item = new BMenuItem( "Siakis profil inny", new BMessage() );
@@ -76,20 +101,20 @@ MainWindow::MainWindow( BString* aProfile )
 	menu->AddItem( iProfileItem );
 	menu->AddSeparatorItem();
 
-	iSubMenu = new BMenu( "List" );
-	iListImport = new BMenuItem( "Import", new BMessage( BEGG_IMPORT_LIST ) );
-	iListExport = new BMenuItem( "Exsport", new BMessage() );
+	iSubMenu = new BMenu( _T("Userlist") );
+	iListImport = new BMenuItem( _T("Import"), new BMessage( BEGG_IMPORT_LIST ) );
+	iListExport = new BMenuItem( _T("Exsport"), new BMessage() );
 	iSubMenu->AddItem( iListImport );
 	iSubMenu->AddItem( iListExport );
 	iListMenu = new BMenuItem( iSubMenu, NULL );
 	menu->AddItem( iListMenu );
 	menu->AddSeparatorItem();
 
-	iPreferences = new BMenuItem( "Ustawienia", new BMessage( BEGG_PREFERENCES ) );
+	iPreferences = new BMenuItem( _T("Preferences"), new BMessage( BEGG_PREFERENCES ) );
 	menu->AddItem( iPreferences );
-	iAbout = new BMenuItem( "O BeGadu..", new BMessage( BEGG_ABOUT ) );
+	iAbout = new BMenuItem( _T("About.."), new BMessage( BEGG_ABOUT ) );
 	menu->AddItem( iAbout );
-	menu->AddItem( new BMenuItem( "Zakończ", new BMessage( BEGG_QUIT ) ) );
+	menu->AddItem( new BMenuItem( _T("Exit"), new BMessage( BEGG_QUIT ) ) );
 	menuBar->AddItem( menu );
 	AddChild( menuBar );
 
@@ -138,11 +163,11 @@ MainWindow::MainWindow( BString* aProfile )
 
 	BMenuItem *selectstatus;
 	iStatusMenu = new BPopUpMenu( "change_status" );
-	iAvail			= new GaduMenuItem( iIconAvail, "Dostępny", new BMessage( SET_AVAIL ) );
-	iBRB			= new GaduMenuItem( iIconBRB, "Zaraz wracam", new BMessage( SET_BRB ) );
-	iInvisible		= new GaduMenuItem( iIconInvisible, "Niewidoczny", new BMessage( SET_INVIS ) );
-	iNotAvail		= new GaduMenuItem( iIconNotAvail, "Niedostępny", new BMessage( SET_NOT_AVAIL ) );
-	iDescr			= new GaduMenuItem( iIconAvailDescr, "Z Opisem", new BMessage( SET_DESCRIPTION ) );	
+	iAvail			= new GaduMenuItem( iIconAvail, _T("Availble"), new BMessage( SET_AVAIL ) );
+	iBRB			= new GaduMenuItem( iIconBRB, _T("Be right back"), new BMessage( SET_BRB ) );
+	iInvisible		= new GaduMenuItem( iIconInvisible, _T("Invisible"), new BMessage( SET_INVIS ) );
+	iNotAvail		= new GaduMenuItem( iIconNotAvail, _T("Not availble"), new BMessage( SET_NOT_AVAIL ) );
+	iDescr			= new GaduMenuItem( iIconAvailDescr, _T("Description.."), new BMessage( SET_DESCRIPTION ) );	
 	
 	iStatusMenu->AddItem( iAvail );
 	iStatusMenu->AddItem( iBRB );
@@ -151,7 +176,7 @@ MainWindow::MainWindow( BString* aProfile )
 	iStatusMenu->AddItem( iDescr );
 	iNotAvail->SetMarked( true );
 	
-	iStatus = new BMenuField( r, "iStatus", "Status:", iStatusMenu, B_FOLLOW_LEFT | B_FOLLOW_BOTTOM, B_WILL_DRAW | B_NAVIGABLE | B_FRAME_EVENTS );
+	iStatus = new BMenuField( r, "iStatus", _T("Status:"), iStatusMenu, B_FOLLOW_LEFT | B_FOLLOW_BOTTOM, B_WILL_DRAW | B_NAVIGABLE | B_FRAME_EVENTS );
 	iGaduView->AddChild( iStatus );
 
 	add_system_beep_event( ONLINE_SOUND );
@@ -163,7 +188,7 @@ MainWindow::MainWindow( BString* aProfile )
 		BMessenger( this ).SendMessage( UPDATE_LIST );
 		}
 
-	fprintf( stderr,"Profile %s loaded.\n", iProfile->ProfileName()->String() );
+	fprintf( stderr, _T("Profile %s loaded.\n"), iProfile->ProfileName()->String() );
 
 	if( iProfile->AutoStatus() != GG_STATUS_NOT_AVAIL )
 		{
@@ -486,7 +511,8 @@ void MainWindow::MessageReceived( BMessage* aMessage )
 				}
 			else
 				{
-				BAlert *alert = new BAlert( "List", "Musisz być połączony by zaimportować listę", "Ok" );
+				BAlert *alert = new BAlert( _T("Userlist"),
+							_T("To import/export userlist You must be connected"), _T("Ok") );
 				alert->Go();
 				}
 			break;

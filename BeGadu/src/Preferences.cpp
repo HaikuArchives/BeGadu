@@ -6,6 +6,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <OS.h>
+#include <Application.h>
+#include <Roster.h>
+#include <Path.h>
 #include <View.h>
 #include <String.h>
 #include <TextControl.h>
@@ -26,10 +30,35 @@
 #include "Network.h"
 #include "Person.h"
 
-#define PREFERENCES_NAME "Ustawienia"
+#ifdef ZETA
+#include <locale/Locale.h>
+#else
+#define _T(str) (str)
+#endif
+
+#define PREFERENCES_NAME "Preferences"
 
 Preferences::Preferences( Profile* aProfile, MainWindow* aWindow, BRect aRect, BResources* aRes ) : BWindow( aRect, PREFERENCES_NAME, B_FLOATING_WINDOW, B_NOT_RESIZABLE | B_NOT_ZOOMABLE | B_NOT_MOVABLE | B_ASYNCHRONOUS_CONTROLS )
 	{
+
+#ifdef ZETA
+	app_info appinfo;
+	be_app->GetAppInfo( &appinfo );
+	BPath localization;
+	BEntry entryloc( &appinfo.ref, true );
+	entryloc.GetPath( &localization );
+	localization.GetParent( &localization );
+	localization.Append( "Language/Dictionaries/BeGadu" );
+	BString localization_string;
+	if( localization.InitCheck() != B_OK )
+		localization_string.SetTo( "Language/Dictionaries/BeGadu" );
+	else
+		localization_string.SetTo( localization.Path() );
+	fprintf( stderr, localization_string.String() );
+	be_locale.LoadLanguageFile( localization_string.String() );
+#endif
+
+	SetTitle( _T( PREFERENCES_NAME ) );
 	iProfile = aProfile;
 	iWindow = aWindow;
 	iResources = aRes;
@@ -44,26 +73,26 @@ Preferences::Preferences( Profile* aProfile, MainWindow* aWindow, BRect aRect, B
 	r.top = 100;
 	r.right = r.left + 250;
 	r.bottom = r.top + 25;
-	iNumberControl = new BTextControl( r, "iNumberControl", "Numer GG:", "0", NULL, B_FOLLOW_LEFT | B_FOLLOW_TOP, B_WILL_DRAW | B_NAVIGABLE );
+	iNumberControl = new BTextControl( r, "iNumberControl", _T("Number GG:"), "0", NULL, B_FOLLOW_LEFT | B_FOLLOW_TOP, B_WILL_DRAW | B_NAVIGABLE );
 	AddChild( iNumberControl );
 	r.left = 20;
 	r.right = r.left + 250;
 	r.top = 130;
 	r.bottom = r.top + 25;
-	iPasswordControl = new BTextControl( r, "iPasswordControl", "Haslo:", "", NULL, B_FOLLOW_LEFT | B_FOLLOW_TOP, B_WILL_DRAW | B_NAVIGABLE );
+	iPasswordControl = new BTextControl( r, "iPasswordControl", _T("Password:"), "", NULL, B_FOLLOW_LEFT | B_FOLLOW_TOP, B_WILL_DRAW | B_NAVIGABLE );
 	AddChild( iPasswordControl );
 	r = Bounds();
 	BButton *przycisk;
     przycisk = new BButton( BRect( r.left + 360, r.bottom - 30,
     							   r.left + 440, r.bottom - 5),
-    							   "przycisk ok", "Ok",
+    							   "ok button", _T("Ok"),
     							   new BMessage( PREFERENCES_OK ) );
     przycisk->MakeDefault(true);
     AddChild(przycisk);
     
     przycisk = new BButton( BRect( r.left + 270, r.bottom - 30,
     							   r.left + 350, r.bottom - 5),
-    							   "przycisk anuluj", "Anuluj",
+    							   "cancel button", _T("Cancel"),
     							   new BMessage( PREFERENCES_CANCEL ) );
     AddChild(przycisk);
 
@@ -75,7 +104,6 @@ Preferences::Preferences( Profile* aProfile, MainWindow* aWindow, BRect aRect, B
 		a << ( int32 ) iProfile->iNumber;
         iNumberControl->SetText( a.String() );
         iPasswordControl->SetText( iProfile->iPassword->String() );
-		fprintf( stderr, "numer: %s\nhaslo: %s\n", a.String(), iProfile->iPassword->String() );
         iNumberControl->UnlockLooper();
     	}    
 	}

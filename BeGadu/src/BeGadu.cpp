@@ -22,6 +22,12 @@
 #include "Preferences.h"
 #include "ProfileWizard.h"
 
+#ifdef ZETA
+#include <locale/Locale.h>
+#else
+#define _T(str) (str)
+#endif
+
 BeGadu::BeGadu() : BApplication( "application/x-vnd.BeGadu" )
 	{
 	/* we're checking configuration */
@@ -33,6 +39,24 @@ BeGadu::BeGadu() : BApplication( "application/x-vnd.BeGadu" )
 	BPath path;
 	BEntry entry;
 	status_t error;
+	
+#ifdef ZETA
+	app_info appinfo;
+	GetAppInfo( &appinfo );
+	BPath localization;
+	BEntry entryloc( &appinfo.ref, true );
+	entryloc.GetPath( &localization );
+	localization.GetParent( &localization );
+	localization.Append( "Language/Dictionaries/BeGadu" );
+	BString localization_string;
+	if( localization.InitCheck() != B_OK )
+		localization_string.SetTo( "Language/Dictionaries/BeGadu" );
+	else
+		localization_string.SetTo( localization.Path() );
+	fprintf( stderr, localization_string.String() );
+	be_locale.LoadLanguageFile( localization_string.String() );
+#endif
+	
 	find_directory( B_USER_SETTINGS_DIRECTORY, &path );
 	BDirectory * bg_conf = new BDirectory( path.Path() );
 	
@@ -67,7 +91,7 @@ BeGadu::BeGadu() : BApplication( "application/x-vnd.BeGadu" )
 	find_directory( B_USER_SETTINGS_DIRECTORY, &path );
 	path.Append( "BeGadu/Config" );
 	BFile file( path.Path(), B_READ_ONLY );
-	fprintf( stderr, "Loading configuration from %s\n", path.Path() );
+	fprintf( stderr, _T("Loading configuration from %s\n"), path.Path() );
 	BMessage *cfgmesg = new BMessage();
 	if( file.InitCheck() == B_OK )
 		{
@@ -88,12 +112,12 @@ BeGadu::BeGadu() : BApplication( "application/x-vnd.BeGadu" )
 	
 	if( iFirstRun )
 		{
-		fprintf( stderr, "First run, starting Profile Wizard...\n" );
+		fprintf( stderr, _T("First run, starting Profile Wizard...\n") );
 		BMessenger( this ).SendMessage( new BMessage( OPEN_PROFILE_WIZARD ) );
 		}
 	else
 		{
-		fprintf( stderr, "Configuration ok.\n" );
+		fprintf( stderr, _T("Configuration OK.\n") );
 		BMessenger( this ).SendMessage( new BMessage( CONFIG_OK ) );
 		}
 	}
@@ -175,7 +199,7 @@ void BeGadu::MessageReceived( BMessage *aMessage )
 			iReadyToRun = true;
 			AddDeskbarIcon();
 			aMessage->FindString( "ProfileName", iLastProfile );
-			fprintf( stderr, "Setting last profile to %s\n", iLastProfile->String() );
+			fprintf( stderr, _T("Setting last profile to %s\n"), iLastProfile->String() );
 			iFirstRun = false;
 			iWindow = new MainWindow( iLastProfile );
 			if( iWindow->LockLooper() )
@@ -231,8 +255,8 @@ bool BeGadu::QuitRequested()
 	BPath path;
 	find_directory( B_USER_SETTINGS_DIRECTORY, &path );
 	path.Append( "BeGadu/Config" );
-	fprintf( stderr, "Last profile: %s\n", iLastProfile->String() );
-	fprintf( stderr, "Saving configuration to %s\n", path.Path() );
+	fprintf( stderr, _T("Last profile %s\n"), iLastProfile->String() );
+	fprintf( stderr, _T("Saving configuration to %s\n"), path.Path() );
 	BFile file( path.Path(), B_WRITE_ONLY | B_CREATE_FILE | B_ERASE_FILE );
 	if( file.InitCheck() == B_OK )
 		{
@@ -256,13 +280,13 @@ void BeGadu::AddDeskbarIcon()
 		status_t status = roster.FindApp( "application/x-vnd.BeGadu", &ref );
 		if( status != B_OK )
 			{
-			fprintf( stderr, "Can't find BeGadu running %s\n", strerror( status ) );
+			fprintf( stderr, _T("Can't find BeGadu running: %s\n"), strerror( status ) );
 			return;
 			}
 		status = deskbar.AddItem( &ref );
 		if( status != B_OK )
 			{
-			fprintf( stderr, "Can't put BeGadu into Deskbar: %s\n", strerror( status ) );
+			fprintf( stderr, _T("Can't put BeGadu into Deskbar: %s\n"), strerror( status ) );
 			return;
 			}
 		}
