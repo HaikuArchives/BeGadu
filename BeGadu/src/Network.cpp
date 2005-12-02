@@ -20,6 +20,13 @@
 #include "Chat.h"
 #include "Person.h"
 #include "NetworkHandler.h"
+
+#ifdef DEBUG
+#define DEBUG_TRACE(str) fprintf(stderr, str)
+#else
+#define DEBUG_TRACE(str)
+#endif
+
 extern "C"
 {
 #include "libgadu.h"
@@ -27,7 +34,7 @@ extern "C"
 
 Network::Network( Profile* aProfile, List* aList ) : BLooper( "Network Loop" )
 	{
-	fprintf( stderr, "Network::Network()\n" );
+	DEBUG_TRACE( "Network::Network()\n" );
 	/* inicjalizacja */
 	iProfile		= aProfile;
 	iList			= aList;
@@ -37,6 +44,7 @@ Network::Network( Profile* aProfile, List* aList ) : BLooper( "Network Loop" )
 	iIdent			= 0;
 	iSession		= NULL;
 	iStatus			= GG_STATUS_NOT_AVAIL;
+	iDescription	= new BString( "" );
 	
 	/* czekamy na wiadomości :)) */
 	Run();
@@ -44,7 +52,7 @@ Network::Network( Profile* aProfile, List* aList ) : BLooper( "Network Loop" )
 
 void Network::Quit()
 	{
-	fprintf( stderr, "Network::Quit()\n" );
+	DEBUG_TRACE( "Network::Quit()\n" );
 	/* Rozłączamy się */
 	if( ( iStatus != GG_STATUS_NOT_AVAIL ) || ( iStatus != GG_STATUS_NOT_AVAIL_DESCR ) )
 		Logout();
@@ -63,7 +71,7 @@ void Network::MessageReceived( BMessage* aMessage )
 		*/
 		case ADD_HANDLER:
 			{
-			fprintf( stderr, "Network::MessageReceived( ADD_HANDLER )\n" );
+			DEBUG_TRACE( "Network::MessageReceived( ADD_HANDLER )\n" );
 			int fd, cond;
 			void *data;
 			aMessage->FindInt32( "fd", ( int32* ) &fd );
@@ -75,7 +83,7 @@ void Network::MessageReceived( BMessage* aMessage )
 			
 		case DEL_HANDLER:
 			{
-			fprintf( stderr, "Network::MessageReceived( DEL_HANDLER )\n" );
+			DEBUG_TRACE( "Network::MessageReceived( DEL_HANDLER )\n" );
 			int fd;
 			aMessage->FindInt32( "fd", ( int32* ) &fd );
 			RemoveHandler( fd );
@@ -84,7 +92,7 @@ void Network::MessageReceived( BMessage* aMessage )
 			
 		case GOT_MESSAGE:
 			{
-			fprintf( stderr, "Network::MessageReceived( GOT_MESSAGE )\n" );
+			DEBUG_TRACE( "Network::MessageReceived( GOT_MESSAGE )\n" );
 			int				who;
 			const char *	msg;
 			aMessage->FindInt32( "who", ( int32* ) &who );
@@ -101,35 +109,35 @@ void Network::MessageReceived( BMessage* aMessage )
 		
 		case DO_LOGIN:
 			{
-			fprintf( stderr, "Network::MessageReceived( DO_LOGIN )\n" );
+			DEBUG_TRACE( "Network::MessageReceived( DO_LOGIN )\n" );
 			Login();
 			break;
 			}
 			
 		case DO_LOGOUT:
 			{
-			fprintf( stderr, "Network::MessageReceived( DO_LOGOUT )\n" );
+			DEBUG_TRACE( "Network::MessageReceived( DO_LOGOUT )\n" );
 			Logout();
 			break;
 			}
 			
 		case ADD_PERSON:
 			{
-			fprintf( stderr, "Network::MessageReceived( ADD_PERSON )\n" );
+			DEBUG_TRACE( "Network::MessageReceived( ADD_PERSON )\n" );
 			// do zaimplementowania
 			break;
 			}
 			
 		case DEL_PERSON:
 			{
-			fprintf( stderr, "Network::MessageReceived( DEL_PERSON )\n" );
+			DEBUG_TRACE( "Network::MessageReceived( DEL_PERSON )\n" );
 			// do zaimplementowania
 			break;
 			}
 			
 		case OPEN_MESSAGE:
 			{
-			fprintf( stderr, "Network::MessageReceived( OPEN_MESSAGE )\n" );
+			DEBUG_TRACE( "Network::MessageReceived( OPEN_MESSAGE )\n" );
 			int	who;
 			aMessage->FindInt32( "who", ( int32* ) &who );
 			ChatWindow *win;
@@ -161,7 +169,7 @@ void Network::MessageReceived( BMessage* aMessage )
 			
 		case SEND_MESSAGE:
 			{
-			fprintf( stderr, "Network::MessageReceived( SEND_MESSAGE )\n" );
+			DEBUG_TRACE( "Network::MessageReceived( SEND_MESSAGE )\n" );
 			int 			who;
 			const char *	msg;
 			aMessage->FindInt32( "who", ( int32* ) &who );
@@ -172,7 +180,7 @@ void Network::MessageReceived( BMessage* aMessage )
 			
 		case CLOSE_MESSAGE:
 			{
-			fprintf( stderr, "Network::MessageReceived( CLOSE_MESSAGE )\n" );
+			DEBUG_TRACE( "Network::MessageReceived( CLOSE_MESSAGE )\n" );
 			ChatWindow	*win;
 			aMessage->FindPointer( "win", ( void** ) &win );
 			iWinList->RemoveItem( win );
@@ -187,7 +195,7 @@ void Network::MessageReceived( BMessage* aMessage )
 
 void Network::GotWindow( MainWindow* aWindow )
 	{
-	fprintf( stderr, "Network::GotWindow( %p )\n", aWindow );
+	DEBUG_TRACE( "Network::GotWindow()\n" );
 	iWindow = aWindow;
 //	if( ( iWindow = aWindow ) ) // or =
 //		BMessenger( iWindow ).SendMessage( UPDATE_STATUS );
@@ -196,7 +204,7 @@ void Network::GotWindow( MainWindow* aWindow )
 /* zwracamy wskaznik do okna jesli rozmowcy jesli z nim juz rozmawiamy */
 ChatWindow* Network::GetMesgWinForUser( uin_t aWho )
 	{
-	fprintf( stderr, "Network::GotMesgWinForUser( %d )\n", aWho );
+	DEBUG_TRACE( "Network::GotMesgWinForUser()\n" );
 	ChatWindow *win = NULL;
 	for( int i = 0; i < iWinList->CountItems(); i++ )
 		{
@@ -214,7 +222,7 @@ ChatWindow* Network::GetMesgWinForUser( uin_t aWho )
 /* zwracamy wskaznik do osoby jesli z taka rozmawiamy */
 Person* Network::GetPersonForUser( uin_t aWho )
 	{
-	fprintf( stderr, "Network::GotPersonForUser( %d )\n", aWho );
+	DEBUG_TRACE( "Network::GotPersonForUser()\n" );
 	Person* person = NULL;
 	for( int i = 0; i < iWindow->GetProfile()->GetUserlist()->GetList()->CountItems(); i++ )
 		{
@@ -230,7 +238,7 @@ Person* Network::GetPersonForUser( uin_t aWho )
 
 void Network::Login()
 	{
-	fprintf( stderr, "Network::Login()\n" );
+	DEBUG_TRACE( "Network::Login()\n" );
 	/* ustawiamy status na "Łączenie" */
 	iStatus = BEGG_CONNECTING;
 //	if( iWindow )
@@ -249,7 +257,7 @@ void Network::Login()
 
 void Network::Login( int status )
 	{
-	fprintf( stderr, "Network::Login(%d)\n", status );
+	DEBUG_TRACE( "Network::Login(status)\n");
 	/* ustawiamy status na "Łączenie" */
 	iStatus = status;
 //	if( iWindow )
@@ -266,13 +274,35 @@ void Network::Login( int status )
 	 	BMessenger( iWindow ).SendMessage( UPDATE_STATUS );
 	}
 
+void Network::Login( int aStatus, BString *aDescription )
+	{
+	DEBUG_TRACE( "Network::Login(status, description)\n");
+	/* ustawiamy status na "Łączenie" */
+	iStatus = aStatus;
+	iDescription = aDescription;
+//	if( iWindow )
+//		BMessenger( iWindow ).SendMessage( UPDATE_STATUS );
+	/* ustawiamy pola potrzebne do połączenia z gg */
+	memset( &iLoginParam, 0, sizeof( iLoginParam ) );
+	iLoginParam.uin = iProfile->iNumber;
+	iLoginParam.password = ( char* ) iProfile->iPassword->String();
+	iLoginParam.async = 1;
+	iLoginParam.status = iStatus;
+	iLoginParam.status_descr = ( char* ) iDescription->String();
+//	gg_debug_level = ~0;
+	BMessenger( this ).SendMessage( ADD_HANDLER );
+	if( iWindow )
+	 	BMessenger( iWindow ).SendMessage( UPDATE_STATUS );
+	}
+
 void Network::Logout()
 	{
-	fprintf( stderr, "Network::Logout()\n" );
+	DEBUG_TRACE( "Network::Logout()\n" );
 	/* poprostu sie wylogowujemy */
 	if( iSession )
 		{
-		iStatus = GG_STATUS_NOT_AVAIL;
+		if( iStatus != GG_STATUS_NOT_AVAIL || iStatus != GG_STATUS_NOT_AVAIL_DESCR )
+			iStatus = GG_STATUS_NOT_AVAIL;
 		gg_logoff( iSession );
 		gg_free_session( iSession );
 		iSession = NULL;
@@ -301,7 +331,6 @@ void Network::Logout()
 		 		}
 			BMessenger( iWindow ).SendMessage( UPDATE_LIST );
 			}
-		
 		/* uaktualniamy status */
 		if( iWindow )
 			BMessenger( iWindow ).SendMessage( UPDATE_STATUS );
@@ -311,7 +340,7 @@ void Network::Logout()
 /* wysyłamy wiadomość */
 void Network::SendMsg( uin_t aWho, const char* aMessage )
 	{
-	fprintf( stderr, "Network::SendMsg()\n" );
+	DEBUG_TRACE( "Network::SendMsg()\n" );
 	if( iSession )
 		{
 		if( gg_send_message( iSession, GG_CLASS_CHAT, aWho, ( unsigned char* ) aMessage ) == -1 )
@@ -326,7 +355,7 @@ void Network::SendMsg( uin_t aWho, const char* aMessage )
 
 void Network::GotMsg( uin_t aWho, const char* aMessage )
 	{
-	fprintf( stderr, "Network::GotMsg()\n" );
+	DEBUG_TRACE( "Network::GotMsg()\n" );
 	/* sprawdzamy czy mamy aktualnie otwarte okno dla tej osoby :) */
 	ChatWindow* win = NULL;
 	for( int i = 0; i < iWinList->CountItems(); i++ )
@@ -354,15 +383,16 @@ void Network::GotMsg( uin_t aWho, const char* aMessage )
 
 void Network::AddHandler( int fd, int cond, void* data )
 	{
-	fprintf( stderr, "Network::AddHandler( fd=%d, cond=%d )\n", fd, cond );
-	NetworkHandler* handler = new NetworkHandler( this, iId, fd, cond, data );
+	DEBUG_TRACE( "Network::AddHandler()\n" );
+	NetworkHandler* handler;
+	handler = new NetworkHandler( this, iId, fd, cond, data );
 	iHandlerList->AddItem( handler );
 	handler->Run();
 	}
 
 void Network::RemoveHandler( int fd )
 	{
-	fprintf( stderr, "Network::RemoveHandler( fd=%d )\n", fd );
+	DEBUG_TRACE( "Network::RemoveHandler()\n" );
 	NetworkHandler* handler = NULL;
 	for( int i = 0; i < iHandlerList->CountItems(); i++ )
 		{
@@ -380,6 +410,11 @@ void Network::RemoveHandler( int fd )
 void Network::SetStatus( int aStatus )
 	{
 	iStatus = aStatus;
+	}
+
+void Network::SetDescription( BString *aDescription )
+	{
+	iDescription = aDescription;
 	}
 
 struct gg_session* Network::Session() const

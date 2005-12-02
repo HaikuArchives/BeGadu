@@ -42,6 +42,12 @@
 #define _T(str) (str)
 #endif
 
+#ifdef DEBUG
+#define DEBUG_TRACE(str) fprintf(stderr, str)
+#else
+#define DEBUG_TRACE(str)
+#endif
+
 #define MAINWINDOW_RECT BRect(50,50,300,350)
 #define MAINWINDOW_NAME	"BeGadu " WERSJA
 
@@ -50,7 +56,7 @@ MainWindow::MainWindow( BString* aProfile )
  	: BWindow( MAINWINDOW_RECT, MAINWINDOW_NAME, B_TITLED_WINDOW, 
  			   B_NOT_ZOOMABLE | B_ASYNCHRONOUS_CONTROLS )
 	{
-	fprintf( stderr, "MainWindow::MainWindow( %s )\n", aProfile->String() );
+	DEBUG_TRACE( "MainWindow::MainWindow()\n"  );
 
 #ifdef ZETA
 	app_info appinfo;
@@ -156,7 +162,6 @@ MainWindow::MainWindow( BString* aProfile )
 	/* adding status */
 	r = iGaduView->Bounds();
 	r.top = iListView->Bounds().bottom + 5;
-//	r.top = iGaduView->Bounds().bottom;
 	r.left = r.left + 5;
 	r.right = r.right -5;
 
@@ -204,7 +209,7 @@ MainWindow::MainWindow( BString* aProfile )
 
 bool MainWindow::QuitRequested()
 	{
-	fprintf( stderr, "MainWindow::QuitRequested()\n" );
+	DEBUG_TRACE( "MainWindow::QuitRequested()\n" );
 	/* saving profile settings */
 	if( LockLooper() )
 		{
@@ -223,7 +228,7 @@ void MainWindow::MessageReceived( BMessage* aMessage )
 		{
 		case CHANGE_DESCRIPTION:
 			{
-			fprintf( stderr, "MainWindow::MessageReceived( CHANGE_DESCRIPTION )\n" );
+			DEBUG_TRACE( "MainWindow::MessageReceived( CHANGE_DESCRIPTION )\n" );
 			BScreen *screen = new BScreen( this );
 			display_mode mode;
 			screen->GetMode( &mode );
@@ -240,7 +245,7 @@ void MainWindow::MessageReceived( BMessage* aMessage )
 			
 		case BEGG_PREFERENCES:
 			{
-			fprintf( stderr, "MainWindow::MessageReceived( BEGG_PREFERENCES )\n" );
+			DEBUG_TRACE( "MainWindow::MessageReceived( BEGG_PREFERENCES )\n" );
 			BScreen *screen = new BScreen( this );
 			display_mode mode;
 			screen->GetMode( &mode );
@@ -257,7 +262,7 @@ void MainWindow::MessageReceived( BMessage* aMessage )
 		
 		case BEGG_ABOUT:
 			{
-			fprintf( stderr, "MainWindow::MessageReceived( BEGG_ABOUT )\n" );
+			DEBUG_TRACE( "MainWindow::MessageReceived( BEGG_ABOUT )\n" );
 //			AboutWindow *about;
 //			about = new AboutWindow();
 //			about->Show();
@@ -266,7 +271,7 @@ void MainWindow::MessageReceived( BMessage* aMessage )
 		
 		case SHOW_MAIN_WINDOW:
 			{
-			fprintf( stderr, "MainWindow::MessageReceived( SHOW_MAIN_WINDOW )\n" );
+			DEBUG_TRACE( "MainWindow::MessageReceived( SHOW_MAIN_WINDOW )\n" );
 			if( LockLooper() )
 				{
 				if( IsHidden() )
@@ -284,7 +289,7 @@ void MainWindow::MessageReceived( BMessage* aMessage )
 			
 		case BEGG_PERSON_SELECTED:
 			{
-			fprintf( stderr, "MainWindow::MessageReceived( BEGG_PERSON_SELECTED )\n" );
+			DEBUG_TRACE( "MainWindow::MessageReceived( BEGG_PERSON_SELECTED )\n" );
 			if( iListView->CurrentSelection() < 0 )
 				{
 				break;
@@ -304,7 +309,7 @@ void MainWindow::MessageReceived( BMessage* aMessage )
 			
 		case BEGG_PERSON_ACTION:
 			{
-			fprintf( stderr, "MainWindow::MessageReceived( BEGG_PERSON_ACTION )\n" );
+			DEBUG_TRACE( "MainWindow::MessageReceived( BEGG_PERSON_ACTION )\n" );
 			if( iListView->CurrentSelection() < 0 )
 				{
 				break;
@@ -331,9 +336,11 @@ void MainWindow::MessageReceived( BMessage* aMessage )
 			break;
 			}
 
+
 		case SET_AVAIL:
 			{
 			fprintf( stderr, "MainWindow::MessageReceived( SET_AVAIL )\n" );
+			iNetwork->SetDescription( new BString( "" ) );
 			if( iNetwork->Session() )
 				{
 				fprintf( stderr, "dupsko\n" );
@@ -356,6 +363,7 @@ void MainWindow::MessageReceived( BMessage* aMessage )
 		case SET_BRB:
 			{
 			fprintf( stderr, "MainWindow::MessageReceived( SET_BRB )\n" );
+			iNetwork->SetDescription( new BString( "" ) );
 			if( iNetwork->Session() )
 				{
 				gg_change_status( iNetwork->Session(), GG_STATUS_BUSY );
@@ -376,6 +384,7 @@ void MainWindow::MessageReceived( BMessage* aMessage )
 		case SET_INVIS:
 			{
 			fprintf( stderr, "MainWindow::MessageReceived( SET_INVIS )\n" );
+			iNetwork->SetDescription( new BString( "" ) );
 			if( iNetwork->Session() )
 				{
 				gg_change_status( iNetwork->Session(), GG_STATUS_INVISIBLE );
@@ -396,6 +405,7 @@ void MainWindow::MessageReceived( BMessage* aMessage )
 		case SET_NOT_AVAIL:
 			{
 			fprintf( stderr, "MainWindow::MessageReceived( SET_NOT_AVAIL )\n" );
+			iNetwork->SetDescription( new BString( "" ) );
 			if( iNetwork->Session() )
 				{
 				iNetwork->Logout();
@@ -407,9 +417,47 @@ void MainWindow::MessageReceived( BMessage* aMessage )
 			break;
 			}
 			
+		case SET_DESCRIPTION:
+			{
+			DEBUG_TRACE(  "MainWindow::MessageReceived( SET_DESCRIPTION )\n" );
+			int8 status = 0;
+			BString *description = new BString( "" );
+			aMessage->FindInt8( "iStatus", (int8*) &status );
+			aMessage->FindString( "iDescription", description );
+			if( status == GG_STATUS_NOT_AVAIL || status == GG_STATUS_NOT_AVAIL_DESCR )
+				{
+				if( iNetwork->Session() )
+					{
+					gg_change_status_descr( iNetwork->Session(), status, description->String() );
+					iNetwork->SetStatus( status );
+					iNetwork->SetDescription( description );
+					iNetwork->Logout();
+					}
+				}
+			else
+				{
+				if( iNetwork->Session() )
+					{
+					gg_change_status_descr( iNetwork->Session(), status, description->String() );
+					iNetwork->SetStatus( status );
+					iNetwork->SetDescription( description );
+					BMessenger( this ).SendMessage( UPDATE_LIST );
+					}
+				else
+					{
+					iNetwork->Login( status, description );
+					}
+				}
+			BMessage* message = new BMessage( BGDESKBAR_CHSTATE );
+			message->AddInt16( "iStatus", status );
+			BMessenger( this ).SendMessage( message );
+			delete message;
+			break;
+			}
+			
 		case UPDATE_STATUS:
 			{
-			fprintf( stderr, "MainWindow::MessageReceived( UPDATE_STATUS )\n" );
+			DEBUG_TRACE( "MainWindow::MessageReceived( UPDATE_STATUS )\n" );
 			switch( iNetwork->GetStatus() )
 				{
 				case GG_STATUS_NOT_AVAIL:
@@ -450,7 +498,7 @@ void MainWindow::MessageReceived( BMessage* aMessage )
 			
 		case UPDATE_LIST:
 			{
-			fprintf( stderr, "MainWindow::MessageReceived( UPDATE_LIST )\n" );
+			DEBUG_TRACE( "MainWindow::MessageReceived( UPDATE_LIST )\n" );
 			List *listAvail = new List( 512 );
 			List *listNotAvail = new List( 512 );
 			
@@ -462,9 +510,17 @@ void MainWindow::MessageReceived( BMessage* aMessage )
 				
 				if( p->iUIN == iProfile->iNumber )
 					{
-					g = new GaduListItem( p->iDisplay, iNetwork->GetStatus(), iProfile->iDescription, &iResources );
-					if( iNetwork->GetStatus() == GG_STATUS_NOT_AVAIL || iNetwork->GetStatus() == GG_STATUS_NOT_AVAIL_DESCR ||
-						iNetwork->GetStatus() == GG_STATUS_INVISIBLE || iNetwork->GetStatus() == GG_STATUS_INVISIBLE_DESCR )
+					fprintf( stderr, "p->iDisplay\t = %s\n", p->iDisplay->String() );
+					fprintf( stderr, "p->iStatus\t = %d\n", iNetwork->GetStatus() );
+					fprintf( stderr, "p->iDescription\t =%s\n", iNetwork->iDescription->String() );
+					if( iNetwork->GetStatus() == GG_STATUS_NOT_AVAIL )
+						g = new GaduListItem( p->iDisplay, iNetwork->GetStatus(), new BString( "" ), &iResources );
+					else
+						g = new GaduListItem( p->iDisplay, iNetwork->GetStatus(), iNetwork->iDescription, &iResources );
+					if( iNetwork->GetStatus() == GG_STATUS_NOT_AVAIL ||
+						iNetwork->GetStatus() == GG_STATUS_NOT_AVAIL_DESCR ||
+						iNetwork->GetStatus() == GG_STATUS_INVISIBLE ||
+						iNetwork->GetStatus() == GG_STATUS_INVISIBLE_DESCR )
 						{
 						listNotAvail->AddItem( g );
 						}
@@ -517,7 +573,7 @@ void MainWindow::MessageReceived( BMessage* aMessage )
 			
 		case BEGG_IMPORT_LIST:
 			{
-			fprintf( stderr, "MainWindow::MessageReceived( BEGG_IMPORT_LIST )\n" );
+			DEBUG_TRACE( "MainWindow::MessageReceived( BEGG_IMPORT_LIST )\n" );
 			if( iNetwork->Session() )
 				{
 				iProfile->GetUserlist()->Import( iNetwork->Session(), iProfile->GetUserlist()->GetList() );
@@ -533,12 +589,8 @@ void MainWindow::MessageReceived( BMessage* aMessage )
 		
 		case BGDESKBAR_CHSTATE:
 			{
-			fprintf( stderr, "MainWindow::MessageReceived( BGDESKBAR_CHSTATE )\n" );
+			DEBUG_TRACE( "MainWindow::MessageReceived( BGDESKBAR_CHSTATE )\n" );
 			iDeskbarMessenger.SendMessage( aMessage );
-//			BMessenger deskbar( "application/x-vnd.Be-TSKB");
-//			deskbar.SendMessage( aMessage );
-//			BRoster roster;
-//			roster.Broadcast( aMessage );
 			break;
 			}
 		
@@ -561,7 +613,6 @@ void MainWindow::MessageReceived( BMessage* aMessage )
 
 int MainWindow::SortUsers( const void *left, const void *right )
 	{
-//	fprintf( stderr, "MainWindow::SortUsers()\n" );
 	const GaduListItem 	**firstItem( ( const GaduListItem ** ) left ),
 						**secondItem( ( const GaduListItem ** ) right );
 	BString users[ 2 ];
@@ -573,7 +624,7 @@ int MainWindow::SortUsers( const void *left, const void *right )
 
 void MainWindow::LoadIcons()
 	{
-	fprintf( stderr, "MainWindow::LoadIcons()\n" );
+	DEBUG_TRACE( "MainWindow::LoadIcons()\n" );
 	iIconAvail	 			= GetBitmap( "online" );
 	iIconBRB		 		= GetBitmap( "busy" );
 	iIconInvisible	 		= GetBitmap( "invisible" );
@@ -586,7 +637,7 @@ void MainWindow::LoadIcons()
 
 void MainWindow::SetProfile( BString* aProfile )
 	{
-	fprintf( stderr, "MainWindow::SetProfil()\n" );
+	DEBUG_TRACE( "MainWindow::SetProfil()\n" );
 	iProfile->Load( aProfile );
 	SetTitle( iProfile->ProfileName()->String() );
 	if( iProfile->GetUserlist()->IsValid() )
@@ -594,15 +645,14 @@ void MainWindow::SetProfile( BString* aProfile )
 		iListItems = iProfile->GetUserlist()->GetList();
 		BMessenger( this ).SendMessage( UPDATE_LIST );
 		}
-/*
-	if( fProfil->fAutoStatus != GG_STATUS_NOT_AVAIL )
-	{
-		if(fSiec->fSesja)
-			gg_change_status(fSiec->fSesja, fProfil->fAutoStatus);
+
+	if( iProfile->iAutoStatus != GG_STATUS_NOT_AVAIL )
+		{
+		if( iNetwork->iSession )
+			gg_change_status( iNetwork->iSession, iProfile->iAutoStatus);
 		else
-			fSiec->Login(fProfil->fAutoStatus);
-	}
-*/
+			iNetwork->Login( iProfile->iAutoStatus );
+		}
 	}
 
 BBitmap *MainWindow::GetBitmap( const char* aName )

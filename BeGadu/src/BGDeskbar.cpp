@@ -40,11 +40,17 @@
 #define _T(str) (str)
 #endif
 
+#ifdef DEBUG
+#define DEBUG_TRACE(str) fprintf(stderr, str)
+#else
+#define DEBUG_TRACE(str)
+#endif
+
 extern "C" _EXPORT BView* instantiate_deskbar_item();
 
 BView *instantiate_deskbar_item( void )
 	{
-	fprintf( stderr, "instantiate_deskbar_item()\n" );
+	DEBUG_TRACE( "instantiate_deskbar_item()\n" );
 	return new BGDeskbar();
 	}
 
@@ -53,7 +59,7 @@ BGDeskbar::BGDeskbar() : BView( BRect( 0, 0, 15, 15),
 								B_FOLLOW_LEFT | B_FOLLOW_TOP,
 								B_WILL_DRAW | B_PULSE_NEEDED )
 	{
-	fprintf( stderr, "BGDeskbar()\n" );
+	DEBUG_TRACE( "BGDeskbar()\n" );
 
 #ifdef ZETA
 	BPath localization( "/boot/apps/Internet/BeGadu/Language/Dictionaries/BeGadu" );
@@ -77,7 +83,7 @@ BGDeskbar::BGDeskbar() : BView( BRect( 0, 0, 15, 15),
 
 BGDeskbar::BGDeskbar( BMessage *aMessage ) : BView( aMessage )
 	{
-	fprintf( stderr, "BGDeskbar( aMessage )\n" );
+	DEBUG_TRACE( "BGDeskbar( aMessage )\n" );
 	
 #ifdef ZETA
 	BPath localization( "/boot/apps/Internet/BeGadu/Translations/BeGadu" );
@@ -102,7 +108,7 @@ BGDeskbar::BGDeskbar( BMessage *aMessage ) : BView( aMessage )
 
 BGDeskbar::~BGDeskbar()
 	{
-	fprintf( stderr, "BGDeskbar::~BGdeskbar()\n" );
+	DEBUG_TRACE( "BGDeskbar::~BGdeskbar()\n" );
 	if( iIconAvail )
 		{
 		delete iIconAvail;
@@ -155,7 +161,6 @@ BGDeskbar::~BGDeskbar()
 		}
 	if( iIcon )
 		{
-//		delete iIcon;
 		iIcon = NULL;
 		}
 	if( iMenu )
@@ -167,7 +172,7 @@ BGDeskbar::~BGDeskbar()
 
 void BGDeskbar::Initialize()
 	{
-	fprintf( stderr, "BGDeskbar::Initialize()\n" );
+	DEBUG_TRACE( "BGDeskbar::Initialize()\n" );
 	BRoster roster;
 	entry_ref ref;
 	BFile resfile;
@@ -203,22 +208,13 @@ void BGDeskbar::Initialize()
 	iMenu->AddItem( invisibleItem );
 	GaduMenuItem *notavailItem = new GaduMenuItem( iIconNotAvail, _T("Not availble"), new BMessage( SET_NOT_AVAIL ) );
 	iMenu->AddItem( notavailItem );
-	GaduMenuItem *descrItem = new GaduMenuItem( iIconAvailDescr, _T("Change description"), new BMessage( SET_DESCRIPTION ) );
+	GaduMenuItem *descrItem = new GaduMenuItem( iIconAvailDescr, _T("Change description"), new BMessage( CHANGE_DESCRIPTION ) );
 	iMenu->AddItem( descrItem );
 	iMenu->AddSeparatorItem();
 	GaduMenuItem *aboutItem = new GaduMenuItem( iIconAvail, _T("About BeGadu"), new BMessage( BEGG_ABOUT ) );
 	iMenu->AddItem( aboutItem );
 	GaduMenuItem *quitItem = new GaduMenuItem( iIconQuit, _T("Exit"), new BMessage( BEGG_QUIT ) );
 	iMenu->AddItem( quitItem );
-
-//	if( iMenu->SetTargetForItems( this ) == B_OK )
-//	{
-//		fprintf( stderr, "iMenu->SetTargetForItems( B_OK )\n", roster );
-//	}
-//	else
-//	{
-//		fprintf( stderr, "iMenu->SetTargetForItems( FAILED )\n" );
-//	}
 	}
 
 BArchivable* BGDeskbar::Instantiate( BMessage *aData )
@@ -305,7 +301,6 @@ void BGDeskbar::MessageReceived( BMessage *aMessage )
 				}
 			break;
 			}
-		/* handling messages */
 		default:
 			BView::MessageReceived( aMessage );
 		}
@@ -340,7 +335,7 @@ void BGDeskbar::Pulse()
 
 void BGDeskbar::MouseDown( BPoint aWhere )
 	{
-	fprintf( stderr, "BGDeskbar: MouseDown( aWhere )\n" );
+	DEBUG_TRACE( "BGDeskbar: MouseDown( aWhere )\n" );
 	unsigned long buttons;
 	if( LockLooper() )
 		{
@@ -349,20 +344,12 @@ void BGDeskbar::MouseDown( BPoint aWhere )
 		}
 	if( buttons & B_PRIMARY_MOUSE_BUTTON )
 		{
-		fprintf( stderr, "BGDeskbar: MouseDown( B_PRIMARY_MOUSE_BUTTON )\n" );
+		DEBUG_TRACE( "BGDeskbar: MouseDown( B_PRIMARY_MOUSE_BUTTON )\n" );
 		BMessenger( "application/x-vnd.BeGadu" ).SendMessage( new BMessage( SHOW_MAIN_WINDOW ) );
-//		if( iWindow->LockLooper() )
-//		{
-//			if( iWindow->IsHidden() )
-//				iWindow->Show();
-//			else
-//				iWindow->Activate();
-//			iWindow->UnlockLooper();
-//		}
 		}
 	else if( buttons & B_SECONDARY_MOUSE_BUTTON )
 		{
-		fprintf( stderr, "BGDeskbar: MouseDown( B_SECONDARY_MOUSE_BUTTON )\n" );
+		DEBUG_TRACE( "BGDeskbar: MouseDown( B_SECONDARY_MOUSE_BUTTON )\n" );
 		GaduMenuItem *selectedItem = (GaduMenuItem*) iMenu->Go( ConvertToScreen( aWhere ), false, true );
 		if( selectedItem )
 			{
@@ -373,20 +360,18 @@ void BGDeskbar::MouseDown( BPoint aWhere )
 
 void BGDeskbar::AttachedToWindow()
 	{
-	fprintf( stderr, "BGDeskbar::AttachedToWindow()\n" );
+	DEBUG_TRACE( "BGDeskbar::AttachedToWindow()\n" );
 	snooze( 500*100 );
 	BMessage* message = new BMessage( ADD_MESSENGER );
 	message->AddMessenger( "messenger", BMessenger( this ) );
 	BMessenger( "application/x-vnd.BeGadu" ).SendMessage( message );
 	delete message;
-	/* temporary empty */
 	BView::AttachedToWindow();
 	}
 
 void BGDeskbar::DetachedFromWindow()
 	{
-	fprintf( stderr, "BGDeskbar::DetachedFromWindow()\n" );
-	/* temporary empty */
+	DEBUG_TRACE( "BGDeskbar::DetachedFromWindow()\n" );
 	BView::DetachedFromWindow();
 	}
 

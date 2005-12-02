@@ -5,7 +5,7 @@
 #
 
 WERSJA = 20051201 ;
-C++FLAGS += -g -I/boot/home/config/include -I./include -DDEBUG -DWERSJA=\\\"$(WERSJA)\\\"  -Wno-multichar -DZETA -O0 ;
+C++FLAGS += -g -I/boot/home/config/include -I./include -DWERSJA=\\\"$(WERSJA)\\\"  -Wno-multichar -DZETA -O0 -DDEBUG ;
 CCFLAGS = $(C++FLAGS) ;
 
 # po zlinkowaniu programu, dodaj resy

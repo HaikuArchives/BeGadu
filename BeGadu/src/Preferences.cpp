@@ -54,7 +54,6 @@ Preferences::Preferences( Profile* aProfile, MainWindow* aWindow, BRect aRect, B
 		localization_string.SetTo( "Language/Dictionaries/BeGadu" );
 	else
 		localization_string.SetTo( localization.Path() );
-	fprintf( stderr, localization_string.String() );
 	be_locale.LoadLanguageFile( localization_string.String() );
 #endif
 

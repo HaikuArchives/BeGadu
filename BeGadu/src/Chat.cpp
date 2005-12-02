@@ -52,7 +52,6 @@ ChatWindow::ChatWindow( Network *aNetwork, MainWindow *aWindow, uin_t aWho )
 		localization_string.SetTo( "Language/Dictionaries/BeGadu" );
 	else
 		localization_string.SetTo( localization.Path() );
-	fprintf( stderr, localization_string.String() );
 	be_locale.LoadLanguageFile( localization_string.String() );
 #endif
 
@@ -162,7 +161,6 @@ void ChatWindow::MessageReceived( BMessage* aMessage )
 			str2 = new BString();
 			str2->SetTo( string );
 			free( string );
-//			str2 << "[" << (int32)now->tm_hour << ":" << now->tm_min << "] ";
 			iChat->SetFontAndColor( iChat->TextLength(), iChat->TextLength() + str2->Length(), font, B_FONT_ALL, &yellow );
 			iChat->Insert( iChat->TextLength(), str2->String(), str2->Length() );
 			str->Append( ": " );
@@ -229,11 +227,6 @@ void ChatWindow::MessageReceived( BMessage* aMessage )
 				iChat->SetFontAndColor( iChat->TextLength(), iChat->TextLength() + str2.Length(), font, B_FONT_ALL, &white );
 				iChat->Insert( iChat->TextLength(), str2.String(), str2.Length() );
 
-//				string = (char*)calloc(strlen(" [00:00]\n%s\n") + 1 + fWindow->fProfil->fNazwaProfilu->Length() + strlen(fPowiedzControl->Text()), 1);
-//				sprintf(string, "%s [%02d:%02d]\n%s\n", fWindow->fProfil->fNazwaProfilu->String(), teraz->tm_hour, teraz->tm_min, fPowiedzControl->Text());
-//				fRozmowa->Insert(fRozmowa->TextLength(), string, strlen(string));
-//				free(string);
-				
 				/* scroll down */
 				BScrollBar * scrollBar = iScrollView->ScrollBar( B_VERTICAL );
 				if( scrollBar->LockLooper() )

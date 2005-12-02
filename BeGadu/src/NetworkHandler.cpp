@@ -32,12 +32,18 @@
 #define _T(str) (str)
 #endif
 
+#ifdef DEBUG
+#define DEBUG_TRACE(str) fprintf(stderr, str)
+#else
+#define DEBUG_TRACE(str)
+#endif
+
 static time_t 	curTime = 0;
 static time_t 	pingTimer = 0;
 
 int32 HandlerThread( void *_handler )
 	{
-	fprintf( stderr, "HandlerThread()\n" );
+	DEBUG_TRACE( "HandlerThread()\n" );
 	NetworkHandler* handler = ( NetworkHandler* ) _handler;
 	Network* network = handler->GetNetwork();
 	fd_set	rd, wr;
@@ -105,7 +111,7 @@ int32 HandlerThread( void *_handler )
 
 NetworkHandler::NetworkHandler( Network* aNetwork, int id, int fd, int cond, void *data )
 	{
-	fprintf( stderr, "NetworkHandler::NetworkHandler()\n" );
+	DEBUG_TRACE( "NetworkHandler::NetworkHandler()\n" );
 	iNetwork = aNetwork;
 	iId		= id;
 	iFd		= fd;
@@ -125,7 +131,6 @@ NetworkHandler::NetworkHandler( Network* aNetwork, int id, int fd, int cond, voi
 		localization_string.SetTo( "Language/Dictionaries/BeGadu" );
 	else
 		localization_string.SetTo( localization.Path() );
-	fprintf( stderr, localization_string.String() );
 	be_locale.LoadLanguageFile( localization_string.String() );
 #endif
 
@@ -133,7 +138,7 @@ NetworkHandler::NetworkHandler( Network* aNetwork, int id, int fd, int cond, voi
 
 void NetworkHandler::Run()
 	{
-	fprintf( stderr, "NetworkHandler::Run()\n" );
+	DEBUG_TRACE( "NetworkHandler::Run()\n" );
 	iDie = false;
 	iThreadID = spawn_thread( HandlerThread, "handler thread", B_NORMAL_PRIORITY, this );
 	resume_thread( iThreadID );
@@ -141,7 +146,7 @@ void NetworkHandler::Run()
 
 void NetworkHandler::Stop()
 	{
-	fprintf( stderr, "NetworkHandler::Stop()\n" );
+	DEBUG_TRACE( "NetworkHandler::Stop()\n" );
 	status_t exit_value;
 	iDie = true;
 	wait_for_thread( iThreadID, &exit_value );
@@ -158,7 +163,6 @@ void NetworkHandler::HandleEvent( struct gg_event *event )
 			break;
 			}
 			
-		case GG_STATE_CONNECTED:
 		case GG_EVENT_CONN_SUCCESS:
 			{
 			HandleEventConnected( event );
@@ -168,6 +172,12 @@ void NetworkHandler::HandleEvent( struct gg_event *event )
 		case GG_EVENT_CONN_FAILED:
 			{
 			HandleEventConnFailed( event );
+			break;
+			}
+		
+		case GG_EVENT_DISCONNECT:
+			{
+			HandleEventDisconnected( event );
 			break;
 			}
 			
@@ -213,7 +223,7 @@ void NetworkHandler::HandleEvent( struct gg_event *event )
 
 void NetworkHandler::HandleEventConnected( struct gg_event *event )
 	{
-	fprintf( stderr, "NetworkHandler::HandleEventConnected()\n" );
+	DEBUG_TRACE( "NetworkHandler::HandleEventConnected()\n" );
 	fprintf( stderr, _T("NetworkHandler=> Checking userlist... ") );
 	if( iNetwork->iWindow->GetProfile()->GetUserlist()->IsValid() == false ||
 		iNetwork->iWindow->GetProfile()->iNeedImport == true )
@@ -236,24 +246,28 @@ void NetworkHandler::HandleEventConnected( struct gg_event *event )
 
 void NetworkHandler::HandleEventConnFailed( struct gg_event *event )
 	{
-	fprintf( stderr, "NetworkHandler::HandleEventConnFailed()\n" );
-	iNetwork->Logout();
-	// BMessenger( iNetwork ).SendMessage( DEL_HANDLER );
+	DEBUG_TRACE( "NetworkHandler::HandleEventConnFailed()\n" );
+	BMessenger( iNetwork->iWindow ).SendMessage( SET_NOT_AVAIL );
+	}
+
+void NetworkHandler::HandleEventDisconnected( struct gg_event *event )
+	{
+	DEBUG_TRACE( "NetworkHandler::HandleEventDisconnected()\n" );
+	BMessenger( iNetwork->iWindow ).SendMessage( SET_NOT_AVAIL );
 	}
 
 void NetworkHandler::HandleEventMsg( struct gg_event *event )
 	{
-	fprintf( stderr, "NetworkHandler::HandleEventMsg()\n");
+	DEBUG_TRACE( "NetworkHandler::HandleEventMsg()\n");
 	BMessage *wiadomosc = new BMessage( GOT_MESSAGE );
 	wiadomosc->AddInt32( "who", iNetwork->iEvent->event.msg.sender );
 	wiadomosc->AddString( "msg", ( char* ) iNetwork->iEvent->event.msg.message );
-//	fprintf( stderr, "Od: %d\nWiadomosc: %s\n", iNetwork->iEvent->event.msg.sender, (char*)iNetwork->iEvent->event.msg.message );
 	BMessenger( iNetwork ).SendMessage( wiadomosc );
 	}
 
 void NetworkHandler::HandleEventUserlist( struct gg_event *event )
 	{
-	fprintf( stderr, "NetworkHandler::HandleEventUserlist()\n");
+	DEBUG_TRACE( "NetworkHandler::HandleEventUserlist()\n");
 	if( iNetwork->iEvent->event.userlist.type == GG_USERLIST_GET_REPLY )
 		{
 		if( iNetwork->iEvent->event.userlist.reply )
@@ -301,7 +315,7 @@ void NetworkHandler::HandleEventUserlist( struct gg_event *event )
 
 void NetworkHandler::HandleEventNotify( struct gg_event *event )
 	{
-	fprintf( stderr, "NetworkHandler::HandleEventNotify()\n");
+	DEBUG_TRACE( "NetworkHandler::HandleEventNotify()\n");
  	struct gg_notify_reply *n;
  	if( iNetwork->iEvent->type == GG_EVENT_NOTIFY )
  		n = iNetwork->iEvent->event.notify;
@@ -335,7 +349,7 @@ void NetworkHandler::HandleEventNotify( struct gg_event *event )
 
 void NetworkHandler::HandleEventNotify60( struct gg_event *event )
 	{
-	fprintf( stderr,"NetworkHandler::HandleEventNotify60()\n");
+	DEBUG_TRACE( "NetworkHandler::HandleEventNotify60()\n");
 	Userlist* userlist = iNetwork->iWindow->GetProfile()->GetUserlist();
 	List* list = userlist->GetList();
 	for( int i = 0; iNetwork->iEvent->event.notify60[ i ].uin; i++ )
@@ -362,7 +376,7 @@ void NetworkHandler::HandleEventNotify60( struct gg_event *event )
 
 void NetworkHandler::HandleEventStatus( struct gg_event *event )
 	{
-	fprintf( stderr, "NetworkHandler::HandleEventStatus()\n");
+	DEBUG_TRACE( "NetworkHandler::HandleEventStatus()\n");
 	Userlist* userlist = iNetwork->iWindow->GetProfile()->GetUserlist();
 	List* list = userlist->GetList();
  	Person *o = NULL;
@@ -386,7 +400,7 @@ void NetworkHandler::HandleEventStatus( struct gg_event *event )
 
 void NetworkHandler::HandleEventStatus60( struct gg_event *event )
 	{
-	fprintf( stderr, "NetworkHandler::HandleEventStatus60()\n" );
+	DEBUG_TRACE( "NetworkHandler::HandleEventStatus60()\n" );
 	Userlist* userlist = iNetwork->iWindow->GetProfile()->GetUserlist();
 	List* list = userlist->GetList();
  	char *descr;
@@ -414,7 +428,6 @@ void NetworkHandler::HandleEventStatus60( struct gg_event *event )
 
 static int Expired( time_t timer )
 	{
-//	fprintf( stderr, "timer = %d curTime = %d\n", timer, curTime );
 	if( timer && curTime >= timer )
 		return 1;
 	return 0;
@@ -428,13 +441,13 @@ static void Rearm( time_t* timer, int seconds )
 
 void NetworkHandler::HandlePingTimeoutCallback( time_t &pingTimer )
 	{
-	fprintf( stderr, "NetworkHandler::HandlePingTimeoutCallback( %d )\n", pingTimer );
+	DEBUG_TRACE( "NetworkHandler::HandlePingTimeoutCallback()\n" );
 	gg_ping( iNetwork->Session() );
 	Rearm( &pingTimer, 60 );
 	}
 
 Network* NetworkHandler::GetNetwork() const
 	{
-	fprintf( stderr, "NetworkHandler::GetNetwork()\n" );
+	DEBUG_TRACE( "NetworkHandler::GetNetwork()\n" );
 	return iNetwork;
 	}

@@ -65,6 +65,7 @@ class Description : public BWindow
 	
 		/* resources */
 		BResources			*	iResources;
+		int						iStatus;
 	};
 
 #endif /* __BEGADU_DESCRIPTION_H__ */

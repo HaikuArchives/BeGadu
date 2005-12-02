@@ -28,6 +28,12 @@
 #define _T(str) (str)
 #endif
 
+#ifdef DEBUG
+#define DEBUG_TRACE(str) fprintf(stderr, str)
+#else
+#define DEBUG_TRACE(str)
+#endif
+
 BeGadu::BeGadu() : BApplication( "application/x-vnd.BeGadu" )
 	{
 	/* we're checking configuration */
@@ -53,7 +59,6 @@ BeGadu::BeGadu() : BApplication( "application/x-vnd.BeGadu" )
 		localization_string.SetTo( "Language/Dictionaries/BeGadu" );
 	else
 		localization_string.SetTo( localization.Path() );
-	fprintf( stderr, localization_string.String() );
 	be_locale.LoadLanguageFile( localization_string.String() );
 #endif
 	
@@ -137,7 +142,7 @@ void BeGadu::MessageReceived( BMessage *aMessage )
 		
 		case ADD_MESSENGER:
 			{
-			fprintf( stderr, "BeGadu::MessageReceived( ADD_MESSENGER )\n" );
+			DEBUG_TRACE( "BeGadu::MessageReceived( ADD_MESSENGER )\n" );
 			BMessenger messenger;
 			aMessage->FindMessenger( "messenger", &messenger );
 			if( iWindow )
@@ -154,6 +159,7 @@ void BeGadu::MessageReceived( BMessage *aMessage )
 		case SET_DESCRIPTION:
 		case BEGG_ABOUT:
 		case SHOW_MAIN_WINDOW:
+		case CHANGE_DESCRIPTION:
 			{
 			if( iWindow )
 				{
@@ -233,7 +239,7 @@ void BeGadu::MessageReceived( BMessage *aMessage )
 
 void BeGadu::ReadyToRun()
 	{
-	fprintf( stderr, "BeGadu::ReadyToRun()\n" );
+	DEBUG_TRACE( "BeGadu::ReadyToRun()\n" );
 	if( iReadyToRun )
 		AddDeskbarIcon();
 	}
@@ -271,7 +277,7 @@ bool BeGadu::QuitRequested()
 
 void BeGadu::AddDeskbarIcon()
 	{
-	fprintf( stderr, "BeGadu::AddDeskbarIcon()\n" );
+	DEBUG_TRACE( "BeGadu::AddDeskbarIcon()\n" );
 	BDeskbar deskbar;
 	if( !deskbar.HasItem( "BGDeskbar" ) )
 		{
@@ -294,7 +300,7 @@ void BeGadu::AddDeskbarIcon()
 
 void BeGadu::DelDeskbarIcon()
 	{
-	fprintf( stderr, "BeGadu::DelDeskbarIcon()\n" );
+	DEBUG_TRACE( "BeGadu::DelDeskbarIcon()\n" );
 	BDeskbar deskbar;
 	if( deskbar.HasItem( "BGDeskbar" ) )
 		{

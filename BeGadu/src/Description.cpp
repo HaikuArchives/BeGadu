@@ -18,7 +18,13 @@
 #include "Msg.h"
 #include "Description.h"
 #include "Main.h"
+#include "Network.h"
 #include "GfxStuff.h"
+
+extern "C"
+{
+#include "libgadu.h"
+}
 
 #ifdef ZETA
 #include <locale/Locale.h>
@@ -34,7 +40,6 @@ IconsView::IconsView( BRect aRect, BResources *aResources )
 	iResources = aResources;
 	if( iResources )
 		{
-		fprintf( stderr, "iResources ok\n" );
 		iIconAvail = GetBitmap( "online_d" );
 		iIconBusy = GetBitmap( "busy_d" );
 		iIconInvisible = GetBitmap( "invisible_d" );
@@ -63,10 +68,12 @@ void IconsView::Draw( BRect aRect )
 		{
 		if( Window()->Lock() )
 			{
+			SetDrawingMode( B_OP_ALPHA );
+			SetLowColor( 255, 255, 255, 0 );
 			DrawBitmap( iIconAvail, BPoint( 5, 5 ) );
 			DrawBitmap( iIconBusy, BPoint( 5, 25 ) );
-			DrawBitmap( iIconBusy, BPoint( 5, 45 ) );
-			DrawBitmap( iIconBusy, BPoint( 5, 65 ) );
+			DrawBitmap( iIconInvisible, BPoint( 5, 45 ) );
+			DrawBitmap( iIconNotAvail, BPoint( 5, 65 ) );
 			Window()->Unlock();
 			}
 		}
@@ -157,7 +164,7 @@ Description::Description( MainWindow* aWindow, BRect aRect, BResources* aRes )
 	r.right = r.left + 15;
 	r.top = 7;
 	r.bottom = r.top + 12;
-	iAvail = new BRadioButton( r, "AvailDesc", "", new BMessage() );
+	iAvail = new BRadioButton( r, "AvailDesc", "", new BMessage( SET_AVAIL ) );
 	iBox->AddChild( iAvail );
 
 	r = iBox->Bounds();
@@ -165,7 +172,7 @@ Description::Description( MainWindow* aWindow, BRect aRect, BResources* aRes )
 	r.right = r.left + 15;
 	r.top = 27;
 	r.bottom = r.top + 12;
-	iBusy = new BRadioButton( r, "BusyDesc", "", new BMessage() );
+	iBusy = new BRadioButton( r, "BusyDesc", "", new BMessage( SET_BRB ) );
 	iBox->AddChild( iBusy );
 
 	r = iBox->Bounds();
@@ -173,7 +180,7 @@ Description::Description( MainWindow* aWindow, BRect aRect, BResources* aRes )
 	r.right = r.left + 15;
 	r.top = 47;
 	r.bottom = r.top + 12;
-	iInvisible = new BRadioButton( r, "InvisibleDesc", "", new BMessage() );
+	iInvisible = new BRadioButton( r, "InvisibleDesc", "", new BMessage( SET_INVIS ) );
 	iBox->AddChild( iInvisible );
 
 	r = iBox->Bounds();
@@ -181,7 +188,7 @@ Description::Description( MainWindow* aWindow, BRect aRect, BResources* aRes )
 	r.right = r.left + 15;
 	r.top = 67;
 	r.bottom = r.top + 12;
-	iNotAvail = new BRadioButton( r, "NotAvailDesc", "", new BMessage() );
+	iNotAvail = new BRadioButton( r, "NotAvailDesc", "", new BMessage( SET_NOT_AVAIL ) );
 	iBox->AddChild( iNotAvail );
 
 	r = iBox->Bounds();
@@ -213,14 +220,75 @@ Description::Description( MainWindow* aWindow, BRect aRect, BResources* aRes )
     
     button = new BButton( r, "cancel button", _T("Cancel"), new BMessage( DESCRIPTION_CANCEL ) );
     AddChild( button );
+
+	/* setting current settings */
+	int status = iWindow->GetNetwork()->GetStatus();
+	BString *description = iWindow->GetNetwork()->iDescription;
+	if( status == GG_STATUS_AVAIL || status == GG_STATUS_AVAIL_DESCR )
+		{
+		iStatus = GG_STATUS_AVAIL_DESCR;
+		iAvail->SetValue( B_CONTROL_ON );
+		}
+	else if( status == GG_STATUS_BUSY || status == GG_STATUS_BUSY_DESCR )
+		{
+		iStatus = GG_STATUS_BUSY_DESCR;
+		iBusy->SetValue( B_CONTROL_ON );
+		}
+	else if( status == GG_STATUS_INVISIBLE || status == GG_STATUS_INVISIBLE_DESCR )
+		{
+		iStatus = GG_STATUS_INVISIBLE_DESCR;
+		iInvisible->SetValue( B_CONTROL_ON );
+		}
+	else if( status == GG_STATUS_NOT_AVAIL || status == GG_STATUS_NOT_AVAIL_DESCR )
+		{
+		iStatus = GG_STATUS_NOT_AVAIL_DESCR;
+		iNotAvail->SetValue( B_CONTROL_ON );
+		}
+	iDescription->SetText( description->String(), description->Length() );	
 	}
 
 void Description::MessageReceived( BMessage* aMessage )
 	{
 	switch( aMessage->what )
 		{
+		case SET_AVAIL:
+			{
+			iStatus = GG_STATUS_AVAIL_DESCR;
+			break;
+			}
+		
+		case SET_BRB:
+			{
+			iStatus = GG_STATUS_BUSY_DESCR;
+			break;
+			}
+		
+		case SET_INVIS:
+			{
+			iStatus = GG_STATUS_INVISIBLE_DESCR;
+			break;
+			}
+		
+		case SET_NOT_AVAIL:
+			{
+			iStatus = GG_STATUS_NOT_AVAIL_DESCR;
+			break;
+			}
+		
 		case DESCRIPTION_OK:
 			{
+			BMessage *desc = new BMessage( SET_DESCRIPTION );
+			fprintf( stderr, "iStatus = %d\n", iStatus );
+			desc->AddInt8( "iStatus", iStatus );
+			BString description;
+			if( iDescription->LockLooper() )
+				{
+				description.SetTo( iDescription->Text() );
+				iDescription->UnlockLooper();
+				}
+			desc->AddString( "iDescription", description );
+			BMessenger( iWindow ).SendMessage( desc );
+			delete desc;
 			BMessenger( this ).SendMessage( B_QUIT_REQUESTED );
 			break;
 			}

@@ -20,6 +20,12 @@ extern "C" {
 #include "strlcpy.h"
 }
 
+#ifdef DEBUG
+#define DEBUG_TRACE(str) fprintf(stderr, str)
+#else
+#define DEBUG_TRACE(str)
+#endif
+
 #ifndef PATH_MAX
 #  define PATH_MAX _POSIX_PATH_MAX
 #endif
@@ -91,7 +97,7 @@ void Profile::SetDesc( BString* aDescription )
 
 void Profile::Load( BString* aProfile )
 	{
-	fprintf( stderr, "Profile::Load(%s)\n", aProfile->String() );
+	DEBUG_TRACE( "Profile::Load()\n" );
 	BPath path;
 	BMessage *cfgmesg = new BMessage();
 	find_directory( B_USER_SETTINGS_DIRECTORY, &path );
@@ -133,7 +139,7 @@ void Profile::Load( BString* aProfile )
 
 void Profile::Save()
 	{
-	fprintf( stderr, "Profile::Save()\n" );
+	DEBUG_TRACE( "Profile::Save()\n" );
 	BMessage *cfgmesg = new BMessage();
 	cfgmesg->AddRect( "iRect", iRect );
 	cfgmesg->AddInt32( "iNumber", iNumber);
@@ -439,7 +445,7 @@ void Userlist::Clear()
 /* Kod w większości ze źródeł ekg/userlist.[c,h] */
 int* Userlist::Set( const char* aContacts )
 	{
-	fprintf( stderr, "Userlist::Set() started\n" );
+	DEBUG_TRACE( "Userlist::Set()\n" );
 	char *buf, *cont, *contsave;
 	char **entry, *uin;
 	Clear();
@@ -540,7 +546,6 @@ void Userlist::Import(struct gg_session* aSession, List* aList )
 			delete person;
 			}
 		}
-	fprintf( stderr, "import exit\n" );
 	}
 
 void Userlist::Export( struct gg_session* aSession, List* aList )
