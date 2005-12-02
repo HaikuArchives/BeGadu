@@ -13,7 +13,7 @@ Main BeGadu :
 	src/Debug.cpp src/Network.cpp src/NetworkHandler.cpp
 	src/Person.cpp src/Preferences.cpp src/GfxStuff.cpp src/GaduListItem.cpp
 	src/GaduMenuItem.cpp src/ProfileWizard.cpp
-	src/BGDeskbar.cpp
+	src/BGDeskbar.cpp src/Description.cpp
 	src/xmalloc.c src/dynstuff.c src/strlcpy.c ;
 
 BinPackage BeGadu-$(WERSJA)-bin.zip ;

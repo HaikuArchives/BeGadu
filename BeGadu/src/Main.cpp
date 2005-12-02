@@ -34,6 +34,7 @@
 #include "Network.h"
 #include "Preferences.h"
 #include "Person.h"
+#include "Description.h"
 
 #ifdef ZETA
 #include <locale/Locale.h>
@@ -64,10 +65,8 @@ MainWindow::MainWindow( BString* aProfile )
 		localization_string.SetTo( "Language/Dictionaries/BeGadu" );
 	else
 		localization_string.SetTo( localization.Path() );
-	fprintf( stderr, localization_string.String() );
 	be_locale.LoadLanguageFile( localization_string.String() );
 #endif
-
 
 	iProfile = new Profile();
 	iProfile->Load( aProfile );
@@ -167,7 +166,7 @@ MainWindow::MainWindow( BString* aProfile )
 	iBRB			= new GaduMenuItem( iIconBRB, _T("Be right back"), new BMessage( SET_BRB ) );
 	iInvisible		= new GaduMenuItem( iIconInvisible, _T("Invisible"), new BMessage( SET_INVIS ) );
 	iNotAvail		= new GaduMenuItem( iIconNotAvail, _T("Not availble"), new BMessage( SET_NOT_AVAIL ) );
-	iDescr			= new GaduMenuItem( iIconAvailDescr, _T("Description.."), new BMessage( SET_DESCRIPTION ) );	
+	iDescr			= new GaduMenuItem( iIconAvailDescr, _T("Description.."), new BMessage( CHANGE_DESCRIPTION ) );	
 	
 	iStatusMenu->AddItem( iAvail );
 	iStatusMenu->AddItem( iBRB );
@@ -222,18 +221,32 @@ void MainWindow::MessageReceived( BMessage* aMessage )
 	{
 	switch( aMessage->what )
 		{
+		case CHANGE_DESCRIPTION:
+			{
+			fprintf( stderr, "MainWindow::MessageReceived( CHANGE_DESCRIPTION )\n" );
+			BScreen *screen = new BScreen( this );
+			display_mode mode;
+			screen->GetMode( &mode );
+			int32 width = 250;
+			int32 height = 140;
+			int32 x_wind = mode.timing.h_display / 2 - ( width / 2);
+			int32 y_wind = mode.timing.v_display / 2 - ( height / 2 );
+			int32 new_width = x_wind + width;	// x 2
+			int32 new_height = y_wind + height;		// x 2
+			Description* desc = new Description( this, BRect( x_wind, y_wind, new_width, new_height ), &iResources );
+			desc->Show();
+			break;
+			}
+			
 		case BEGG_PREFERENCES:
 			{
 			fprintf( stderr, "MainWindow::MessageReceived( BEGG_PREFERENCES )\n" );
 			BScreen *screen = new BScreen( this );
 			display_mode mode;
 			screen->GetMode( &mode );
-			// centering
 			int32 width = 600;
 			int32 height = 400; 
-			// obliczamy srodek ekranu /2  - 1/2 szerokosci okna
 			int32 x_wind = mode.timing.h_display / 2 - ( width / 2);
-			// obliczamy srodek ekranu /2 - 1/2 wysokosci okna
 			int32 y_wind = mode.timing.v_display / 2 - ( height / 2 );
 			int32 new_width = x_wind + width;	// x 2
 			int32 new_height = y_wind + height;		// x 2

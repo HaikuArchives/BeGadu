@@ -86,3 +86,7 @@
 "Password: "
 "Sorry, but BeGadu needs at least one account configured"
 "Ok"
+
+# Description.cpp
+"Change description"
+"Change"

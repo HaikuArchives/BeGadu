@@ -61,5 +61,8 @@
 #define BGDESKBAR_CHSTATE	'chst'
 #define ADD_MESSENGER		'adme'
 #define DEL_MESSENGER		'deme'
+#define CHANGE_DESCRIPTION	'chde'
+#define DESCRIPTION_OK		'deok'
+#define DESCRIPTION_CANCEL	'deca'
 
 #endif /* __BEGADU_MSG_H__ */
