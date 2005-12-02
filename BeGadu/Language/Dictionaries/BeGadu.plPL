@@ -92,3 +92,12 @@
 # Description.cpp
 "Change description"								"Zmień opis"
 "Change"											"Zmień"
+
+# Preferences.cpp
+"General"											"Ogólne"
+"IM"												"Komunikator"
+"Sounds"											"Dźwięki"
+"Catalog"											"Katalog"
+"Notify"											"Powiadomienia"
+"Theme"												"Wygląd"
+"Connection"										"Połączenie"

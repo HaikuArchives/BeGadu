@@ -90,3 +90,12 @@
 # Description.cpp
 "Change description"
 "Change"
+
+# Preferences.cpp
+"General"
+"IM"
+"Sounds"
+"Catalog"
+"Notify"
+"Theme"
+"Connection"

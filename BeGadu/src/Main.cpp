@@ -194,17 +194,17 @@ MainWindow::MainWindow( BString* aProfile )
 
 	fprintf( stderr, _T("Profile %s loaded.\n"), iProfile->ProfileName()->String() );
 
-	if( iProfile->AutoStatus() != GG_STATUS_NOT_AVAIL )
-		{
-		if( iNetwork->Session() )
-			{
-			gg_change_status( iNetwork->Session(), iProfile->AutoStatus() );
-			}
-		else
-			{
-			iNetwork->Login( iProfile->AutoStatus() );
-			}
-		}
+//	if( iProfile->AutoStatus() != GG_STATUS_NOT_AVAIL )
+//		{
+//		if( iNetwork->Session() )
+//			{
+//			gg_change_status( iNetwork->Session(), iProfile->AutoStatus() );
+//			}
+//		else
+//			{
+//			iNetwork->Login( iProfile->AutoStatus() );
+//			}
+//		}
 	}
 
 bool MainWindow::QuitRequested()
@@ -249,8 +249,8 @@ void MainWindow::MessageReceived( BMessage* aMessage )
 			BScreen *screen = new BScreen( this );
 			display_mode mode;
 			screen->GetMode( &mode );
-			int32 width = 600;
-			int32 height = 400; 
+			int32 width = 630;
+			int32 height = 400;
 			int32 x_wind = mode.timing.h_display / 2 - ( width / 2);
 			int32 y_wind = mode.timing.v_display / 2 - ( height / 2 );
 			int32 new_width = x_wind + width;	// x 2

@@ -25,6 +25,7 @@ class Network;
 class Person;
 class BBitmap;
 class BitmapView;
+class PreferencesTab;
 
 class Preferences : public BWindow
 	{
@@ -36,8 +37,7 @@ class Preferences : public BWindow
 		
 		Profile				*	iProfile;
 		MainWindow			*	iWindow;
-		BBitmap				*	iLogo;
-		BitmapView			*	iLogoView;
+		PreferencesTab		*	iPreferencesTab;
 		BTextControl		*	iNumberControl;
 		BTextControl		*	iPasswordControl;
 		BResources			*	iResources;

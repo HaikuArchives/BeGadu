@@ -3,7 +3,6 @@
 	Ten plik jest częscią kodu źródłowego BeGadu.
 	Homepage: http://begadu.sf.net
 */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <OS.h>
@@ -22,9 +21,9 @@
 #include <OutlineListView.h>
 #include <ListView.h>
 #include <ListItem.h>
-
 #include "Msg.h"
 #include "Preferences.h"
+#include "PreferencesTab.h"
 #include "Main.h"
 #include "GfxStuff.h"
 #include "Network.h"
@@ -58,16 +57,25 @@ Preferences::Preferences( Profile* aProfile, MainWindow* aWindow, BRect aRect, B
 #endif
 
 	SetTitle( _T( PREFERENCES_NAME ) );
+
 	iProfile = aProfile;
 	iWindow = aWindow;
 	iResources = aRes;
 	BRect r = Bounds();
 
-	iLogoView = new BitmapView( BRect( r.left , r.top,
-									   r.left + 600, r.top + 150 ),
-									   "logo", aRes );
-	AddChild( iLogoView );
+	/* making a default background */
+	BView *someView;
+	someView = new BView( r, "some view", B_FOLLOW_ALL, B_WILL_DRAW );
+	someView->SetViewColor( 60, 60, 60 );
+	AddChild( someView );
+
+	r = Bounds();
+	r.bottom = r.top + 60;
+	iPreferencesTab = new PreferencesTab( r, "Preferences Tab", iResources );
+	AddChild( iPreferencesTab );
 	
+/*
+	r = Bounds();
 	r.left = 20;
 	r.top = 100;
 	r.right = r.left + 250;
@@ -95,8 +103,6 @@ Preferences::Preferences( Profile* aProfile, MainWindow* aWindow, BRect aRect, B
     							   new BMessage( PREFERENCES_CANCEL ) );
     AddChild(przycisk);
 
-	/* pobieramy aktualna konfiguracje */
-
     if( iNumberControl->LockLooper() )
     	{
 		BString a;
@@ -105,6 +111,7 @@ Preferences::Preferences( Profile* aProfile, MainWindow* aWindow, BRect aRect, B
         iPasswordControl->SetText( iProfile->iPassword->String() );
         iNumberControl->UnlockLooper();
     	}    
+*/
 	}
 
 void Preferences::MessageReceived( BMessage* aMessage )
