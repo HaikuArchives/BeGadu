@@ -103,7 +103,7 @@ BuddyEdit::BuddyEdit( MainWindow* aWindow, BRect aRect, Person* aPerson )
 
 	iDisplayControl = new BTextControl( r,
 									 "iDisplayControl",
-									 _T( "Display:" ),
+									 _T( "Display as:" ),
 									"",
 									NULL );
 	iDisplayControl->SetDivider( 75 );

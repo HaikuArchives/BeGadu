@@ -108,3 +108,11 @@
 "Delete account"									"Usuń konto"
 "Change"											"Zmień"
 "Remember password"									"Pamiętaj hasło"
+
+# BuddyEdit.cpp
+"Name:"												"Imię:"
+"Surname:"											"Nazwisko:"
+"Nick:"												"Nick:"
+"Display as:"										"Wyświetl jako:"
+"Mobile:"											"Telefon kom.:"
+"Email:"											"Email:"

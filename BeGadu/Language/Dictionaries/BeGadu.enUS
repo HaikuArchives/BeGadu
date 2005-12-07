@@ -107,4 +107,10 @@
 "Change"
 "Remember password"
 
-# ProfileSelector.cpp
+# BuddyEdit.cpp
+"Name:"
+"Surname:"
+"Nick:"
+"Display as:"
+"Mobile:"
+"Email:"
