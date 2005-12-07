@@ -22,6 +22,7 @@
 "About BeGadu"										"O BeGadu"
 "Exit"												"Zakończ"
 "Can't find 'iStatus' in message...\n"				"Nie znalazłem 'iStatus' w BMessage...\n"
+"Change profile"									"Zmień profil"
 
 # Chat.cpp
 "[Stranger]"										"[Nieznajomy]"
@@ -68,7 +69,7 @@
 "Cancel"											"Anuluj"
 
 # ProfileWizard.cpp
-"Profile Wizard"									"Kreator Profilu"
+"Profile Wizard"									"Kreator profilu"
 "Welcome in Profile Wizard\n"						"Witaj w Kreatorze Profilu\n"
 "\n\nThis wizard helps You configure your existing account "	"\n\nTen kreator pomoże Ci skonfigurować istniejące konto "
 "on GaduGadu server or let You create a new one.\n\n"			"na serwerze GaduGadu lub stworzyć nowe.\n\n"
@@ -84,8 +85,8 @@
 "Create a new one (not implemented)"				"Stworzyć nowe"
 "Profile name:"										"Nazwa profilu:"
 "New"												"Nowy"
-"Number: "											"Numer: "
-"Password: "										"Hasło: "
+"Number:"											"Numer: "
+"Password:"										"Hasło: "
 "Sorry, but BeGadu needs at least one account configured"	"BeGadu potrzebuję przynajmniej jedno konto skonfigurowane by działać"
 "Ok"												"Ok"
 
@@ -101,3 +102,9 @@
 "Notify"											"Powiadomienia"
 "Theme"												"Wygląd"
 "Connection"										"Połączenie"
+"Access to the profile with a password"				"Zabezpiecz dostęp do profilu hasłem"
+"Repeat password:"									"Powtórz hasło:"
+"Your account"										"Twoje konto"
+"Delete account"									"Usuń konto"
+"Change"											"Zmień"
+"Remember password"									"Pamiętaj hasło"

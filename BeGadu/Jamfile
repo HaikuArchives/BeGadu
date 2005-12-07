@@ -13,8 +13,9 @@ Main BeGadu :
 	src/Debug.cpp src/Network.cpp src/NetworkHandler.cpp
 	src/Person.cpp src/Preferences.cpp src/GfxStuff.cpp src/GaduListItem.cpp
 	src/GaduMenuItem.cpp src/ProfileWizard.cpp
-	src/BGDeskbar.cpp src/Description.cpp src/PreferencesTab.cpp
-	src/xmalloc.c src/dynstuff.c src/strlcpy.c ;
+	src/BGDeskbar.cpp src/Description.cpp src/PreferencesList.cpp
+	src/PreferencesItem.cpp src/ProfileSelector.cpp src/GaduListView.cpp
+	src/BuddyEdit.cpp src/xmalloc.c src/dynstuff.c src/strlcpy.c ;
 
 BinPackage BeGadu-$(WERSJA)-bin.zip ;
 Depends BeGadu-$(WERSJA).zip-bin : BeGadu ;

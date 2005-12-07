@@ -78,7 +78,10 @@ BGDeskbar::BGDeskbar() : BView( BRect( 0, 0, 15, 15),
 	iIconNotAvailDescr = NULL;
 	iIconQuit = NULL;
 	iIconNewMessage = NULL;
-	iMenu = NULL;
+	iIconSelect = NULL;
+	iMenuProfileSelected = NULL;
+	iMenuProfileNotSelected = NULL;
+	iProfileSelected = false;
 	}
 
 BGDeskbar::BGDeskbar( BMessage *aMessage ) : BView( aMessage )
@@ -102,7 +105,10 @@ BGDeskbar::BGDeskbar( BMessage *aMessage ) : BView( aMessage )
 	iIconNotAvailDescr = NULL;
 	iIconQuit = NULL;
 	iIconNewMessage = NULL;
-	iMenu = NULL;
+	iIconSelect = NULL;
+	iMenuProfileSelected = NULL;
+	iMenuProfileNotSelected = NULL;
+	iProfileSelected = false;
 	Initialize();
 	}
 
@@ -159,14 +165,24 @@ BGDeskbar::~BGDeskbar()
 		delete iIconNewMessage;
 		iIconNewMessage = NULL;
 		}
+	if( iIconSelect )
+		{
+		delete iIconSelect;
+		iIconSelect = NULL;
+		}
 	if( iIcon )
 		{
 		iIcon = NULL;
 		}
-	if( iMenu )
+	if( iMenuProfileSelected )
 		{
-		delete iMenu;
-		iMenu = NULL;
+		delete iMenuProfileSelected;
+		iMenuProfileSelected = NULL;
+		}
+	if( iMenuProfileNotSelected )
+		{
+		delete iMenuProfileNotSelected;
+		iMenuProfileNotSelected = NULL;
 		}
 	}
 
@@ -192,6 +208,7 @@ void BGDeskbar::Initialize()
 		iIconNotAvailDescr = GetBitmap( "offline_d" );
 		iIconNewMessage = GetBitmap( "message" );
 		iIconQuit = GetBitmap( "quit" );
+		iIconSelect = GetBitmap( "config_catalog" );
 		iIcon = iIconNotAvail;
 		}
 	else
@@ -199,22 +216,32 @@ void BGDeskbar::Initialize()
 		fprintf(stderr, _T("BGDeskbar: BeGadu not runned, launching it...\n") );
 		be_roster->Launch( "application/x-vnd.BeGadu" );
 		}
-	iMenu = new BPopUpMenu( "BGDeskbarMenu", true, true );
-	GaduMenuItem *availItem = new GaduMenuItem( iIconAvail, _T("Availble"), new BMessage( SET_AVAIL ) );
-	iMenu->AddItem( availItem );
-	GaduMenuItem *busyItem = new GaduMenuItem( iIconBusy, _T("Be right back"), new BMessage( SET_BRB ) );
-	iMenu->AddItem( busyItem );
-	GaduMenuItem *invisibleItem = new GaduMenuItem( iIconInvisible, _T("Invisible"), new BMessage( SET_INVIS ) );
-	iMenu->AddItem( invisibleItem );
-	GaduMenuItem *notavailItem = new GaduMenuItem( iIconNotAvail, _T("Not availble"), new BMessage( SET_NOT_AVAIL ) );
-	iMenu->AddItem( notavailItem );
-	GaduMenuItem *descrItem = new GaduMenuItem( iIconAvailDescr, _T("Change description"), new BMessage( CHANGE_DESCRIPTION ) );
-	iMenu->AddItem( descrItem );
-	iMenu->AddSeparatorItem();
-	GaduMenuItem *aboutItem = new GaduMenuItem( iIconAvail, _T("About BeGadu"), new BMessage( BEGG_ABOUT ) );
-	iMenu->AddItem( aboutItem );
-	GaduMenuItem *quitItem = new GaduMenuItem( iIconQuit, _T("Exit"), new BMessage( BEGG_QUIT ) );
-	iMenu->AddItem( quitItem );
+
+	iMenuProfileSelected = new BPopUpMenu( "BGDeskbarMenuSelected", true, true );
+	GaduMenuItem *availItem = new GaduMenuItem( iIconAvail, _T( "Availble" ), new BMessage( SET_AVAIL ) );
+	iMenuProfileSelected->AddItem( availItem );
+	GaduMenuItem *busyItem = new GaduMenuItem( iIconBusy, _T( "Be right back" ), new BMessage( SET_BRB ) );
+	iMenuProfileSelected->AddItem( busyItem );
+	GaduMenuItem *invisibleItem = new GaduMenuItem( iIconInvisible, _T( "Invisible" ), new BMessage( SET_INVIS ) );
+	iMenuProfileSelected->AddItem( invisibleItem );
+	GaduMenuItem *notavailItem = new GaduMenuItem( iIconNotAvail, _T( "Not availble" ), new BMessage( SET_NOT_AVAIL ) );
+	iMenuProfileSelected->AddItem( notavailItem );
+	GaduMenuItem *descrItem = new GaduMenuItem( iIconAvailDescr, _T( "Change description" ), new BMessage( CHANGE_DESCRIPTION ) );
+	iMenuProfileSelected->AddItem( descrItem );
+	iMenuProfileSelected->AddSeparatorItem();
+	GaduMenuItem *aboutItem = new GaduMenuItem( iIconAvail, _T( "About BeGadu" ), new BMessage( BEGG_ABOUT ) );
+	iMenuProfileSelected->AddItem( aboutItem );
+	GaduMenuItem *quitItem = new GaduMenuItem( iIconQuit, _T( "Exit" ), new BMessage( BEGG_QUIT ) );
+	iMenuProfileSelected->AddItem( quitItem );
+	
+	iMenuProfileNotSelected = new BPopUpMenu( "BGDeskbarMenuNotSelected", true, true );
+	GaduMenuItem *selectItem = new GaduMenuItem( iIconSelect, _T( "Change profile" ), new BMessage( PROFILE_SELECT ) );
+	iMenuProfileNotSelected->AddItem( selectItem );
+	iMenuProfileNotSelected->AddSeparatorItem();
+	GaduMenuItem *aboutItem2 = new GaduMenuItem( iIconAvail, _T( "About BeGadu" ), new BMessage( BEGG_ABOUT ) );
+	iMenuProfileNotSelected->AddItem( aboutItem2 );
+	GaduMenuItem *quitItem2 = new GaduMenuItem( iIconQuit, _T( "Exit" ), new BMessage( BEGG_QUIT ) );
+	iMenuProfileNotSelected->AddItem( quitItem2 );
 	}
 
 BArchivable* BGDeskbar::Instantiate( BMessage *aData )
@@ -237,6 +264,20 @@ void BGDeskbar::MessageReceived( BMessage *aMessage )
 	{
 	switch( aMessage->what )
 		{
+		case PROFILE_NOT_SELECTED:
+			{
+			iProfileSelected = false;
+			fprintf( stderr, "deskbar:not selected\n" );
+			break;
+			}
+		
+		case PROFILE_SELECTED:
+			{
+			iProfileSelected = true;
+			fprintf( stderr, "deskbar:selected\n" );
+			break;
+			}
+			
 		case BGDESKBAR_CHSTATE:
 			{
 			fprintf( stderr, "BGDeskbar::MessageReceived( BGDESKBAR_CHSTATE );\n" );
@@ -350,10 +391,21 @@ void BGDeskbar::MouseDown( BPoint aWhere )
 	else if( buttons & B_SECONDARY_MOUSE_BUTTON )
 		{
 		DEBUG_TRACE( "BGDeskbar: MouseDown( B_SECONDARY_MOUSE_BUTTON )\n" );
-		GaduMenuItem *selectedItem = (GaduMenuItem*) iMenu->Go( ConvertToScreen( aWhere ), false, true );
-		if( selectedItem )
+		if( iProfileSelected )
 			{
-			BMessenger( "application/x-vnd.BeGadu" ).SendMessage( selectedItem->Message() );
+			GaduMenuItem *selectedItem = (GaduMenuItem*) iMenuProfileSelected->Go( ConvertToScreen( aWhere ), false, true );
+			if( selectedItem )
+				{
+				BMessenger( "application/x-vnd.BeGadu" ).SendMessage( selectedItem->Message() );
+				}
+			}
+		else
+			{
+			GaduMenuItem *selectedItem = (GaduMenuItem*) iMenuProfileNotSelected->Go( ConvertToScreen( aWhere ), false, true );
+			if( selectedItem )
+				{
+				BMessenger( "application/x-vnd.BeGadu" ).SendMessage( selectedItem->Message() );
+				}
 			}
 		}
 	}

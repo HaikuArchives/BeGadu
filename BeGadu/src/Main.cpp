@@ -23,9 +23,12 @@
 #include <ScrollView.h>
 #include <String.h>
 #include <StringView.h>
+#include <StorageKit.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "BuddyEdit.h"
+#include "GaduListView.h"
 #include "GaduListItem.h"
 #include "GaduMenuItem.h"
 #include "GfxStuff.h"
@@ -51,7 +54,6 @@
 #define MAINWINDOW_RECT BRect(50,50,300,350)
 #define MAINWINDOW_NAME	"BeGadu " WERSJA
 
-
 MainWindow::MainWindow( BString* aProfile )
  	: BWindow( MAINWINDOW_RECT, MAINWINDOW_NAME, B_TITLED_WINDOW, 
  			   B_NOT_ZOOMABLE | B_ASYNCHRONOUS_CONTROLS )
@@ -73,7 +75,8 @@ MainWindow::MainWindow( BString* aProfile )
 		localization_string.SetTo( localization.Path() );
 	be_locale.LoadLanguageFile( localization_string.String() );
 #endif
-
+	
+	iPreferencesWindow = NULL;
 	iProfile = new Profile();
 	iProfile->Load( aProfile );
 	SetTitle( aProfile->String() );
@@ -88,42 +91,78 @@ MainWindow::MainWindow( BString* aProfile )
 	iNetwork = new Network( iProfile, iProfile->GetUserlist()->GetList());
 	iNetwork->GotWindow( this );
 	iListItems = new List( 512 );
-	if( iProfile->iRect.IsValid() )
+	if( iProfile->GetRect().IsValid() )
 		{
-		MoveTo( iProfile->iRect.left, iProfile->iRect.top );
+		MoveTo( iProfile->GetRect().left, iProfile->GetRect().top );
 		}
 	/* setting menu */
 	BRect r = Bounds();
-	BMenuBar *menuBar = new BMenuBar( r, "menu bar" );
-	BMenu *menu;
-	menu = new BMenu( _T("Menu") );
-	iSubMenu = new BMenu( _T("Profiles") );
-	BMenuItem *item = new BMenuItem( "Siakis profil", new BMessage() );
-	iSubMenu->AddItem( item );
-	item = new BMenuItem( "Siakis profil inny", new BMessage() );
-	iSubMenu->AddItem( item );
-	iProfileItem = new BMenuItem( iSubMenu, NULL );
-	menu->AddItem( iProfileItem );
-	menu->AddSeparatorItem();
+	iMenuBar = new BMenuBar( r, "menu bar" );
+	iMenu = new BMenu( _T("Menu") );
+	iProfilesMenu = new BMenu( _T("Profiles") );
 
-	iSubMenu = new BMenu( _T("Userlist") );
+	/* searching for user profiles */
+	BPath path;
+	BEntry entry;
+	status_t error;
+	BMenuItem *item = NULL;
+	char name[ B_FILE_NAME_LENGTH ];
+	BString *nameString;
+	
+	find_directory( B_USER_SETTINGS_DIRECTORY, &path );
+	BDirectory * bg_conf = new BDirectory( path.Path() );
+	path.Append( "BeGadu/Profiles" );
+	bg_conf->SetTo( path.Path() );
+
+	/* filling list */
+
+	if( bg_conf->CountEntries() > 0 )
+		{
+		bg_conf->Rewind();
+		while( bg_conf->GetNextEntry( &entry ) == B_OK )
+			{
+			if( entry.IsDirectory() )
+				{
+				entry.GetName( name );
+				nameString = new BString( name );
+				/* checking if that profile is last profile */
+				if( nameString->Compare( aProfile->String() ) != 0 )
+					{
+					/* adding item to menu */
+					item = new BMenuItem( nameString->String(), new BMessage( PROFILE_SWITCH ) );
+					iProfilesMenu->AddItem( item );
+//					/* selecting this item as active */
+//					item->SetMarked( true );
+					}
+				}
+			}
+		}
+	iProfilesMenu->AddSeparatorItem();
+	item = new BMenuItem( _T( "New" ), new BMessage( OPEN_PROFILE_WIZARD ) );
+	iProfilesMenu->AddItem( item );
+	
+	iProfileItem = new BMenuItem( iProfilesMenu, NULL );
+	iMenu->AddItem( iProfileItem );
+	iMenu->AddSeparatorItem();
+
+	iUserlistMenu = new BMenu( _T("Userlist") );
 	iListImport = new BMenuItem( _T("Import"), new BMessage( BEGG_IMPORT_LIST ) );
-	iListExport = new BMenuItem( _T("Exsport"), new BMessage() );
-	iSubMenu->AddItem( iListImport );
-	iSubMenu->AddItem( iListExport );
-	iListMenu = new BMenuItem( iSubMenu, NULL );
-	menu->AddItem( iListMenu );
-	menu->AddSeparatorItem();
+	iListExport = new BMenuItem( _T("Exsport"), new BMessage( BEGG_EXPORT_LIST ) );
+	iUserlistMenu->AddItem( iListImport );
+	iUserlistMenu->AddItem( iListExport );
+	iListMenu = new BMenuItem( iUserlistMenu, NULL );
+	iMenu->AddItem( iListMenu );
+	iMenu->AddSeparatorItem();
 
 	iPreferences = new BMenuItem( _T("Preferences"), new BMessage( BEGG_PREFERENCES ) );
-	menu->AddItem( iPreferences );
+	iMenu->AddItem( iPreferences );
 	iAbout = new BMenuItem( _T("About.."), new BMessage( BEGG_ABOUT ) );
-	menu->AddItem( iAbout );
-	menu->AddItem( new BMenuItem( _T("Exit"), new BMessage( BEGG_QUIT ) ) );
-	menuBar->AddItem( menu );
-	AddChild( menuBar );
+	iMenu->AddItem( iAbout );
+	iMenu->AddItem( new BMenuItem( _T("Exit"), new BMessage( BEGG_QUIT ) ) );
+	iMenuBar->AddItem( iMenu );
+	AddChild( iMenuBar );
 
-	r.top = menuBar->Bounds().bottom ;
+	r.top = iMenuBar->Bounds().bottom ;
 //	r.bottom = r.top + 32;
 //	fIconsView = new BView( BRect(r.left, r.top, r.right, r.bottom), "IconsView", B_FOLLOW_LEFT_RIGHT | B_FOLLOW_TOP , B_FULL_UPDATE_ON_RESIZE);
 //	fIconsView->SetViewColor(100,100,100);
@@ -138,7 +177,7 @@ MainWindow::MainWindow( BString* aProfile )
 //	r.top = fIconsView->Bounds().bottom + menuBar->Bounds().bottom;
 	
 	iGaduView = new BView( r, "iGaduView", B_FOLLOW_ALL, B_FRAME_EVENTS | B_WILL_DRAW | B_FULL_UPDATE_ON_RESIZE | B_SUBPIXEL_PRECISE );
-	iGaduView->SetViewColor( 90, 90, 90 );
+	iGaduView->SetViewColor( 225, 225, 225 ); // 90, 90, 90
 	AddChild( iGaduView );
 	
 	/* list */
@@ -146,11 +185,10 @@ MainWindow::MainWindow( BString* aProfile )
 	r.right -= B_V_SCROLL_BAR_WIDTH;
 	r.bottom -= 30;
 
-	iListView = new BListView( r, "iListView", B_SINGLE_SELECTION_LIST, B_FOLLOW_ALL_SIDES, B_WILL_DRAW | B_FRAME_EVENTS | B_FULL_UPDATE_ON_RESIZE | B_NAVIGABLE  );
-	iListView->SetViewColor( 110, 110, 110 );
+	iListView = new GaduListView( this, r, "iListView" );
+	iListView->SetViewColor( 255, 255, 255 );
 	BFont *font = new BFont( be_plain_font );
-	font->SetSize( 15.0 );
-	font->SetEncoding( B_ISO_8859_2 );
+	font->SetSize( 14.0 );
 	iListView->SetFont( font );
 	iScrollView = new BScrollView( "iScrollView", iListView, B_FOLLOW_ALL, B_SUBPIXEL_PRECISE | B_FRAME_EVENTS | B_WILL_DRAW | B_FULL_UPDATE_ON_RESIZE, false, true, B_PLAIN_BORDER );
 	iGaduView->AddChild( iScrollView );
@@ -181,6 +219,8 @@ MainWindow::MainWindow( BString* aProfile )
 	iNotAvail->SetMarked( true );
 	
 	iStatus = new BMenuField( r, "iStatus", _T("Status:"), iStatusMenu, B_FOLLOW_LEFT | B_FOLLOW_BOTTOM, B_WILL_DRAW | B_NAVIGABLE | B_FRAME_EVENTS );
+	iStatus->SetViewColor( 255, 255, 255 );
+	iStatus->SetDivider( 50 );
 	iGaduView->AddChild( iStatus );
 
 	add_system_beep_event( ONLINE_SOUND );
@@ -192,19 +232,41 @@ MainWindow::MainWindow( BString* aProfile )
 		BMessenger( this ).SendMessage( UPDATE_LIST );
 		}
 
-	fprintf( stderr, _T("Profile %s loaded.\n"), iProfile->ProfileName()->String() );
+	fprintf( stderr, _T("Profile %s loaded.\n"), iProfile->GetProfileName() );
 
-//	if( iProfile->AutoStatus() != GG_STATUS_NOT_AVAIL )
-//		{
-//		if( iNetwork->Session() )
-//			{
-//			gg_change_status( iNetwork->Session(), iProfile->AutoStatus() );
-//			}
-//		else
-//			{
-//			iNetwork->Login( iProfile->AutoStatus() );
-//			}
-//		}
+	if( iProfile->GetAutoStatus() != GG_STATUS_NOT_AVAIL )
+		{
+		if( iNetwork->Session() )
+			{
+			gg_change_status( iNetwork->Session(), iProfile->GetAutoStatus() );
+			}
+		else
+			{
+			iNetwork->Login( iProfile->GetAutoStatus() );
+			}
+		}
+	}
+
+MainWindow::~MainWindow()
+	{
+	if( iProfile )
+		delete iProfile;
+	if( iIconAvail )
+		delete iIconAvail;
+	if( iIconBRB )
+		delete iIconBRB;
+	if( iIconInvisible )
+		delete iIconInvisible;
+	if( iIconNotAvail )
+		delete iIconNotAvail;
+	if( iIconAvailDescr )
+		delete iIconAvailDescr;
+	if( iIconBRBDescr )
+		delete iIconBRBDescr;
+	if( iIconInvisibleDescr )
+		delete iIconInvisibleDescr;
+	if( iIconNotAvailDescr )
+		delete iIconNotAvailDescr;
 	}
 
 bool MainWindow::QuitRequested()
@@ -226,6 +288,42 @@ void MainWindow::MessageReceived( BMessage* aMessage )
 	{
 	switch( aMessage->what )
 		{
+		case PROFILE_SWITCH:
+			{
+			DEBUG_TRACE( "MainWindow::MessageReceived( PROFILE_SWITCH )\n" );
+			BMenuItem* item = NULL;
+			int32 index = 0;
+			aMessage->FindInt32( "index", &index );
+			aMessage->FindPointer( "source", ( void** ) &item );
+			BString* profile = new BString( "" );
+			profile->SetTo( item->Label() );
+			BMessage* message = new BMessage( PROFILE_SWITCH );
+			message->AddString( "iProfileName", *profile );
+			BMessenger( be_app ).SendMessage( message );
+			break;
+			}
+		
+		case BUDDY_EDIT:
+			{
+			Person* person = NULL;
+			GaduListItem *who = ( GaduListItem* ) iListView->ItemAt( iListView->CurrentSelection() );
+			for( int i = 0; i < iProfile->GetUserlist()->GetList()->CountItems(); i++ )
+				{
+				person = ( Person* ) iProfile->GetUserlist()->GetList()->ItemAt( i );
+				if( strcmp( person->GetDisplay(), who->iName->String() ) == 0)
+					{
+					break;
+					}
+				}
+			if( person->GetUIN() == iProfile->GetUIN() )
+				{
+				break;
+				}
+			BuddyEdit *buddyEdit = new BuddyEdit( this, BRect( 50, 50, 300, 250), person );
+			buddyEdit->Show();
+			break;
+			}
+			
 		case CHANGE_DESCRIPTION:
 			{
 			DEBUG_TRACE( "MainWindow::MessageReceived( CHANGE_DESCRIPTION )\n" );
@@ -246,20 +344,45 @@ void MainWindow::MessageReceived( BMessage* aMessage )
 		case BEGG_PREFERENCES:
 			{
 			DEBUG_TRACE( "MainWindow::MessageReceived( BEGG_PREFERENCES )\n" );
-			BScreen *screen = new BScreen( this );
-			display_mode mode;
-			screen->GetMode( &mode );
-			int32 width = 630;
-			int32 height = 400;
-			int32 x_wind = mode.timing.h_display / 2 - ( width / 2);
-			int32 y_wind = mode.timing.v_display / 2 - ( height / 2 );
-			int32 new_width = x_wind + width;	// x 2
-			int32 new_height = y_wind + height;		// x 2
-			Preferences* prefs = new Preferences( iProfile, this, BRect( x_wind, y_wind, new_width, new_height ), &iResources );
-			prefs->Show();
+			if( iPreferencesWindow == NULL )
+				{
+				BScreen *screen = new BScreen( this );
+				display_mode mode;
+				screen->GetMode( &mode );
+				int32 width = 500;
+				int32 height = 420;
+				int32 x_wind = mode.timing.h_display / 2 - ( width / 2);
+				int32 y_wind = mode.timing.v_display / 2 - ( height / 2 );
+				int32 new_width = x_wind + width;	// x 2
+				int32 new_height = y_wind + height;		// x 2
+				iPreferencesWindow = new Preferences( iProfile, this, BRect( x_wind, y_wind, new_width, new_height ), &iResources );
+				}
+			if( iPreferencesWindow->LockLooper() )
+				{
+				if( iPreferencesWindow->IsHidden() )
+					{
+					iPreferencesWindow->Show();
+					}
+				else
+					{
+					iPreferencesWindow->Activate();
+					}
+				iPreferencesWindow->UnlockLooper();
+				}
 			break;
 			}
 		
+		case PREFERENCES_CLOSE:
+			{
+			DEBUG_TRACE( "MainWindow::MessageReceived( PREFERENCES_CLOSE )\n" );
+			if( iPreferencesWindow != NULL )
+				{
+				delete iPreferencesWindow;
+				iPreferencesWindow = NULL;
+				}
+			break;
+			}
+			
 		case BEGG_ABOUT:
 			{
 			DEBUG_TRACE( "MainWindow::MessageReceived( BEGG_ABOUT )\n" );
@@ -286,6 +409,12 @@ void MainWindow::MessageReceived( BMessage* aMessage )
 				}
 			break;
 			}
+		
+		case PREFERENCES_SWITCH:
+			{
+			BMessenger( iPreferencesWindow ).SendMessage( aMessage );
+			break;
+			}
 			
 		case BEGG_PERSON_SELECTED:
 			{
@@ -299,10 +428,8 @@ void MainWindow::MessageReceived( BMessage* aMessage )
 			for( int i = 0; i < iProfile->GetUserlist()->GetList()->CountItems(); i++ )
 				{
 				person = ( Person* ) iProfile->GetUserlist()->GetList()->ItemAt( i );
-				if( !person->iDisplay->Compare( who->iName->String() ) )
-					{
+				if( strcmp( person->GetDisplay(), who->iName->String() ) == 0 )
 					break;
-					}
 				}
 			break;
 			}
@@ -319,18 +446,18 @@ void MainWindow::MessageReceived( BMessage* aMessage )
 			for( int i = 0; i < iProfile->GetUserlist()->GetList()->CountItems(); i++ )
 				{
 				person = ( Person* ) iProfile->GetUserlist()->GetList()->ItemAt( i );
-				if( !person->iDisplay->Compare( who->iName->String() ) )
+				if( strcmp( person->GetDisplay(), who->iName->String() ) == 0)
 					{
 					break;
 					}
 				}
-			if( person->iUIN == iProfile->iNumber )
+			if( person->GetUIN() == iProfile->GetUIN() )
 				{
 				break;
 				}
 			BMessage *message;
 			message = new BMessage( OPEN_MESSAGE );
-			message->AddInt32( "who", person->iUIN );
+			message->AddInt32( "who", person->GetUIN() );
 			BMessenger( iNetwork ).SendMessage( message );		
 			delete message;
 			break;
@@ -508,15 +635,12 @@ void MainWindow::MessageReceived( BMessage* aMessage )
 				{
 				p = ( Person* ) iProfile->GetUserlist()->GetList()->ItemAt( i );
 				
-				if( p->iUIN == iProfile->iNumber )
+				if( p->GetUIN() == iProfile->GetUIN() )
 					{
-					fprintf( stderr, "p->iDisplay\t = %s\n", p->iDisplay->String() );
-					fprintf( stderr, "p->iStatus\t = %d\n", iNetwork->GetStatus() );
-					fprintf( stderr, "p->iDescription\t =%s\n", iNetwork->iDescription->String() );
 					if( iNetwork->GetStatus() == GG_STATUS_NOT_AVAIL )
-						g = new GaduListItem( p->iDisplay, iNetwork->GetStatus(), new BString( "" ), &iResources );
+						g = new GaduListItem( p->GetDisplay(), iNetwork->GetStatus(), "", &iResources );
 					else
-						g = new GaduListItem( p->iDisplay, iNetwork->GetStatus(), iNetwork->iDescription, &iResources );
+						g = new GaduListItem( p->GetDisplay(), iNetwork->GetStatus(), iNetwork->iDescription->String(), &iResources );
 					if( iNetwork->GetStatus() == GG_STATUS_NOT_AVAIL ||
 						iNetwork->GetStatus() == GG_STATUS_NOT_AVAIL_DESCR ||
 						iNetwork->GetStatus() == GG_STATUS_INVISIBLE ||
@@ -533,16 +657,14 @@ void MainWindow::MessageReceived( BMessage* aMessage )
 					{
 					if( iNetwork->GetStatus() == GG_STATUS_NOT_AVAIL || iNetwork->GetStatus() == GG_STATUS_NOT_AVAIL_DESCR )
 						{
-						BString *empty = new BString();
-						empty->SetTo( "" );
-						g = new GaduListItem( p->iDisplay, p->iStatus, empty, &iResources );
+						g = new GaduListItem( p->GetDisplay(), p->GetStatus(), "", &iResources );
 						}
 					else
 						{
-						g = new GaduListItem( p->iDisplay, p->iStatus, p->iDescription, &iResources );
+						g = new GaduListItem( p->GetDisplay(), p->GetStatus(), p->GetDescription(), &iResources );
 						}
 
-					if( p->iStatus == GG_STATUS_NOT_AVAIL || p->iStatus == GG_STATUS_NOT_AVAIL_DESCR )
+					if( p->GetStatus() == GG_STATUS_NOT_AVAIL || p->GetStatus() == GG_STATUS_NOT_AVAIL_DESCR )
 						{
 						listNotAvail->AddItem( g );
 						}
@@ -594,8 +716,26 @@ void MainWindow::MessageReceived( BMessage* aMessage )
 			break;
 			}
 		
+		case OPEN_PROFILE_WIZARD:
+			{
+			BMessenger( be_app ).SendMessage( OPEN_PROFILE_WIZARD );
+			break;
+			}
+		
+		case CLOSE_MAIN_WINDOW:
+			{
+			DEBUG_TRACE( "MainWindow::MessageReceived( CLOSE_MAIN_WINDOW )\n" );
+			iProfile->SetRect( Frame() );
+			iProfile->Save();
+			/* cleaning up ;D */
+			iNetwork->GotWindow( NULL );
+			iNetwork->Quit();
+			break;
+			}
+		
 		case BEGG_QUIT:
 			{
+			DEBUG_TRACE( "MainWindow::MessageReceived( BEGG_QUIT )\n" );
 			iProfile->SetRect( Frame() );
 			iProfile->Save();
 			/* cleaning up ;D */
@@ -637,21 +777,21 @@ void MainWindow::LoadIcons()
 
 void MainWindow::SetProfile( BString* aProfile )
 	{
-	DEBUG_TRACE( "MainWindow::SetProfil()\n" );
+	DEBUG_TRACE( "MainWindow::SetProfile()\n" );
 	iProfile->Load( aProfile );
-	SetTitle( iProfile->ProfileName()->String() );
+	SetTitle( iProfile->GetProfileName() );
 	if( iProfile->GetUserlist()->IsValid() )
 		{
 		iListItems = iProfile->GetUserlist()->GetList();
 		BMessenger( this ).SendMessage( UPDATE_LIST );
 		}
 
-	if( iProfile->iAutoStatus != GG_STATUS_NOT_AVAIL )
+	if( iProfile->GetAutoStatus() != GG_STATUS_NOT_AVAIL )
 		{
 		if( iNetwork->iSession )
-			gg_change_status( iNetwork->iSession, iProfile->iAutoStatus);
+			gg_change_status( iNetwork->iSession, iProfile->GetAutoStatus() );
 		else
-			iNetwork->Login( iProfile->iAutoStatus );
+			iNetwork->Login( iProfile->GetAutoStatus() );
 		}
 	}
 

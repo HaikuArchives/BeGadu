@@ -79,6 +79,7 @@ PreferencesTab::~PreferencesTab()
 
 void PreferencesTab::Draw( BRect aRect )
 	{
+	fprintf( stderr, "l: %f, t: %f, r: %f, b: %f\n", aRect.left, aRect.top, aRect.right, aRect.bottom );
 	int itemWidth = 90;
 	int offset = 29;
 	rgb_color selected;
@@ -101,28 +102,7 @@ void PreferencesTab::Draw( BRect aRect )
 	BRect r6( itemWidth * 5, 0, itemWidth * 6, 60 );
 	BRect r7( itemWidth * 6, 0, itemWidth * 7, 60 );
 
-	/* full redraw */
-	if( aRect == Bounds() )
-		{
-		SetDrawingMode( B_OP_COPY );
-		SetHighColor( 255, 255, 255, 255 );
-		FillRect( Bounds() );
-		
-		SetHighColor( selected );
-		
-		
-		
-		SetDrawingMode( B_OP_ALPHA );
-		SetLowColor( 0, 0, 0, 255 );
-		DrawBitmap( iIconGeneral,	 BPoint( offset, 5 ) );
-		DrawBitmap( iIconIM,		 BPoint( itemWidth + offset, 5 ) );
-		DrawBitmap( iIconSounds,	 BPoint( itemWidth * 2 + offset, 5 ) );
-		DrawBitmap( iIconCatalog,	 BPoint( itemWidth * 3 + offset, 5 ) );
-		DrawBitmap( iIconNotify,	 BPoint( itemWidth * 4 + offset, 5 ) );
-		DrawBitmap( iIconTheme,		 BPoint( itemWidth * 5 + offset, 5 ) );
-		DrawBitmap( iIconConnection, BPoint( itemWidth * 6 + offset, 5 ) );
-		}
-	else
+	if( aRect != Bounds() )
 		{
 		/* checking that mouse is over tab and on which button */
 		if( iIsOver )
@@ -131,13 +111,16 @@ void PreferencesTab::Draw( BRect aRect )
 				{
 				case 1:
 					{
-					r = r1;
-					SetHighColor( 255, 255, 255, 255 );
-					FillRect( r );
-					SetDrawingMode( B_OP_ALPHA );
-					SetLowColor( 0, 0, 0, 255 );
-					DrawBitmap( iIconGeneral,	 BPoint( offset, 5 ) );
-					SetDrawingMode( B_OP_OVER );
+					if( iItemOverOld != iItemSelected )
+						{
+						r = r1;
+						SetHighColor( 255, 255, 255, 255 );
+						FillRect( r );
+						SetDrawingMode( B_OP_ALPHA );
+						SetLowColor( 0, 0, 0, 255 );
+						DrawBitmap( iIconGeneral,	 BPoint( offset, 5 ) );
+						SetDrawingMode( B_OP_OVER );
+						}
 					break;
 					}
 				case 2:
@@ -212,83 +195,202 @@ void PreferencesTab::Draw( BRect aRect )
 				{
 				case 1:
 					{
-					r = r1;
-					SetHighColor( over );
-					FillRect( r );
-					SetDrawingMode( B_OP_ALPHA );
-					SetLowColor( 0, 0, 0, 255 );
-					DrawBitmap( iIconGeneral,	 BPoint( offset, 5 ) );
-					SetDrawingMode( B_OP_OVER );
+					if( iItemOver != iItemSelected )
+						{
+						r = r1;
+						SetHighColor( over );
+						FillRect( r );
+						SetDrawingMode( B_OP_ALPHA );
+						SetLowColor( 0, 0, 0, 255 );
+						DrawBitmap( iIconGeneral,	 BPoint( offset, 5 ) );
+						SetDrawingMode( B_OP_OVER );
+						}
 					break;
 					}
 				case 2:
 					{
-					r = r2;
-					SetHighColor( over );
-					FillRect( r );
-					SetDrawingMode( B_OP_ALPHA );
-					SetLowColor( 0, 0, 0, 255 );
-					DrawBitmap( iIconIM,		 BPoint( itemWidth + offset, 5 ) );
-					SetDrawingMode( B_OP_OVER );
+					if( iItemOver != iItemSelected )
+						{
+						r = r2;
+						SetHighColor( over );
+						FillRect( r );
+						SetDrawingMode( B_OP_ALPHA );
+						SetLowColor( 0, 0, 0, 255 );
+						DrawBitmap( iIconIM,		 BPoint( itemWidth + offset, 5 ) );
+						SetDrawingMode( B_OP_OVER );
+						}
 					break;
 					}
 				case 3:
 					{
-					r = r3;
-					SetHighColor( over );
-					FillRect( r );
-					SetDrawingMode( B_OP_ALPHA );
-					SetLowColor( 0, 0, 0, 255 );
-					DrawBitmap( iIconSounds,	 BPoint( itemWidth * 2 + offset, 5 ) );
-					SetDrawingMode( B_OP_OVER );
+					if( iItemOver != iItemSelected )
+						{
+						r = r3;
+						SetHighColor( over );
+						FillRect( r );
+						SetDrawingMode( B_OP_ALPHA );
+						SetLowColor( 0, 0, 0, 255 );
+						DrawBitmap( iIconSounds,	 BPoint( itemWidth * 2 + offset, 5 ) );
+						SetDrawingMode( B_OP_OVER );
+						}
 					break;
 					}
 				case 4:
 					{
-					r = r4;
-					SetHighColor( over );
-					FillRect( r );
-					SetDrawingMode( B_OP_ALPHA );
-					SetLowColor( 0, 0, 0, 255 );
-					DrawBitmap( iIconCatalog,	 BPoint( itemWidth * 3 + offset, 5 ) );
-					SetDrawingMode( B_OP_OVER );
+					if( iItemOver != iItemSelected )
+						{
+						r = r4;
+						SetHighColor( over );
+						FillRect( r );
+						SetDrawingMode( B_OP_ALPHA );
+						SetLowColor( 0, 0, 0, 255 );
+						DrawBitmap( iIconCatalog,	 BPoint( itemWidth * 3 + offset, 5 ) );
+						SetDrawingMode( B_OP_OVER );
+						}
 					break;
 					}
 				case 5:
 					{
-					r = r5;
-					SetHighColor( over );
-					FillRect( r );
-					SetDrawingMode( B_OP_ALPHA );
-					SetLowColor( 0, 0, 0, 255 );
-					DrawBitmap( iIconNotify,	 BPoint( itemWidth * 4 + offset, 5 ) );
-					SetDrawingMode( B_OP_OVER );
+					if( iItemOver != iItemSelected )
+						{
+						r = r5;
+						SetHighColor( over );
+						FillRect( r );
+						SetDrawingMode( B_OP_ALPHA );
+						SetLowColor( 0, 0, 0, 255 );
+						DrawBitmap( iIconNotify,	 BPoint( itemWidth * 4 + offset, 5 ) );
+						SetDrawingMode( B_OP_OVER );
+						}
 					break;
 					}
 				case 6:
 					{
-					r = r6;
-					SetHighColor( over );
-					FillRect( r );
-					SetDrawingMode( B_OP_ALPHA );
-					SetLowColor( 0, 0, 0, 255 );
-					DrawBitmap( iIconTheme,		 BPoint( itemWidth * 5 + offset, 5 ) );
-					SetDrawingMode( B_OP_OVER );
+					if( iItemOver != iItemSelected )
+						{
+						r = r6;
+						SetHighColor( over );
+						FillRect( r );
+						SetDrawingMode( B_OP_ALPHA );
+						SetLowColor( 0, 0, 0, 255 );
+						DrawBitmap( iIconTheme,		 BPoint( itemWidth * 5 + offset, 5 ) );
+						SetDrawingMode( B_OP_OVER );
+						}
 					break;
 					}
 				case 7:
 					{
-					r = r7;
-					SetHighColor( over );
-					FillRect( r );
-					SetDrawingMode( B_OP_ALPHA );
-					SetLowColor( 0, 0, 0, 255 );
-					DrawBitmap( iIconConnection, BPoint( itemWidth * 6 + offset, 5 ) );
-					SetDrawingMode( B_OP_OVER );
+					if( iItemOver != iItemSelected )
+						{
+						r = r7;
+						SetHighColor( over );
+						FillRect( r );
+						SetDrawingMode( B_OP_ALPHA );
+						SetLowColor( 0, 0, 0, 255 );
+						DrawBitmap( iIconConnection, BPoint( itemWidth * 6 + offset, 5 ) );
+						SetDrawingMode( B_OP_OVER );
+						}
 					break;
 					}
 				}
 			}
+		}
+	else
+		{
+		SetDrawingMode( B_OP_COPY );
+		SetHighColor( 255, 255, 255, 255 );
+		FillRect( Bounds() );
+		
+		SetHighColor( selected );
+		switch( iItemSelected )
+			{
+			case 1:
+				{
+				r = r1;
+				SetHighColor( selected );
+				FillRect( r );
+				SetDrawingMode( B_OP_ALPHA );
+				SetLowColor( 0, 0, 0, 255 );
+				DrawBitmap( iIconGeneral,	 BPoint( offset, 5 ) );
+				SetDrawingMode( B_OP_OVER );
+				break;
+				}
+			case 2:
+				{
+				r = r2;
+				SetHighColor( selected );
+				FillRect( r );
+				SetDrawingMode( B_OP_ALPHA );
+				SetLowColor( 0, 0, 0, 255 );
+				DrawBitmap( iIconIM,		 BPoint( itemWidth + offset, 5 ) );
+				SetDrawingMode( B_OP_OVER );
+				break;
+				}
+			case 3:
+				{
+				r = r3;
+				SetHighColor( selected );
+				FillRect( r );
+				SetDrawingMode( B_OP_ALPHA );
+				SetLowColor( 0, 0, 0, 255 );
+				DrawBitmap( iIconSounds,	 BPoint( itemWidth * 2 + offset, 5 ) );
+				SetDrawingMode( B_OP_OVER );
+				break;
+				}
+			case 4:
+				{
+				r = r4;
+				SetHighColor( selected );
+				FillRect( r );
+				SetDrawingMode( B_OP_ALPHA );
+				SetLowColor( 0, 0, 0, 255 );
+				DrawBitmap( iIconCatalog,	 BPoint( itemWidth * 3 + offset, 5 ) );
+				SetDrawingMode( B_OP_OVER );
+				break;
+				}
+			case 5:
+				{
+				r = r5;
+				SetHighColor( selected );
+				FillRect( r );
+				SetDrawingMode( B_OP_ALPHA );
+				SetLowColor( 0, 0, 0, 255 );
+				DrawBitmap( iIconNotify,	 BPoint( itemWidth * 4 + offset, 5 ) );
+				SetDrawingMode( B_OP_OVER );
+				break;
+				}
+			case 6:
+				{
+				r = r6;
+				SetHighColor( selected );
+				FillRect( r );
+				SetDrawingMode( B_OP_ALPHA );
+				SetLowColor( 0, 0, 0, 255 );
+				DrawBitmap( iIconTheme,		 BPoint( itemWidth * 5 + offset, 5 ) );
+				SetDrawingMode( B_OP_OVER );
+				break;
+				}
+			case 7:
+				{
+				r = r7;
+				SetHighColor( selected );
+				FillRect( r );
+				SetDrawingMode( B_OP_ALPHA );
+				SetLowColor( 0, 0, 0, 255 );
+				DrawBitmap( iIconConnection, BPoint( itemWidth * 6 + offset, 5 ) );
+				SetDrawingMode( B_OP_OVER );
+				break;
+				}
+			}
+		
+		SetDrawingMode( B_OP_ALPHA );
+		SetLowColor( 0, 0, 0, 255 );
+		DrawBitmap( iIconGeneral,	 BPoint( offset, 5 ) );
+		DrawBitmap( iIconIM,		 BPoint( itemWidth + offset, 5 ) );
+		DrawBitmap( iIconSounds,	 BPoint( itemWidth * 2 + offset, 5 ) );
+		DrawBitmap( iIconCatalog,	 BPoint( itemWidth * 3 + offset, 5 ) );
+		DrawBitmap( iIconNotify,	 BPoint( itemWidth * 4 + offset, 5 ) );
+		DrawBitmap( iIconTheme,		 BPoint( itemWidth * 5 + offset, 5 ) );
+		DrawBitmap( iIconConnection, BPoint( itemWidth * 6 + offset, 5 ) );
 		}
 
 	SetDrawingMode( B_OP_COPY );

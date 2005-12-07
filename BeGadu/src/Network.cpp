@@ -56,6 +56,16 @@ void Network::Quit()
 	/* Rozłączamy się */
 	if( ( iStatus != GG_STATUS_NOT_AVAIL ) || ( iStatus != GG_STATUS_NOT_AVAIL_DESCR ) )
 		Logout();
+	ChatWindow* chat;
+	for( int i = 0; i < iWinList->CountItems(); i++ )
+		{
+		chat = ( ChatWindow* ) iWinList->ItemAt( i );
+		iWinList->RemoveItem( i );
+		if( chat->Lock() )
+			{
+			chat->Quit();
+			}
+		}
 	Lock();
 	BLooper::Quit();
 	}
@@ -121,16 +131,16 @@ void Network::MessageReceived( BMessage* aMessage )
 			break;
 			}
 			
-		case ADD_PERSON:
+		case ADD_BUDDY:
 			{
-			DEBUG_TRACE( "Network::MessageReceived( ADD_PERSON )\n" );
+			DEBUG_TRACE( "Network::MessageReceived( ADD_BUDDY )\n" );
 			// do zaimplementowania
 			break;
 			}
 			
-		case DEL_PERSON:
+		case DEL_BUDDY:
 			{
-			DEBUG_TRACE( "Network::MessageReceived( DEL_PERSON )\n" );
+			DEBUG_TRACE( "Network::MessageReceived( DEL_BUDDY )\n" );
 			// do zaimplementowania
 			break;
 			}
@@ -158,7 +168,7 @@ void Network::MessageReceived( BMessage* aMessage )
 				if( ( person = GetPersonForUser( who ) ) )
 					{
 					BMessage *newmessage = new BMessage( UPDATE_STATUS );
-					newmessage->AddInt32( "status", person->iStatus );
+					newmessage->AddInt32( "status", person->GetStatus() );
 					BMessenger( win ).SendMessage( newmessage );
 					delete newmessage;
 					}
@@ -227,10 +237,10 @@ Person* Network::GetPersonForUser( uin_t aWho )
 	for( int i = 0; i < iWindow->GetProfile()->GetUserlist()->GetList()->CountItems(); i++ )
 		{
 		person = ( Person* ) iWindow->GetProfile()->GetUserlist()->GetList()->ItemAt( i );
-		if( person->iUIN == aWho )
+		if( person->GetUIN() == aWho )
 			break;
 		}
-	if( person && ( person->iUIN == aWho ) )
+	if( person && ( person->GetUIN() == aWho ) )
 		return person;
 
 	return NULL;
@@ -245,10 +255,10 @@ void Network::Login()
 //		BMessenger( iWindow ).SendMessage( UPDATE_STATUS );
 	/* ustawiamy pola potrzebne do połączenia z gg */
 	memset( &iLoginParam, 0, sizeof( iLoginParam ) );
-	iLoginParam.uin = iProfile->iNumber;
-	iLoginParam.password = ( char* ) iProfile->iPassword->String();
+	iLoginParam.uin = iProfile->GetUIN();
+	iLoginParam.password = ( char* ) iProfile->GetPassword();
 	iLoginParam.async = 1;
-	iLoginParam.status = iProfile->AutoStatus();
+	iLoginParam.status = iProfile->GetAutoStatus();
 //	gg_debug_level = ~0;
 	BMessenger( this ).SendMessage( ADD_HANDLER );
 	if( iWindow )
@@ -264,8 +274,8 @@ void Network::Login( int status )
 //		BMessenger( iWindow ).SendMessage( UPDATE_STATUS );
 	/* ustawiamy pola potrzebne do połączenia z gg */
 	memset( &iLoginParam, 0, sizeof( iLoginParam ) );
-	iLoginParam.uin = iProfile->iNumber;
-	iLoginParam.password = ( char* ) iProfile->iPassword->String();
+	iLoginParam.uin = iProfile->GetUIN();
+	iLoginParam.password = ( char* ) iProfile->GetPassword();
 	iLoginParam.async = 1;
 	iLoginParam.status = iStatus;
 //	gg_debug_level = ~0;
@@ -284,8 +294,8 @@ void Network::Login( int aStatus, BString *aDescription )
 //		BMessenger( iWindow ).SendMessage( UPDATE_STATUS );
 	/* ustawiamy pola potrzebne do połączenia z gg */
 	memset( &iLoginParam, 0, sizeof( iLoginParam ) );
-	iLoginParam.uin = iProfile->iNumber;
-	iLoginParam.password = ( char* ) iProfile->iPassword->String();
+	iLoginParam.uin = iProfile->GetUIN();
+	iLoginParam.password = ( char* ) iProfile->GetPassword();
 	iLoginParam.async = 1;
 	iLoginParam.status = iStatus;
 	iLoginParam.status_descr = ( char* ) iDescription->String();
@@ -320,7 +330,7 @@ void Network::Logout()
 			for( int i = 0; i < iWindow->ListItems()->CountItems(); i++ )
 				{
 				p = ( Person* ) iWindow->ListItems()->ItemAt( i );
-				p->iStatus = GG_STATUS_NOT_AVAIL;
+				p->SetStatus( GG_STATUS_NOT_AVAIL );
 			}
 		
 			/* uaktualniamy liste */

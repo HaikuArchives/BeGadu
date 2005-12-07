@@ -27,8 +27,8 @@
 /* messages from interface */
 #define DO_LOGIN				'0007'
 #define DO_LOGOUT				'0008'
-#define ADD_PERSON				'0009'
-#define DEL_PERSON				'0010'
+#define ADD_BUDDY				'0009'
+#define DEL_BUDDY				'0010'
 #define OPEN_MESSAGE			'0011'
 #define SEND_MESSAGE			'0012'
 #define CLOSE_MESSAGE			'0013'
@@ -52,16 +52,39 @@
 #define BEGG_CONNECTING			'0027'
 #define PREFERENCES_OK			'0028'
 #define PREFERENCES_CANCEL		'0029'
-#define PROFILE_CREATED			'0030'
-#define OPEN_PROFILE_WIZARD 	'0031'
-#define CONFIG_OK				'0032'
-#define SHOW_MAIN_WINDOW		'0033'
-#define BGDESKBAR_CHSTATE		'0034'
-#define ADD_MESSENGER			'0035'
-#define DEL_MESSENGER			'0036'
-#define CHANGE_DESCRIPTION		'0037'
-#define DESCRIPTION_OK			'0038'
-#define DESCRIPTION_CANCEL		'0039'
+#define PREFERENCES_SWITCH		'0030'
+#define PREFERENCES_CLOSE		'0031'
+#define PROFILE_CREATED			'0032'
+#define OPEN_PROFILE_WIZARD 	'0033'
+#define CONFIG_OK				'0034'
+#define SHOW_MAIN_WINDOW		'0035'
+#define BGDESKBAR_CHSTATE		'0036'
+#define ADD_MESSENGER			'0037'
+#define DEL_MESSENGER			'0038'
+#define CHANGE_DESCRIPTION		'0039'
+#define DESCRIPTION_OK			'0040'
+#define DESCRIPTION_CANCEL		'0041'
+
+/* preferences */
+#define PROFILE_PASS_CHECK_BOX	'0042'
+#define PROFILE_DELETE_ACCOUNT	'0043'
+#define PROFILE_CHANGE_PASSWORD	'0044'
+
+/* profies */
+#define PROFILE_SELECTED		'0090'
+#define PROFILE_NOT_SELECTED	'0091'
+#define PROFILE_SELECT			'0092'
+#define PROFILE_CANCEL			'0093'
+#define PROFILE_CHECK			'0094'
+#define PROFILE_SWITCH			'0095'
+#define CLOSE_MAIN_WINDOW		'0096'
+
+/* buddies msgs */
+#define BUDDY_EDIT				'0100'
+#define BUDDY_EDIT_OK			'0101'
+#define BUDDY_EDIT_CANCEL		'0102'
+#define BUDDY_CATALOG			'0103'
+#define BUDDY_SEND				'0104'
 
 #define ONLINE_SOUND			"BeGadu state changed"
 #define MESSAGE_SOUND			"BeGadu new message"

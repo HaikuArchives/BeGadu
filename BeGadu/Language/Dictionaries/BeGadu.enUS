@@ -21,6 +21,7 @@
 "About BeGadu"
 "Exit"
 "Can't find 'iStatus' in message...\n"
+"Change profile"
 
 # Chat.cpp
 "[Stranger]"
@@ -82,8 +83,8 @@
 "Create a new one (not implemented)"
 "Profile name:"
 "New"
-"Number: "
-"Password: "
+"Number:"
+"Password:"
 "Sorry, but BeGadu needs at least one account configured"
 "Ok"
 
@@ -99,3 +100,11 @@
 "Notify"
 "Theme"
 "Connection"
+"Access to the profile with a password"
+"Repeat password:"
+"Your account"
+"Delete account"
+"Change"
+"Remember password"
+
+# ProfileSelector.cpp

@@ -70,9 +70,9 @@ ChatWindow::ChatWindow( Network *aNetwork, MainWindow *aWindow, uin_t aWho )
 	for( int i = 0; i < iWindow->GetProfile()->GetUserlist()->GetList()->CountItems(); i++ )
 		{
 		person = ( Person* ) iWindow->GetProfile()->GetUserlist()->GetList()->ItemAt( i );
-		if( aWho == person->iUIN )
+		if( aWho == person->GetUIN() )
 			{
-			pe = person->iDisplay;
+			pe = new BString( person->GetDisplay() );
 			break;
 			}
 		}
@@ -138,10 +138,10 @@ void ChatWindow::MessageReceived( BMessage* aMessage )
 			for( int i = 0; i < iWindow->GetProfile()->GetUserlist()->GetList()->CountItems(); i++ )
 				{
 				person = ( Person* ) iWindow->GetProfile()->GetUserlist()->GetList()->ItemAt( i );
-				if( iWho == person->iUIN )
+				if( iWho == person->GetUIN() )
 					{
 					str = new BString();
-					str->SetTo( person->iDisplay->String() );
+					str->SetTo( person->GetDisplay() );
 					break;
 					}
 				}
@@ -217,7 +217,7 @@ void ChatWindow::MessageReceived( BMessage* aMessage )
 				iChat->SetFontAndColor( iChat->TextLength(), iChat->TextLength() + str2.Length(), font, B_FONT_ALL, &yellow );
 				iChat->Insert( iChat->TextLength(), str2.String(), str2.Length() );
 
-				str.SetTo( iWindow->GetProfile()->iProfileName->String() );
+				str.SetTo( iWindow->GetProfile()->GetProfileName() );
 				str.Append( ": " );
 				iChat->SetFontAndColor( iChat->TextLength(), iChat->TextLength() + str.Length(), font, B_FONT_ALL, &green );
 				iChat->Insert( iChat->TextLength(), str.String(), str.Length() );
